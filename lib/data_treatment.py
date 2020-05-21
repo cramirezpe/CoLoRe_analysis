@@ -25,7 +25,7 @@ def suppress_stdout():
         finally:
             sys.stdout = old_stdout
 
-def data_treatment(path, do_cls=False, do_kappa=False):
+def data_treatment(path,source=1, do_cls=False, do_kappa=False):
     with suppress_stdout():
         nside = 128
         npix = hp.nside2npix(nside)
@@ -35,8 +35,8 @@ def data_treatment(path, do_cls=False, do_kappa=False):
         nmap = np.zeros(hp.nside2npix(nside))
         e1map = np.zeros(hp.nside2npix(nside))
         e2map = np.zeros(hp.nside2npix(nside))
-        while os.path.isfile(path+'/out_srcs_s1_%d.fits' % ifile):
-            hdulist = fits.open(path+'/out_srcs_s1_%d.fits' % ifile)
+        while os.path.isfile(path+'/out_srcs_s%d_%d.fits' % (source,ifile)):
+            hdulist = fits.open(path+'/out_srcs_s%d_%d.fits' % (source,ifile))
             tbdata = hdulist[1].data
 
             pix = hp.ang2pix(nside,
@@ -60,8 +60,10 @@ def data_treatment(path, do_cls=False, do_kappa=False):
                                                 pol=True),
                                     pol=False,
                                     nside=nside)
-                                    
-    savetofile(path,[mp_e1,mp_e2,mp_d,mp_db,mp_E,mp_B], ["mp_e1","mp_e2","mp_d","mp_db","mp_E","mp_B"])
+    
+    location_ext = path + f'/data_treated/source_{ source }'
+    os.makedirs(location_ext, exist_ok=True)                    
+    savetofile(location_ext,[mp_e1,mp_e2,mp_d,mp_db,mp_E,mp_B], ["mp_e1","mp_e2","mp_d","mp_db","mp_E","mp_B"])
 
     if do_cls:
         lt, cls_dd = np.loadtxt(path+'/pred_lj/outlj_cl_dd.txt',
@@ -101,11 +103,13 @@ if __name__ == "__main__":
     parser.add_argument("-p","--path", required=True, type=str, help="Path of CoLoRe run")
     parser.add_argument("-c","--cls", action='store_true', help="Compute cls (it should be provided by simulation")
     parser.add_argument("-k","--kappa", action='store_true', help="Analyse kappa")
+    parser.add_argument("-s","--source", required=False, type=int, default=1, help="Sources to be computed")
 
     args = parser.parse_args()
 
-    path = args.path
-    do_cls = args.cls
-    do_kappa = args.kappa
+    path    = args.path
+    do_cls  = args.cls
+    do_kappa= args.kappa
+    source  = args.source 
    
-    data_treatment(path, do_cls, do_kappa)
+    data_treatment(path,source, do_cls, do_kappa)

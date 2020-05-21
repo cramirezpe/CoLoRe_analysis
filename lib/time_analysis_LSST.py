@@ -10,11 +10,10 @@ import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import os.path
-import time_analysis_LSST as timean
 import re
 import shutil
 import subprocess
-import data_treatment
+from lib.data_treatment import data_treatment
 
 class FilterList:
     def prepared():
@@ -150,8 +149,8 @@ class ShearReader:
     def __init__(self,location):
         self.location = location
     
-    def do_data_treatment(self, do_cls=False, do_kappa=False):
-        data_treatment.data_treatment(self.location, do_cls, do_kappa)
+    def do_data_treatment(self,source=1, do_cls=False, do_kappa=False):
+        data_treatment(self.location,source, do_cls, do_kappa)
 
     def get_values(self,parameter):
         return np.loadtxt(self.location + '/'+parameter+'.dat')
