@@ -9,7 +9,7 @@ class ShearReader:
     def do_data_treatment(self,source=1, do_cls=False, do_kappa=False, minz=None, maxz=None, output_path=None):
         data_treatment(self.location,source, do_cls, do_kappa, minz, maxz, output_path)
 
-    def get_values(self,parameter, source=1, minz=None, maxz=None):
+    def get_values(self, parameter, source=1, minz=None, maxz=None):
         if minz and maxz:
             minz    = round(float(minz)*100)
             maxz    = round(float(maxz)*100)
@@ -32,3 +32,9 @@ class ShearReader:
 
             self.do_data_treatment(source=source, do_cls=do_cls, do_kappa=do_kappa, minz=minz, maxz=maxz, output_path=path)
             return np.loadtxt( path + '/'+parameter+'.dat')
+
+    def compute_binned_statistics(self, minz, maxz, bins, source=1):
+        # I use mp_e1 to not compute if values already exist
+        step = (maxz-minz)/bins
+        for b in range(bins):
+            _ = self.get_values('mp_e1', minz=minz+b*step, maxz= minz + (1+b)*step)

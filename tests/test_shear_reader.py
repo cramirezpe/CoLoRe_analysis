@@ -50,5 +50,14 @@ class TestShearReader(unittest.TestCase):
         mock_func.assert_not_called()
         self.assertEqual(vals,3141592653)
 
+    def test_binned_statistics(self):
+        self.sr.compute_binned_statistics(1,2,4)
+
+        path_head   = self.sim_path + f'/data_treated/binned/'
+        path_tail    = '/source_1/mp_E.dat'
+
+        for str in '100_125','125_150','150_175','175_200':
+            self.assertTrue( os.path.isfile(path_head + str + path_tail), path_head+str+path_tail)
+
 if __name__ == '__main__':
     unittest.main()
