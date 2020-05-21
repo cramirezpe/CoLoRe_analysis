@@ -14,7 +14,6 @@ import time_analysis_LSST as timean
 import re
 import shutil
 import subprocess
-sys.path.insert(0, '/global/homes/c/cramirez/Shs/CoLoRe_data_treatment')
 import data_treatment
 
 class FilterList:
