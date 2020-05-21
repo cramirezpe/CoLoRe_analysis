@@ -13,7 +13,7 @@ import os.path
 import re
 import shutil
 import subprocess
-from lib.data_treatment import data_treatment
+from lib.shear_reader import ShearReader
 
 class FilterList:
     def prepared():
@@ -143,18 +143,7 @@ class FileManager:
     def running_to_crash(cls,path):
         cls.change_parameters(path,'status','running','crashed')
     
-
-# The class shear reader is used to get data from data_treatment, it will always be shear information but it can also treat with cl information.
-class ShearReader:
-    def __init__(self,location):
-        self.location = location
-    
-    def do_data_treatment(self,source=1, do_cls=False, do_kappa=False):
-        data_treatment(self.location,source, do_cls, do_kappa)
-
-    def get_values(self,parameter):
-        return np.loadtxt(self.location + '/'+parameter+'.dat')
-    
+   
 # The class TimeReader is devoted to obtain computation time for a given Simulation. 
 # The process relies in the terminal output of CoLoRe and therefore it requires tricky methods (searching for strings in files). This is likely to change in the future and hence the convenience of having it separatedly.
 class TimeReader:

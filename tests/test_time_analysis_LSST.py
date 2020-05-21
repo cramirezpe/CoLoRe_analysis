@@ -68,17 +68,17 @@ class TestSimulationMaster(unittest.TestCase):
     def test_size(self):
         self.Sim.set_size()
 
-        #self.assertEqual( self.Sim.size, '13M')
+        self.assertEqual( self.Sim.size, '13M')
 
-    def test_shear_reader(self):
-        self.Sim.set_shear_reader()
-        shear_reader = self.Sim.shear_reader
-        shear_reader.do_data_treatment()
-        shear_reader.do_data_treatment(source=2)
+    # def test_shear_reader(self):
+    #     self.Sim.set_shear_reader()
+    #     shear_reader = self.Sim.shear_reader
+    #     shear_reader.do_data_treatment()
+    #     shear_reader.do_data_treatment(source=2)
 
-        with open(self.sim_path+f'/data_treated/source_1/mp_E.dat') as f:
-            first_line = f.readline()
-        self.assertEqual(first_line, '3.161026775081331630e-04\n')
+    #     with open(self.sim_path+f'/data_treated/source_1/mp_E.dat') as f:
+    #         first_line = f.readline()
+    #     self.assertEqual(first_line, '3.161026775081331630e-04\n')
 
 
 
