@@ -4,6 +4,7 @@ import os
 from lib.shear_reader import ShearReader
 from mock import patch
 from shutil import rmtree
+import numpy as np
 
 class TestShearReader(unittest.TestCase):
     def setUp(self):
@@ -31,7 +32,23 @@ class TestShearReader(unittest.TestCase):
         mock_func.assert_not_called()
         self.assertEqual(vals,3141592653)
         
+    def test_creation_when_does_not_exist_binned(self):
+        a = self.sr.get_values('mp_E', source=1, minz=2, maxz=2.01)
+        expected_file = self.sim_path + '/data_treated/binned/200_201/source_1/mp_E.dat'
+        
+        self.assertTrue( os.path.isfile(expected_file) )
+        a = np.loadtxt(expected_file)
+        self.assertEqual(a[0], 0.00031610267750813316)
 
+    @patch.object(ShearReader, "do_data_treatment")
+    def test_not_created_when_exists_binned(self, mock_func):
+        path = self.sim_path + '/data_treated/binned/300_301/source_3'
+        os.makedirs(path)
+        with open( path + '/mp_e1.dat', 'a') as the_file:
+            the_file.write('3141592653\n')
+        vals = self.sr.get_values('mp_e1', source=3, minz=3, maxz=3.01)
+        mock_func.assert_not_called()
+        self.assertEqual(vals,3141592653)
 
 if __name__ == '__main__':
     unittest.main()

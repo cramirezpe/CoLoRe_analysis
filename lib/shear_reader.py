@@ -6,12 +6,19 @@ class ShearReader:
     def __init__(self,location):
         self.location = location
     
-    def do_data_treatment(self,source=1, do_cls=False, do_kappa=False):
-        data_treatment(self.location,source, do_cls, do_kappa)
+    def do_data_treatment(self,source=1, do_cls=False, do_kappa=False, minz=None, maxz=None, output_path=None):
+        data_treatment(self.location,source, do_cls, do_kappa, minz, maxz, output_path)
 
-    def get_values(self,parameter, source=1):
+    def get_values(self,parameter, source=1, minz=None, maxz=None):
+        if minz and maxz:
+            minz    = round(float(minz)*100)
+            maxz    = round(float(maxz)*100)
+            path    = self.location + f'/data_treated/binned/{ str(minz) }_{ str(maxz) }/source_{ source }'
+        else:
+            path    = self.location + f'/data_treated/source_{ source }'
+
         try:
-            return np.loadtxt(self.location + f'/data_treated/source_{ source }/'+parameter+'.dat')
+            return np.loadtxt( path + '/'+parameter+'.dat')
         except OSError:
             if parameter == 'mp_k': 
                 do_kappa = True
@@ -22,5 +29,6 @@ class ShearReader:
                 do_cls   = True
             else:
                 do_cls   = False
-            self.do_data_treatment(source=source, do_cls=do_cls, do_kappa=do_kappa)
-            return np.loadtxt(self.location + f'/data_treated/source_{ source }/'+parameter+'.dat')
+
+            self.do_data_treatment(source=source, do_cls=do_cls, do_kappa=do_kappa, minz=minz, maxz=maxz, output_path=path)
+            return np.loadtxt( path + '/'+parameter+'.dat')
