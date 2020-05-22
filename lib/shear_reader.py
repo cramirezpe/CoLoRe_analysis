@@ -1,5 +1,7 @@
 from lib.data_treatment import data_treatment
 import numpy as np
+from shutil import rmtree
+import os
 
 # The class shear reader is used to get data from data_treatment, it will always be shear information but it can also treat with cl information.
 class ShearReader:
@@ -38,3 +40,7 @@ class ShearReader:
         step = (maxz-minz)/bins
         for b in range(bins):
             _ = self.get_values('mp_e1', minz=minz+b*step, maxz= minz + (1+b)*step)
+    
+    def remove_data_treated(self):
+        if os.path.isdir(self.location + '/data_treated'):
+            rmtree(self.location + '/data_treated')

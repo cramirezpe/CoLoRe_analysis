@@ -59,5 +59,11 @@ class TestShearReader(unittest.TestCase):
         for str in '100_125','125_150','150_175','175_200':
             self.assertTrue( os.path.isfile(path_head + str + path_tail), path_head+str+path_tail)
 
+    def test_removed_data_treated(self):
+        path = self.sim_path + '/data_treated/zz/zz'
+        os.makedirs(path)
+        self.sr.remove_data_treated()
+        self.assertFalse( os.path.isdir(path) )
+
 if __name__ == '__main__':
     unittest.main()
