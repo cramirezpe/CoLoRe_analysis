@@ -115,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument("-k","--kappa", action='store_true', help="Analyse kappa")
     parser.add_argument("-s","--source", required=False, type=int, default=1, help="Sources to be computed")
     parser.add_argument("-o","--output", required=False, type=str, default=None, help="Path for output files")
-    parser.add_argument("-mz","--minz", required=False, type=float, defualt=None, help="min. redshift")
+    parser.add_argument("-mz","--minz", required=False, type=float, default=None, help="min. redshift")
     parser.add_argument("-Mz","--maxz", required=False, type=float, default=None, help="max. redshift")
 
     args = parser.parse_args()

@@ -1,6 +1,7 @@
 from lib.shear_reader import ShearReader
 from lib.functions import check_iterable
 import numpy as np
+from sklearn.linear_model import LinearRegression
 
 # It takes two lists of sim classes. It will average and compute the correlation (or maybe the other way around...)
 class CorrelateTwoShears:
@@ -49,10 +50,20 @@ class CorrelateTwoShears:
         correlations = []
         for seed in self.sims.keys():
             Avals = self.sims[seed][0].shear_reader.get_values(parameter=parameter, source=source, minz=minz, maxz=maxz)
-            Bvals = self.sims[seed][0].shear_reader.get_values(parameter=parameter, source=source, minz=minz, maxz=maxz)
+            Bvals = self.sims[seed][1].shear_reader.get_values(parameter=parameter, source=source, minz=minz, maxz=maxz)
 
-            correlations.append( np.corrcoef(Avals,Bvals)[0][1])
-        
+            correlations.append( np.corrcoef(Avals,Bvals)[0][1] )
         return np.mean(correlations)
-            
 
+    def regression_in_bin(self, parameter='mp_e1', source=1, minz=None, maxz=None):
+        reg_coef    = []
+        reg_intercept = []
+        for seed in self.sims.keys():
+            Avals = self.sims[seed][0].shear_reader.get_values(parameter=parameter, source=source, minz=minz, maxz=maxz)
+            Bvals = self.sims[seed][1].shear_reader.get_values(parameter=parameter, source=source, minz=minz, maxz=maxz)
+
+            model = LinearRegression().fit(Avals.reshape((-1,1)),Bvals)
+            reg_coef.append( model.coef_[0])
+            reg_intercept.append( model.intercept_)
+        return np.mean(reg_coef), np.mean(reg_intercept)
+        

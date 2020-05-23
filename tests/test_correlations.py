@@ -1,8 +1,11 @@
 import lib.correlations as corrlib
 from lib.time_analysis_LSST import Sim0404
+from lib.shear_reader import ShearReader
 import unittest
 import os
 from shutil import rmtree
+import numpy as np
+from mock import patch
 
 class TestCorrelations(unittest.TestCase):
     def setUp(self):
@@ -44,21 +47,41 @@ class TestCorrelations(unittest.TestCase):
         # Program should match simulations run with the same seed. 
         self.assertEqual( ['New_s2', 'Old_s2'] , [x.__name__ for x in self.corr_sims.sims['300']])
         
-
-    def test_correlation_tiny_bin(self):
+    @patch.object(ShearReader, "do_data_treatment")
+    def test_correlation_regression_tiny_bin(self, mock_func):
         cs = self.corr_sims
 
-        corr = cs.correlation_in_bin(minz=1,maxz=1.05)
+        path_a = os.getcwd() + '/tests/test_sims/Old/data_treated/binned/100_105/source_1'
+        path_b = os.getcwd() + '/tests/test_sims/Old_s2/data_treated/binned/100_105/source_1'
+        path_c = os.getcwd() + '/tests/test_sims/New/data_treated/binned/100_105/source_1'
+        path_d = os.getcwd() + '/tests/test_sims/New_s2/data_treated/binned/100_105/source_1'
+        
+        for path in path_a,path_b,path_c,path_d:
+            os.makedirs(path)
+            open(path + '/mp_e2.dat','a').close()
+
+        np.savetxt(path_a + '/mp_e2.dat', [1,3,4,5])
+        np.savetxt(path_b + '/mp_e2.dat', [1,3,4,4])
+        np.savetxt(path_c + '/mp_e2.dat', [1,9,4,5])
+        np.savetxt(path_d + '/mp_e2.dat', [1,2,2,2])
+
+
+        corr = cs.correlation_in_bin(parameter='mp_e2',minz=1,maxz=1.05)
+        mock_func.assert_not_called()
 
         first_sim_path = cs.sims['300'][0].location
 
         # Check data was computed
         self.assertTrue( os.path.isdir(first_sim_path + '/data_treated/binned/100_105/source_1'))
-        self.assertTrue( os.path.isfile(first_sim_path + '/data_treated/binned/100_105/source_1/mp_e1.dat'))
+        self.assertFalse( os.path.isfile(first_sim_path + '/data_treated/binned/100_105/source_1/mp_e1.dat'))
 
-        # Once we have pais 1 to 1. We can compute the correlation and coeff for each of them
 
-        # There should be a method to output the mean of the correlation and the mean of the coeff.
-        self.fail('Finish the test!')
+        self.assertEqual( corr, 0.6855447840406176)
+
+        coef, intercept = cs.regression_in_bin(parameter='mp_e2', minz=1, maxz=1.05)
+        self.assertEqual( intercept, 0.2659033078880413)
+        self.assertEqual( coef, 1.4440203562340965)
+    
+
 if __name__ == '__main__':
     unittest.main()

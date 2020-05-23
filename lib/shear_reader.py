@@ -35,7 +35,8 @@ class ShearReader:
             self.do_data_treatment(source=source, do_cls=do_cls, do_kappa=do_kappa, minz=minz, maxz=maxz, output_path=path)
             return np.loadtxt( path + '/'+parameter+'.dat')
 
-    def compute_binned_statistics(self, minz, maxz, bins, source=1):
+    
+    def compute_binned_statistics(self, minz, maxz, bins, source=1): # Not tested
         # I use mp_e1 to not compute if values already exist
         step = (maxz-minz)/bins
         for b in range(bins):
