@@ -15,6 +15,10 @@ import shutil
 import subprocess
 from lib.shear_reader import ShearReader
 
+import logging
+log = logging.getLogger(__name__)
+
+
 class FilterList:
     def prepared():
         prepared = {

@@ -3,6 +3,10 @@ from lib.functions import check_iterable
 import numpy as np
 from sklearn.linear_model import LinearRegression
 
+import logging
+log = logging.getLogger(__name__)
+
+
 # It takes two lists of sim classes. It will average and compute the correlation (or maybe the other way around...)
 class CorrelateTwoShears:
     def __init__(self, listA, listB):

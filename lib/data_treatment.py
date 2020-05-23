@@ -8,6 +8,11 @@ from astropy.io import fits
 import argparse
 import warnings
 
+
+import logging
+log = logging.getLogger(__name__)
+
+
 ###############################################################################
 ### Functions
 ###############################################################################
@@ -76,36 +81,44 @@ def data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=N
     savetofile(output_path,[mp_e1,mp_e2,mp_d,mp_db,mp_E,mp_B], ["mp_e1","mp_e2","mp_d","mp_db","mp_E","mp_B"])
 
     if do_cls:
-        lt, cls_dd = np.loadtxt(path+'/pred_lj/outlj_cl_dd.txt',
-                                unpack=True)
-        lt, clt_dl = np.loadtxt(path+'/pred_lj/outlj_cl_d1l2.txt',
-                                unpack=True)
-        lt, clt_ll = np.loadtxt(path+'/pred_lj/outlj_cl_ll.txt',
-                                unpack=True)
-        lt, clt_kd = np.loadtxt(path+'/pred_lj/outlj_cl_dc.txt',
-                                unpack=True)
-        lt, clt_kk = np.loadtxt(path+'/pred_lj/outlj_cl_cc.txt',
-                                unpack=True)
-        lt, clt_id = np.loadtxt(path+'/pred_lj/outlj_cl_di.txt',
-                                unpack=True)
-        lt, clt_ii = np.loadtxt(path+'/pred_lj/outlj_cl_ii.txt',
-                                unpack=True)
-        cln_dd = np.ones_like(lt) / ndens
-        clt_dd = cls_dd + cln_dd
-        d = hp.anafast(np.array([mp_d, mp_e1, mp_e2]), pol=True)
-        cld_dd, cld_ee, cld_bb, cld_de, cld_eb, cld_db = d
-        ld = np.arange(len(cld_dd))
-        
+        with suppress_stdout():
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                fxn()
+            lt, cls_dd = np.loadtxt(path+'/pred_lj/outlj_cl_dd.txt',
+                                    unpack=True)
+            lt, clt_dl = np.loadtxt(path+'/pred_lj/outlj_cl_d1l2.txt',
+                                    unpack=True)
+            lt, clt_ll = np.loadtxt(path+'/pred_lj/outlj_cl_ll.txt',
+                                    unpack=True)
+            lt, clt_kd = np.loadtxt(path+'/pred_lj/outlj_cl_dc.txt',
+                                    unpack=True)
+            lt, clt_kk = np.loadtxt(path+'/pred_lj/outlj_cl_cc.txt',
+                                    unpack=True)
+            lt, clt_id = np.loadtxt(path+'/pred_lj/outlj_cl_di.txt',
+                                    unpack=True)
+            lt, clt_ii = np.loadtxt(path+'/pred_lj/outlj_cl_ii.txt',
+                                    unpack=True)
+            cln_dd = np.ones_like(lt) / ndens
+            clt_dd = cls_dd + cln_dd
+            d = hp.anafast(np.array([mp_d, mp_e1, mp_e2]), pol=True)
+            cld_dd, cld_ee, cld_bb, cld_de, cld_eb, cld_db = d
+            ld = np.arange(len(cld_dd))
+            
         savetofile(output_path, [lt,cld_dd,cld_ee,cld_bb,cld_de,cld_eb,cld_db,ld], ["lt","cld_dd","cld_ee","cld_bb","cld_de","cld_eb","cld_db","ld"] )
         
     if do_kappa:
         # Analyze kappa
-        mp_k = hp.read_map(path+"/out_kappa_z000.fits")
-        if do_cls:
-            cld_kk = hp.anafast(mp_k)
-            ld = np.arange(len(cld_kk))
-            cld_kd = hp.anafast(mp_k, map2=mp_d)
-            savetofile(path, [cld_kk, cld_kd], ["cld_kk", "cld_kd"] )
+        with suppress_stdout():
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                fxn()
+                mp_k = hp.read_map(path+"/out_kappa_z000.fits")
+                if do_cls:
+                    cld_kk = hp.anafast(mp_k)
+                    ld = np.arange(len(cld_kk))
+                    cld_kd = hp.anafast(mp_k, map2=mp_d)
+                    savetofile(path, [cld_kk, cld_kd], ["cld_kk", "cld_kd"] )
         savetofile(output_path, [mp_k], ["mp_k"] )
     
 if __name__ == "__main__":     
