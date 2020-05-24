@@ -17,7 +17,7 @@ class TestShearReader(unittest.TestCase):
             rmtree(self.sim_path + '/data_treated')
     
     def test_creation_when_does_not_exist(self):
-        a = self.sr.get_values('mp_E', source=1)
+        a = self.sr.get_values('mp_E', source=1, compute=True)
         self.assertTrue( os.path.isfile(self.sim_path + '/data_treated/source_1/mp_E.dat'), self.sim_path + '/data_treatment/source_1/mp_E.dat')
 
         self.assertEqual(a[0], 0.00031610267750813316)
@@ -33,12 +33,19 @@ class TestShearReader(unittest.TestCase):
         self.assertEqual(vals,3141592653)
         
     def test_creation_when_does_not_exist_binned(self):
-        a = self.sr.get_values('mp_E', source=1, minz=1, maxz=2.10)
+        a = self.sr.get_values('mp_E', source=1, minz=1, maxz=2.10, compute=True)
         expected_file = self.sim_path + '/data_treated/binned/100_210/source_1/mp_E.dat'
         
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)
         self.assertEqual(a[0], 0.00031610267750813316)
+
+    def test_raise_when_does_not_exist_and_no_compute(self):
+        self.sr.remove_data_treated()
+
+        with self.assertRaises(OSError):
+            a = self.sr.get_values('mp_E', source=1, minz=1, maxz=2.10)
+
 
     @patch.object(ShearReader, "do_data_treatment")
     def test_not_created_when_exists_binned(self, mock_func):

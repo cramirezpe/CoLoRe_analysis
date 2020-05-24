@@ -16,7 +16,7 @@ class ShearReader:
         log.info(f'Doing data treatment for source: { source }. cls: { do_cls }, kappa: { do_kappa }, minz: { minz }, maxz: { maxz }')
         data_treatment(self.location,source, do_cls, do_kappa, minz, maxz, output_path)
 
-    def get_values(self, parameter, source=1, minz=None, maxz=None, do_cls=False, do_kappa=False):
+    def get_values(self, parameter, source=1, minz=None, maxz=None, do_cls=False, do_kappa=False, compute=False):
         log.info(f'Getting values for sim: { self.location }. Parameter: { parameter }')
         if minz != None and maxz != None:
             minz_str    = round(float(minz)*100)
@@ -28,6 +28,9 @@ class ShearReader:
         try:
             return np.loadtxt( path + '/'+parameter+'.dat')
         except OSError:
+            if not compute:
+                raise
+
             if parameter == 'mp_k': 
                 do_kappa = True
             if parameter[:2] == 'cl' or parameter == 'ld' or parameter == 'lt':
@@ -42,7 +45,7 @@ class ShearReader:
         # I use mp_e1 to not compute if values already exist
         step = (maxz-minz)/bins
         for b in range(bins):
-            _ = self.get_values('mp_e1', minz=minz+b*step, maxz= minz + (1+b)*step, do_cls=do_cls, do_kappa=do_kappa, source=source)
+            _ = self.get_values('mp_e1', minz=minz+b*step, maxz= minz + (1+b)*step, do_cls=do_cls, do_kappa=do_kappa, source=source, compute=True)
     
     def remove_data_treated(self):
         log.info(f'Removing treated data for sim: { self.location }')
