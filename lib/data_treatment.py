@@ -39,6 +39,8 @@ def data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=N
         output_path = path + f'/data_treated/source_{ source }'
     os.makedirs(output_path, exist_ok=True)
     
+    log.debug(f'path: { path }, source: { source }, do_cls: { do_cls }, do_kapa: { do_kappa }, minz: { minz }, maxz: { maxz }, output_path: { output_path }')
+
     with suppress_stdout():
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -51,8 +53,9 @@ def data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=N
             nmap = np.zeros(hp.nside2npix(nside))
             e1map = np.zeros(hp.nside2npix(nside))
             e2map = np.zeros(hp.nside2npix(nside))
-            while os.path.isfile(path+'/out_srcs_s%d_%d.fits' % (source,ifile)):
-                hdulist = fits.open(path+'/out_srcs_s%d_%d.fits' % (source,ifile))
+
+            while os.path.isfile(path+f'/out_srcs_s{ source }_{ ifile }.fits'):
+                hdulist = fits.open(path+f'/out_srcs_s{ source }_{ ifile }.fits')
                 tbdata = hdulist[1].data
 
                 pix = hp.ang2pix(nside,

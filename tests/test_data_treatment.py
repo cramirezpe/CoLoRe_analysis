@@ -26,7 +26,7 @@ class TestDataTreatment(unittest.TestCase):
         self.assertEqual(a[0], 3.161026775081331630e-04)
 
     def test_data_treatment_with_bins_2(self):
-        data_treatment(self.sim_path, source=1, minz=2, maxz=2.01, output_path = self.sim_path + f'/data_treated/source_1')
+        data_treatment(self.sim_path, source=1, minz=2, maxz=2.01, output_path = self.sim_path + f'/data_treated/source_1', do_cls=False, do_kappa=True)
 
         a = np.loadtxt(self.sim_path + f'/data_treated/source_1/mp_E.dat')
 
