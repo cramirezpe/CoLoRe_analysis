@@ -41,6 +41,9 @@ def data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=N
     
     log.debug(f'path: { path }, source: { source }, do_cls: { do_cls }, do_kapa: { do_kappa }, minz: { minz }, maxz: { maxz }, output_path: { output_path }')
 
+    minz = 0 if minz==None else minz
+    maxz = 2000 if maxz==None else maxz
+
     with suppress_stdout():
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -57,6 +60,8 @@ def data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=N
             while os.path.isfile(path+f'/out_srcs_s{ source }_{ ifile }.fits'):
                 hdulist = fits.open(path+f'/out_srcs_s{ source }_{ ifile }.fits')
                 tbdata = hdulist[1].data
+                mask = (tbdata['Z_COSMO'] >= minz) & (tbdata['Z_COSMO'] < maxz)
+                tbdata = tbdata[mask]
 
                 pix = hp.ang2pix(nside,
                                 np.radians(90-tbdata['DEC']),

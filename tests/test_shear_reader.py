@@ -33,8 +33,8 @@ class TestShearReader(unittest.TestCase):
         self.assertEqual(vals,3141592653)
         
     def test_creation_when_does_not_exist_binned(self):
-        a = self.sr.get_values('mp_E', source=1, minz=2, maxz=2.01)
-        expected_file = self.sim_path + '/data_treated/binned/200_201/source_1/mp_E.dat'
+        a = self.sr.get_values('mp_E', source=1, minz=1, maxz=2.10)
+        expected_file = self.sim_path + '/data_treated/binned/100_210/source_1/mp_E.dat'
         
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)

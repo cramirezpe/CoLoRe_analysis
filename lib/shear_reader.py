@@ -42,7 +42,6 @@ class ShearReader:
         # I use mp_e1 to not compute if values already exist
         step = (maxz-minz)/bins
         for b in range(bins):
-            print(b)
             _ = self.get_values('mp_e1', minz=minz+b*step, maxz= minz + (1+b)*step, do_cls=do_cls, do_kappa=do_kappa, source=source)
     
     def remove_data_treated(self):
