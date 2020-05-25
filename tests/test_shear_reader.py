@@ -2,9 +2,10 @@ import lib.shear_reader as module
 import unittest
 import os
 from lib.shear_reader import ShearReader
-from mock import patch
+from mock import patch, call
 from shutil import rmtree
 import numpy as np
+import sys
 
 class TestShearReader(unittest.TestCase):
     def setUp(self):

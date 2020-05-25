@@ -322,9 +322,11 @@ class Simulation:
             self.output_file =   glob.glob(location + '/script/*.out')[-1]
         if self.version != 'master':
             self.shear = FileManager.get_parameter(self.location, 'shear')
+            self.nside = FileManager.get_parameter(self.location, 'nside')
             self.commit = FileManager.get_parameter(self.location, 'commit')
         else:
-            self.shear = None
+            self.shear  = None
+            self.nside  = None
             self.commit = None
         
     def __str__(self):
