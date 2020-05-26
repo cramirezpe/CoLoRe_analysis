@@ -85,7 +85,7 @@ class FileManager:
                     # if there is no need for filter, I append directly
                     else:
                         sims.append(folder)
-        return sorted(list(sims), key=lambda folder: os.stat(folder).st_ctime)
+        return sorted(list(sims), key=lambda folder: int(cls.get_parameter(folder,'preparation_time')))
     
     @classmethod
     def remove_sim(cls,path):

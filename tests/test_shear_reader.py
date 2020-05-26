@@ -21,7 +21,7 @@ class TestShearReader(unittest.TestCase):
         a = self.sr.get_values('mp_E', source=1, compute=True)
         self.assertTrue( os.path.isfile(self.sim_path + '/data_treated/source_1/mp_E.dat'), self.sim_path + '/data_treatment/source_1/mp_E.dat')
 
-        self.assertEqual(a[0], 0.00031610267750813316)
+        self.assertEqual(a[0], -5.219686441568587e-06)
 
     @patch.object(ShearReader, "do_data_treatment")
     def test_not_created_when_exists(self, mock_func):
@@ -39,7 +39,7 @@ class TestShearReader(unittest.TestCase):
         
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)
-        self.assertEqual(a[0], 0.00031610267750813316)
+        self.assertEqual(a[0], -5.219686441568587e-06)
 
     def test_raise_when_does_not_exist_and_no_compute(self):
         self.sr.remove_data_treated()
