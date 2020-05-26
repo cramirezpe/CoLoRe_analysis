@@ -48,7 +48,7 @@ def data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=N
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             fxn()
-            nside = 128
+            nside = 512
             npix = hp.nside2npix(nside)
 
             # Analyze sources
@@ -93,27 +93,27 @@ def data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=N
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore")
                 fxn()
-            lt, cls_dd = np.loadtxt(path+'/pred_lj/outlj_cl_dd.txt',
-                                    unpack=True)
-            lt, clt_dl = np.loadtxt(path+'/pred_lj/outlj_cl_d1l2.txt',
-                                    unpack=True)
-            lt, clt_ll = np.loadtxt(path+'/pred_lj/outlj_cl_ll.txt',
-                                    unpack=True)
-            lt, clt_kd = np.loadtxt(path+'/pred_lj/outlj_cl_dc.txt',
-                                    unpack=True)
-            lt, clt_kk = np.loadtxt(path+'/pred_lj/outlj_cl_cc.txt',
-                                    unpack=True)
-            lt, clt_id = np.loadtxt(path+'/pred_lj/outlj_cl_di.txt',
-                                    unpack=True)
-            lt, clt_ii = np.loadtxt(path+'/pred_lj/outlj_cl_ii.txt',
-                                    unpack=True)
-            cln_dd = np.ones_like(lt) / ndens
-            clt_dd = cls_dd + cln_dd
+            # lt, cls_dd = np.loadtxt(path+'/pred_lj/outlj_cl_dd.txt',
+            #                         unpack=True)
+            # lt, clt_dl = np.loadtxt(path+'/pred_lj/outlj_cl_d1l2.txt',
+            #                         unpack=True)
+            # lt, clt_ll = np.loadtxt(path+'/pred_lj/outlj_cl_ll.txt',
+            #                         unpack=True)
+            # lt, clt_kd = np.loadtxt(path+'/pred_lj/outlj_cl_dc.txt',
+            #                         unpack=True)
+            # lt, clt_kk = np.loadtxt(path+'/pred_lj/outlj_cl_cc.txt',
+            #                         unpack=True)
+            # lt, clt_id = np.loadtxt(path+'/pred_lj/outlj_cl_di.txt',
+            #                         unpack=True)
+            # lt, clt_ii = np.loadtxt(path+'/pred_lj/outlj_cl_ii.txt',
+            #                         unpack=True)
+            # cln_dd = np.ones_like(lt) / ndens
+            # clt_dd = cls_dd + cln_dd
             d = hp.anafast(np.array([mp_d, mp_e1, mp_e2]), pol=True)
             cld_dd, cld_ee, cld_bb, cld_de, cld_eb, cld_db = d
             ld = np.arange(len(cld_dd))
             
-        savetofile(output_path, [lt,cld_dd,cld_ee,cld_bb,cld_de,cld_eb,cld_db,ld], ["lt","cld_dd","cld_ee","cld_bb","cld_de","cld_eb","cld_db","ld"] )
+        savetofile(output_path, [cld_dd,cld_ee,cld_bb,cld_de,cld_eb,cld_db,ld], ["cld_dd","cld_ee","cld_bb","cld_de","cld_eb","cld_db","ld"] )
         
     if do_kappa:
         # Analyze kappa

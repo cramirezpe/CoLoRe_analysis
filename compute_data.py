@@ -42,7 +42,7 @@ for sim in sims.values():
         maxz = 0 + (1+b)*0.25
         minz_str    = round(float(minz)*100)
         maxz_str    = round(float(maxz)*100)
-        arguments = (sim.location, 2,False,True,minz,maxz,sim.location+ f'/data_treated/binned/{ str(minz_str) }_{ str(maxz_str) }/source_2')
+        arguments = (sim.location, 2,True,True,minz,maxz,sim.location+ f'/data_treated/binned/{ str(minz_str) }_{ str(maxz_str) }/source_2')
 
         data_treatment_args.append(arguments)
     #sim.shear_reader.compute_binned_statistics(minz=0, maxz=2.5, bins=10, source=2, do_cls=False, do_kappa=True)
