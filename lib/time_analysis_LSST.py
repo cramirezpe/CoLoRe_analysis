@@ -81,10 +81,11 @@ class FileManager:
                     if param_filter:
                         # If the Simulation pass the filter I append it
                         if FileManager.filter_parameters(folder,param_filter):
-                            sims.append(folder)   
+                            sims.append(folder)  
                     # if there is no need for filter, I append directly
                     else:
                         sims.append(folder)
+                        
         return sorted(list(sims), key=lambda folder: int(cls.get_parameter(folder,'preparation_time')))
     
     @classmethod
@@ -146,7 +147,36 @@ class FileManager:
     @classmethod
     def running_to_crash(cls,path):
         cls.change_parameters(path,'status','running','crashed')
-    
+
+    @classmethod
+    def print_sims_table(cls,path,param_filter):
+        sims = {}
+        print('| id | commit | Status | Nodes | Seed | Version | Template | Factor | Shear | Nside | Memory (GB) | Disk  | Time (s)| Preparation Date')
+        print(' |:---:|:----:|:----:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:----:|:----:|')
+
+        # Delete empty directories
+        FileManager.remove_empty_dirs(path)
+
+        # Find simulations
+        for i,sim in enumerate(cls.get_simulations(path,param_filter)):
+            simname = i
+            sims[simname] = Sim0404(sim,simname)
+        
+        # Getting informations    
+        for x in sims.keys():
+            if sims[x].status == 'done': 
+                sims[x].set_time_reader()
+                
+            sims[x].set_memory_reader()
+            sims[x].set_size()
+            sims[x].set_shear_reader()
+            
+        for sim in sims.items():
+            x = sim[1]
+            total_time = round(x.time_reader.times["Total"]/1000 if x.status == 'done' else 0,4)
+            print('| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |'.format(x.__name__,x.commit,x.status,x.nodes,x.seed,x.version,x.template,x.factor,x.shear,x.nside,x.memory_reader.tasks['Total']['Memory']/1000, x.size,total_time, x.preparation_time))
+        return sims
+
    
 # The class TimeReader is devoted to obtain computation time for a given Simulation. 
 # The process relies in the terminal output of CoLoRe and therefore it requires tricky methods (searching for strings in files). This is likely to change in the future and hence the convenience of having it separatedly.
