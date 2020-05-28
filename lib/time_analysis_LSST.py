@@ -350,7 +350,7 @@ class Simulation:
             self.terminal_file = glob.glob(location + '/script/terminal*')[-1]
             self.error_file =    glob.glob(location + '/script/*.error')[-1]
             self.output_file =   glob.glob(location + '/script/*.out')[-1]
-        if self.version != 'master':
+        if 'master' not in self.version:
             self.shear = FileManager.get_parameter(self.location, 'shear')
             self.nside = FileManager.get_parameter(self.location, 'nside')
             self.commit = FileManager.get_parameter(self.location, 'commit')
@@ -391,7 +391,7 @@ class Simulation:
     
     @version.setter
     def version(self, value):
-        if value not in ['New','Old','master']:
+        if value not in ['New','Old','master','master_bias3']:
             raise TypeError('Version should be New/Old/master',value)
         self._version = value
         
