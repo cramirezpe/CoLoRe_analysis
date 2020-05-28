@@ -126,7 +126,7 @@ def data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=N
                     cld_kk = hp.anafast(mp_k)
                     ld = np.arange(len(cld_kk))
                     cld_kd = hp.anafast(mp_k, map2=mp_d)
-                    savetofile(path, [cld_kk, cld_kd], ["cld_kk", "cld_kd"] )
+                    savetofile(output_path, [cld_kk, cld_kd], ["cld_kk", "cld_kd"] )
         savetofile(output_path, [mp_k], ["mp_k"] )
     
 if __name__ == "__main__":     
