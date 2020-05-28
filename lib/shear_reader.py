@@ -6,6 +6,8 @@ import os
 import logging
 log = logging.getLogger(__name__)
 
+def redshift_to_str_for_path(redshift):
+    return round(float(redshift)*100)
 
 # The class shear reader is used to get data from data_treatment, it will always be shear information but it can also treat with cl information.
 class ShearReader:
@@ -19,8 +21,8 @@ class ShearReader:
     def get_values(self, parameter, source=1, minz=None, maxz=None, do_cls=False, do_kappa=False, compute=False):
         log.info(f'Getting values for sim: { self.location }. Parameter: { parameter }')
         if minz != None and maxz != None:
-            minz_str    = round(float(minz)*100)
-            maxz_str    = round(float(maxz)*100)
+            minz_str    = redshift_to_str_for_path(minz)
+            maxz_str    = redshift_to_str_for_path(maxz)
             path    = self.location + f'/data_treated/binned/{ str(minz_str) }_{ str(maxz_str) }/source_{ source }'
         else:
             path    = self.location + f'/data_treated/source_{ source }'
