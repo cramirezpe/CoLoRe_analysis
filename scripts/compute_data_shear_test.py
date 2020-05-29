@@ -1,4 +1,6 @@
 import sys, os
+import sys
+sys.path.insert(1,'..')
 from lib.shear_reader import ShearReader
 from lib.time_analysis_LSST import (FileManager, Sim0404)
 import shutil

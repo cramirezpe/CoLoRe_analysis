@@ -1,4 +1,5 @@
 import sys, os
+sys.path.insert(1,'..')
 from lib.shear_reader import ShearReader
 from lib.time_analysis_LSST import (FileManager, Sim0404)
 import shutil
@@ -12,12 +13,14 @@ log = logging.getLogger(__name__)
 def log_error(retval):
     print('Error:',retval)
 
+def log_result(retval):
+    print('Result:',retval)
+
 path = "/global/cscratch1/sd/cramirez/CoLoRe_LSST/"
 
 filt = {
     "status" : ["done"],
-    "template": ["master_with_shear"],
-    "factor": [0.1,0.01]
+    "preparation_time": [20200528034653, 20200529032916]
 }
 
 sims = {}
@@ -45,15 +48,16 @@ for sim in sims.values():
         arguments = (sim.location, 2,True,True,minz,maxz,sim.location+ f'/data_treated/binned/{ str(minz_str) }_{ str(maxz_str) }/source_2')
 
         data_treatment_args.append(arguments)
+    data_treatment_args.append((sim.location,2,True,True,None,None,None))
     #sim.shear_reader.compute_binned_statistics(minz=0, maxz=2.5, bins=10, source=2, do_cls=False, do_kappa=True)
 
 if __name__ == '__main__':
     pool = Pool(processes = 64)
-    
-    x= [pool.apply_async(data_treatment, args, error_callback=log_error) for args in data_treatment_args]
+    print('starting pool')
+    x= [pool.apply_async(data_treatment, args,callback=log_result, error_callback=log_error) for args in data_treatment_args]
 
     pool.close()
     pool.join()
-
-    [p.get() for p in x]
+    print('closing pool')
+    [print(p.get()) for p in x]
 

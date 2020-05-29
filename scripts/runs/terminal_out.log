@@ -1,0 +1,4 @@
+Id. 0	Location: /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.1/20200528034653
+Id. 1	Location: /global/cscratch1/sd/cramirez/CoLoRe_LSST/New/shear_50/nside_2048/0.01/20200529032916
+INFO:__main__:Computing information for sim in locations: /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.1/20200528034653
+INFO:lib.shear_reader:Removing treated data for sim: /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.1/20200528034653
