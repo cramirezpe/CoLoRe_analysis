@@ -1,18 +1,11 @@
 import lib.time_analysis_LSST as module
 import unittest
-from lib.time_analysis_LSST import (FileManager, MemoryReader, FilterList, Simulation, Sim0404)
+from lib.file_manager import (FileManager) 
+from lib.time_analysis_LSST import  (MemoryReader, Simulation, Sim0404)
 import os
 import filecmp
 from shutil import rmtree
 
-class TestFileManager(unittest.TestCase):
-    def setUp(self):
-        self.filters = FilterList.filters()
-
-    def test_get_simulations(self):
-        filt = self.filters[3][1]
-        result = FileManager.get_simulations(os.getcwd() + '/tests/test_sims',param_filter=filt)
-        self.assertIn( os.getcwd() + '/tests/test_sims/0404', result )
 
 class TestSimulationMaster(unittest.TestCase):
     def setUp(self):
@@ -28,8 +21,8 @@ class TestSimulationMaster(unittest.TestCase):
         sim         = self.Sim
         self.assertEqual(sim.__name__, 'testname')
         self.assertEqual(sim.version, 'master')
-        self.assertEqual(sim.seed, '1003')
-        self.assertEqual(sim.factor, '0.01')
+        self.assertEqual(sim.seed, 1003)
+        self.assertEqual(sim.factor, 0.01)
         self.assertEqual(sim.template, 'master_with_shear')
         self.assertEqual(sim.status, 'done')
         self.assertEqual(sim.preparation_time, '20200416090110')
@@ -70,15 +63,7 @@ class TestSimulationMaster(unittest.TestCase):
 
         self.assertEqual( self.Sim.size, '13M')
 
-    # def test_shear_reader(self):
-    #     self.Sim.set_shear_reader()
-    #     shear_reader = self.Sim.shear_reader
-    #     shear_reader.do_data_treatment()
-    #     shear_reader.do_data_treatment(source=2)
 
-    #     with open(self.sim_path+f'/data_treated/source_1/mp_E.dat') as f:
-    #         first_line = f.readline()
-    #     self.assertEqual(first_line, '3.161026775081331630e-04\n')
 
 
 

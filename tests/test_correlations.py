@@ -57,10 +57,10 @@ class TestCorrelations(unittest.TestCase):
 
     def test_matched_seeds(self):
         # The matched seeds are 300 and 1003
-        self.assertSetEqual( self.corr_sims.seeds, {'1003','300'} )
+        self.assertSetEqual( self.corr_sims.seeds, {1003,300} )
 
         # Program should match simulations run with the same seed. 
-        self.assertEqual( ['New_s2', 'Old_s2'] , [x.__name__ for x in self.corr_sims.sims['300']])
+        self.assertEqual( ['New_s2', 'Old_s2'] , [x.__name__ for x in self.corr_sims.sims[300]])
     
     @patch.object(ShearReader, "do_data_treatment")
     def test_correlation_regression_tiny_bin(self, mock_func):
@@ -69,7 +69,7 @@ class TestCorrelations(unittest.TestCase):
         corr = cs.correlation_in_bin(parameter='mp_e2',minz=1,maxz=1.05)
         mock_func.assert_not_called()
 
-        first_sim_path = cs.sims['300'][0].location
+        first_sim_path = cs.sims[300][0].location
 
         # Check data was computed
         self.assertTrue( os.path.isdir(first_sim_path + '/data_treated/binned/100_105/source_1'))
@@ -92,8 +92,8 @@ class TestCorrelations(unittest.TestCase):
         with self.assertRaises(ValueError):
             mult_cs.store_correlation(parameter='mp_e2',minz=1,maxz=1.05)
         
-        mult_cs.store_correlation(parameter='mp_e2',minz=1,maxz=1.05, out= mult_cs.sims['300'][0].location + '/data_treated')
-        x = np.loadtxt(mult_cs.sims['300'][0].location + '/data_treated/mp_e2.dat')
+        mult_cs.store_correlation(parameter='mp_e2',minz=1,maxz=1.05, out= mult_cs.sims[300][0].location + '/data_treated')
+        x = np.loadtxt(mult_cs.sims[300][0].location + '/data_treated/mp_e2.dat')
 
         self.assertEqual(x, 0.6855447840406176)
 
