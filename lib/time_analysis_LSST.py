@@ -5,7 +5,6 @@ import re
 import shutil
 import subprocess
 import lib.shear_reader as shear_reader
-import lib.file_manager as file_manager
 import configparser
 import logging
 log = logging.getLogger(__name__)
