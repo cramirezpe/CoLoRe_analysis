@@ -47,6 +47,26 @@ class TestShearReader(unittest.TestCase):
         self.assertTrue( os.path.isfile(self.sim_path + '/data_treated/source_1/mp_E.dat') )
         self.assertEqual(a[0], 21)
 
+    @patch('lib.shear_reader.data_treatment',side_effect=mock_data_treatment)
+    def test_get_cls_and_kappa(self, mock_func):
+        a = self.sr.get_values('mp_k', source=1, minz=1, maxz=2.10, compute=True)
+        expected_file = self.sim_path + '/data_treated/binned/100_210/source_1/mp_k.dat'
+        self.assertTrue( os.path.isfile(expected_file) )
+        a = np.loadtxt(expected_file)
+        self.assertEqual(a[0],7)
+    
+        a = self.sr.get_values('cld_dd', source=1, minz=1, maxz=2.10, compute=True, do_kappa=True)
+        expected_file = self.sim_path + '/data_treated/binned/100_210/source_1/cld_dd.dat'
+        self.assertTrue( os.path.isfile(expected_file) )
+        a = np.loadtxt(expected_file)
+        self.assertEqual(a[0],4)
+  
+        expected_file = self.sim_path + '/data_treated/binned/100_210/source_1/cld_kk.dat'
+        self.assertTrue( os.path.isfile(expected_file) )
+        a = np.loadtxt(expected_file)
+        self.assertEqual(a[0],10)
+
+
     @patch.object(ShearReader, "do_data_treatment")
     def test_not_created_when_exists(self, mock_func):
         path = self.sim_path + '/data_treated/source_2'
