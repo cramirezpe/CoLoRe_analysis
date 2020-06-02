@@ -10,8 +10,8 @@ logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 log = logging.getLogger(__name__)
 
 def do_correlation(corrTwoShearobj,minz,maxz):
-    print('computing correlation')
-    corrTwoShearobj.store_correlation(parameter='mp_e1', source=2, minz=minz, maxz=maxz)
+    print('computing regression')
+    corrTwoShearobj.store_regression(parameter='mp_e1', source=2, minz=minz, maxz=maxz)
     return
 
 def log_error(retval):
@@ -23,6 +23,8 @@ def log_result(retval):
 # create arguments
 old_01_sim  = Sim0404('/global/cscratch1/sd/cramirez/CoLoRe_LSST/Old/shear_100/nside_512/0.1/20200524160256')
 old_001_sim = Sim0404('/global/cscratch1/sd/cramirez/CoLoRe_LSST/Old/shear_100/nside_512/0.01/20200524164137')
+master_01_sim = Sim0404('/global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.1/20200528034653')
+master_001_sim = Sim0404('/global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.01/20200528012712')
 
 # New sims:
 filt = {
@@ -50,9 +52,13 @@ corrobjs = []
 for x in sims_01:
     print('0.1 sim at:\t',x.location)
     corrobjs.append(CorrelateTwoShears([x],[old_01_sim]))
+
 for x in sims_001:
     print('0.01 sim at:\t',x.location)
     corrobjs.append(CorrelateTwoShears([x],[old_001_sim]))
+
+corrobjs.append(CorrelateTwoShears([old_01_sim],[master_01_sim]))
+corrobjs.append(CorrelateTwoShears([old_001_sim],[master_001_sim]))
 
 data_treatment_args = []
 for x in corrobjs:

@@ -1,7 +1,8 @@
 import sys, os
 sys.path.insert(1,'..')
 from lib.shear_reader import ShearReader
-from lib.time_analysis_LSST import (FileManager, Sim0404)
+from lib.time_analysis_LSST import Sim0404
+from lib.file_manager import FileManager
 import shutil
 from lib.data_treatment import data_treatment
 from multiprocessing import Pool
@@ -20,7 +21,7 @@ path = "/global/cscratch1/sd/cramirez/CoLoRe_LSST/"
 
 filt = {
     "status" : ["done"],
-    "preparation_time": [20200528034653, 20200529032916]
+    "preparation_time": [20200528044545, 20200529043731,20200529043742]
 }
 
 sims = {}

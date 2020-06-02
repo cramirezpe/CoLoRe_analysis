@@ -90,12 +90,42 @@ class CorrelateTwoShears:
         with open(out+ '/' + parameter +'.dat', "w") as f:
             f.write(str(correlation))
 
+    def store_regression(self, parameter='mp_e1', source=1, minz=None, maxz=None, out=None):
+        if out == None and len(self.sims) > 1:
+            raise ValueError('Multiple simulations provided. Output path is needed')
+        
+        if out == None:
+            out = self.path_to_regression(parameter=parameter, source=source, minz=minz, maxz=maxz)
+            if not os.path.exists(out):
+                os.makedirs(out)
+            seed = list(self.seeds)[0]
+            copy2(self.sims[seed][1].location+'/sim_info.dat',out+'/compared_to_info.dat')         
+
+        coef, intercept = self.regression_in_bin(parameter=parameter, source=source, minz=minz, maxz=maxz)
+
+        with open(out+ '/coef_' + parameter +'.dat', "w") as f:
+            f.write(str(coef))
+
+        with open(out+ '/intercept_' + parameter +'.dat', "w") as f:
+            f.write(str(intercept))
+
+
     def get_correlation(self, parameter='mp_e1', source=1, minz=None, maxz=None):
         file_path = self.path_to_correlation(parameter=parameter, source=source, minz=minz, maxz=maxz)
 
         with open(file_path + parameter + '.dat',"r") as f:
             correlation = f.read()
         return float(correlation)
+
+    def get_regression(self, reg_parameter, parameter='mp_e1', source=1, minz=None, maxz=None):
+        if reg_parameter not in ('coef','intercept'):
+            raise ValueError(f'Unvalid regression parameter: { reg_parameter } not in ("coef","intercept")')
+
+        file_path = self.path_to_regression(parameter=parameter, source=source, minz=minz, maxz=maxz)
+
+        with open(file_path + reg_parameter + '_' + parameter + '.dat',"r") as f:
+            regression_value = f.read()
+        return float(regression_value)        
 
     def path_to_correlation(self, parameter='mp_e1', source=1, minz=None, maxz=None):
         seed = list(self.seeds)[0]
@@ -106,3 +136,6 @@ class CorrelateTwoShears:
         else:
             out = self.sims[seed][0].location + f'/data_treated/correlations/source_{ source }/' + self.sims[seed][1].preparation_time +'/'
         return out
+
+    def path_to_regression(self, parameter='mp_e1', source=1, minz=None, maxz=None):
+        return self.path_to_correlation(parameter=parameter, source=source, minz=minz, maxz=maxz).replace('correlations','regressions')

@@ -24,6 +24,7 @@ class Simulation:
         self.factor  = config.getfloat('SIM_CONFIG','factor')
         self.template= config.get('SIM_CONFIG','template')
         self.status  = config.get('SIM_CONFIG','status')
+        self.nodes   = config.getint('SIM_CONFIG','nodes')
         self.preparation_time = config.get('SIM_CONFIG','preparation_time')
         self.shear   = config.getint('SIM_CONFIG', 'shear', fallback=None)
         self.nside   = config.getint('SIM_CONFIG', 'nside', fallback=None)
@@ -58,13 +59,13 @@ class Simulation:
             config.write(configfile)
      
     def set_time_reader(self):
-        self.time_reader = TimeReader(self.version,self.commit,self.terminal_file,self.positions_time_def)
+        self.time_reader = TimeReader(self.version,self.commit,self.terminal_file,self.positions_time_def, self.nodes)
         self.time_reader.get_times()
         
     def set_memory_reader(self):      
         self.memory_reader = MemoryReader(self.terminal_file,self.positions_memory_def,self.memory_line_key)
         self.memory_reader.get_memory_values_from_file()
-        self.nodes = len(self.memory_reader.tasks) - 1
+        self.used_nodes = len(self.memory_reader.tasks) - 1
 
     def set_shear_reader(self):
         self.shear_reader = shear_reader.ShearReader(self.location)
@@ -118,11 +119,12 @@ class Sim0404(Simulation):
 # The class TimeReader is devoted to obtain computation time for a given Simulation. 
 # The process relies in the terminal output of CoLoRe and therefore it requires tricky methods (searching for strings in files). This is likely to change in the future and hence the convenience of having it separatedly.
 class TimeReader:
-    def __init__(self,version,commit,terminal_file,positions_def):
-        self.version = version
-        self.commit = commit
-        self.file = terminal_file
-        self.positions_def = positions_def
+    def __init__(self,version,commit,terminal_file,positions_def,nodes):
+        self.version        = version
+        self.commit         = commit
+        self.file           = terminal_file
+        self.positions_def  = positions_def
+        self.nodes          = nodes
         
     def get_times(self):
         times = {}
@@ -134,8 +136,9 @@ class TimeReader:
             line_time = search_1st_string_in_file(self.file, 'time ellapsed' ,ocurrence=self.positions_def[key][1], startline=line_string-1 if line_string else None)
             # Search the next ocurrence of time ellapsed
             times[key] = get_time_from_string(line_time[1])
-        self.times = times        
-        
+        self.times = times      
+
+        self.raw_hours = times['Total']*self.nodes/(1000*60*60)
 
 # The class MemoryReader is devoted to obtain memory usage for a given Simulation. 
 # The process relies in the terminal output of CoLoRe and therefore it requires tricky methods (searching for strings in files). This is likely to change in the future and hence the convenience of having it separatedly.

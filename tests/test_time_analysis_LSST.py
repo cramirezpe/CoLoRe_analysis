@@ -17,6 +17,18 @@ class TestSimulationMaster(unittest.TestCase):
         if os.path.isdir(data_treated_path):
             rmtree(self.sim_path + '/data_treated')
 
+    def test_raw_hours(self):
+        self.Sim.set_time_reader()
+        
+        nodes   = self.Sim.nodes
+        ms      = self.Sim.time_reader.times['Total']
+
+        hours   = ms/(1000*60*60)
+        raw_hours = hours*nodes
+
+        self.assertEqual(self.Sim.time_reader.raw_hours,raw_hours) 
+        
+
     def test_set_simulation(self):
         sim         = self.Sim
         self.assertEqual(sim.__name__, 'testname')

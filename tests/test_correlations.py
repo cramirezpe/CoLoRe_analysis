@@ -67,7 +67,6 @@ class TestCorrelations(unittest.TestCase):
         self.prepare_mock_data()
         cs = self.corr_sims
         corr = cs.correlation_in_bin(parameter='mp_e2',minz=1,maxz=1.05)
-        mock_func.assert_not_called()
 
         first_sim_path = cs.sims[300][0].location
 
@@ -81,6 +80,8 @@ class TestCorrelations(unittest.TestCase):
         coef, intercept = cs.regression_in_bin(parameter='mp_e2', minz=1, maxz=1.05)
         self.assertEqual( intercept, 0.2659033078880413)
         self.assertEqual( coef, 1.4440203562340965)
+        
+        mock_func.assert_not_called()
 
     def test_saved_correlation(self):
         self.prepare_mock_data()
@@ -100,7 +101,41 @@ class TestCorrelations(unittest.TestCase):
         good_cs.store_correlation(parameter='mp_e2', minz=1, maxz=1.05)
         
         self.assertEqual(good_cs.get_correlation(parameter='mp_e2',minz=1, maxz=1.05), 0.42828052649917187)
+
+    def test_saved_regression(self):
+        self.prepare_mock_data()
+
+        mult_cs = self.corr_sims
+        good_cs = corrlib.CorrelateTwoShears([self.simNew],[self.simOld])
+        
+        # Multiple simulations won't have a defined place to be stored
+        with self.assertRaises(ValueError):
+            mult_cs.store_regression(parameter='mp_e2',minz=1,maxz=1.05)
+        
+        mult_cs.store_regression(parameter='mp_e2',minz=1,maxz=1.05, out= mult_cs.sims[300][0].location + '/data_treated')
+        x = np.loadtxt(mult_cs.sims[300][0].location + '/data_treated/coef_mp_e2.dat')
+        y = np.loadtxt(mult_cs.sims[300][0].location + '/data_treated/intercept_mp_e2.dat')
+        self.assertEqual(x, 1.4440203562340965)
+        self.assertEqual(y, 0.2659033078880413)
+
+        good_cs.store_regression(parameter='mp_e2', minz=1, maxz=1.05)
+        
+        self.assertEqual(good_cs.get_regression(reg_parameter = 'coef', parameter='mp_e2',minz=1, maxz=1.05), 0.22137404580152661)
+        self.assertEqual(good_cs.get_regression(reg_parameter = 'intercept', parameter='mp_e2',minz=1, maxz=1.05), 2.1984732824427486)
     
+    def test_path_to_regression(self):
+        param     = "mp_e2"
+        source    = 2
+        self.prepare_mock_data()
+
+        cs = corrlib.CorrelateTwoShears([self.simNew],[self.simOld])
+        self.assertEqual(cs.path_to_regression(parameter=param, source=source), self.simNew.location + f'/data_treated/regressions/source_2/{ self.simNew.preparation_time }/')
+
+    def test_get_regression(self):
+        with self.assertRaises(ValueError):
+           self.corr_sims.get_regression('234')
+            
+            
     def test_path_to_correlation(self):
         param = 'mp_e2'
         source = 2
