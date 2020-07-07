@@ -28,7 +28,7 @@ class Simulation:
         self.preparation_time = config.get('SIM_CONFIG','preparation_time')
         self.shear   = config.getint('SIM_CONFIG', 'shear', fallback=None)
         self.nside   = config.getint('SIM_CONFIG', 'nside', fallback=None)
-        self.commit  = config.getint('SIM_CONFIG', 'commit', fallback=None)
+        self.commit  = config.get('SIM_CONFIG', 'commit', fallback=None)
 
         if self.status != 'prepared':
             self.terminal_file = glob.glob(location + '/script/terminal*')[-1]
