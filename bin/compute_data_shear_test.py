@@ -1,10 +1,10 @@
 import sys, os
 import sys
 sys.path.insert(1,'..')
-from lib.shear_reader import ShearReader
-from lib.time_analysis_LSST import (FileManager, Sim0404)
+from CoLoRe_analysis.shear_reader import ShearReader
+from CoLoRe_analysis.sims_reader import (FileManager, Sim0404)
 import shutil
-from lib.data_treatment import data_treatment
+from CoLoRe_analysis.data_treatment import data_treatment
 from multiprocessing import Pool
 
 import logging.config

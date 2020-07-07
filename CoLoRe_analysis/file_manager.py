@@ -1,6 +1,6 @@
 import os
 import shutil 
-from lib.time_analysis_LSST import Sim0404
+from CoLoRe_analysis.sims_reader import Sim0404
 import configparser
 
 # The class FileManager should be understood as a group of functions (a FileManager object would be totally unuseful). 

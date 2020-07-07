@@ -1,8 +1,8 @@
 import sys
 sys.path.insert(1,'..')
-from lib.correlations import CorrelateTwoShears
-from lib.time_analysis_LSST import (Sim0404)
-from lib.file_manager import FileManager
+from CoLoRe_analysis.correlations import CorrelateTwoShears
+from CoLoRe_analysis.sims_reader import (Sim0404)
+from CoLoRe_analysis.file_manager import FileManager
 from multiprocessing import Pool
 
 import logging.config

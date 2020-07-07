@@ -2,14 +2,14 @@ import unittest
 import os, sys
 from shutil import rmtree
 sys.path.append('./')
-import lib.data_treatment
-from lib.data_treatment import data_treatment
+import CoLoRe_analysis.data_treatment
+from CoLoRe_analysis.data_treatment import data_treatment
 import numpy as np
 import glob
 
 class TestDataTreatment(unittest.TestCase):
     def setUp(self):
-        self.sim_path = os.getcwd() + '/tests/test_sims/0404'
+        self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/0404'
 
     def tearDown(self):
         data_treated_path = self.sim_path + '/data_treated'

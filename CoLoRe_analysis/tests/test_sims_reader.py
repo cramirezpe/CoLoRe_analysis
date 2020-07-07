@@ -1,7 +1,7 @@
-import lib.time_analysis_LSST as module
+import CoLoRe_analysis.sims_reader as module
 import unittest
-from lib.file_manager import (FileManager) 
-from lib.time_analysis_LSST import  (MemoryReader, Simulation, Sim0404)
+from CoLoRe_analysis.file_manager import (FileManager) 
+from CoLoRe_analysis.sims_reader import  (MemoryReader, Simulation, Sim0404)
 import os
 import filecmp
 from shutil import rmtree
@@ -9,7 +9,7 @@ from shutil import rmtree
 
 class TestSimulationMaster(unittest.TestCase):
     def setUp(self):
-        self.sim_path = os.getcwd() + '/tests/test_sims/0404'
+        self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/0404'
         self.Sim      = Sim0404( self.sim_path, 'testname')
     
     def tearDown(self):

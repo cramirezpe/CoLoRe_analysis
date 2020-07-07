@@ -1,4 +1,4 @@
-import lib.functions as f
+import CoLoRe_analysis.functions as f
 import unittest
 
 class TestFunctions(unittest.TestCase):

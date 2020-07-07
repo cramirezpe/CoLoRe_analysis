@@ -4,7 +4,7 @@ import numpy as np
 import re
 import shutil
 import subprocess
-import lib.shear_reader as shear_reader
+import CoLoRe_analysis.shear_reader as shear_reader
 import configparser
 import logging
 log = logging.getLogger(__name__)
@@ -35,13 +35,13 @@ class Simulation:
             self.error_file =    glob.glob(location + '/script/*.error')[-1]
             self.output_file =   glob.glob(location + '/script/*.out')[-1]
         
-    def __str__(self):
+    def __str__(self): # pragma: no cover
         if self.__name__:
             return str(self.__name__)
         else:
             return str(self.location)
         
-    def write_ini_file(self):
+    def write_ini_file(self): # pragma: no cover
         config = configparser.ConfigParser()
         config['SIM_CONFIG'] = {
             'factor': str(self.factor),
@@ -74,7 +74,7 @@ class Simulation:
         # in Mb
         self.size = subprocess.check_output(['du','-sh', self.location]).split()[0].decode('utf-8')      
   
-    def remove(self):
+    def remove(self): # pragma: no cover
         # After run this, remember to remove it from any array that contains it.
         shutil.rmtree(self.location)
            

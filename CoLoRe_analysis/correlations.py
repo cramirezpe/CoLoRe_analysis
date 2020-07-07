@@ -1,5 +1,5 @@
-from lib.shear_reader import ShearReader, redshift_to_str_for_path
-from lib.functions import check_iterable
+from CoLoRe_analysis.shear_reader import ShearReader, redshift_to_str_for_path
+from CoLoRe_analysis.functions import check_iterable
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from shutil import copy2

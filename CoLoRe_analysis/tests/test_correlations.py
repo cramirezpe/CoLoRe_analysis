@@ -1,6 +1,6 @@
-import lib.correlations as corrlib
-from lib.time_analysis_LSST import Sim0404
-from lib.shear_reader import ShearReader
+import CoLoRe_analysis.correlations as corrlib
+from CoLoRe_analysis.sims_reader import Sim0404
+from CoLoRe_analysis.shear_reader import ShearReader
 import unittest
 import os
 from shutil import rmtree
@@ -10,13 +10,13 @@ from mock import patch
 class TestCorrelations(unittest.TestCase):
     def setUp(self):
         # Prepare the sim objects
-        self.location    = os.getcwd()
-        self.simNew      = Sim0404(self.location + '/tests/test_sims/New', "New")
-        self.simNew_rep  = Sim0404(self.location + '/tests/test_sims/New', "Newrep")
-        self.simNew_s2   = Sim0404(self.location + '/tests/test_sims/New_s2', "New_s2")
-        self.simOld      = Sim0404(self.location + '/tests/test_sims/Old', "Old")
-        self.simOld_wrong= Sim0404(self.location + '/tests/test_sims/Old_false_seed',    "Old_wrong")  
-        self.simOld_s2   = Sim0404(self.location + '/tests/test_sims/Old_s2', 'Old_s2')
+        self.location    = os.path.dirname(os.path.realpath(__file__))
+        self.simNew      = Sim0404(self.location + '/test_sims/New', "New")
+        self.simNew_rep  = Sim0404(self.location + '/test_sims/New', "Newrep")
+        self.simNew_s2   = Sim0404(self.location + '/test_sims/New_s2', "New_s2")
+        self.simOld      = Sim0404(self.location + '/test_sims/Old', "Old")
+        self.simOld_wrong= Sim0404(self.location + '/test_sims/Old_false_seed',    "Old_wrong")  
+        self.simOld_s2   = Sim0404(self.location + '/test_sims/Old_s2', 'Old_s2')
 
         # Prepare corrleations object
         self.corr_sims   = corrlib.CorrelateTwoShears([self.simNew, self.simNew_rep, self.simNew_s2],[self.simOld,self.simOld_wrong, self.simOld_s2])
@@ -29,10 +29,10 @@ class TestCorrelations(unittest.TestCase):
                 rmtree(sim.location + '/data_treated')
 
     def prepare_mock_data(self):
-        path_a = os.getcwd() + '/tests/test_sims/Old/data_treated/binned/100_105/source_1'
-        path_b = os.getcwd() + '/tests/test_sims/Old_s2/data_treated/binned/100_105/source_1'
-        path_c = os.getcwd() + '/tests/test_sims/New/data_treated/binned/100_105/source_1'
-        path_d = os.getcwd() + '/tests/test_sims/New_s2/data_treated/binned/100_105/source_1'
+        path_a = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/Old/data_treated/binned/100_105/source_1'
+        path_b = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/Old_s2/data_treated/binned/100_105/source_1'
+        path_c = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/New/data_treated/binned/100_105/source_1'
+        path_d = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/New_s2/data_treated/binned/100_105/source_1'
         
         for path in path_a,path_b,path_c,path_d:
             os.makedirs(path)
