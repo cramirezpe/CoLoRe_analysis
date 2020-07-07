@@ -9,7 +9,8 @@
 #SBATCH --error=runs/compute_data.error
 #SBATCH --output=runs/compute_data.out
 
-rm -r runs/*
+rm -r runs
+mkdir runs
 export OMP_NUM_THREADS=1
 source activate colore_env
 umask 0002
