@@ -33,7 +33,7 @@ def mock_data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,m
 
 class TestShearReader(unittest.TestCase):
     def setUp(self):
-        self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/tests/test_sims/0404'
+        self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/0404'
         self.sr = ShearReader( self.sim_path )
 
     def tearDown(self):
