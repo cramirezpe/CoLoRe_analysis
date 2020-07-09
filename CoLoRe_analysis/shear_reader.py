@@ -1,4 +1,4 @@
-from CoLoRe_analysis.data_treatment import data_treatment
+from CoLoRe_analysis.compute_data_shear import data_treatment
 import numpy as np
 from shutil import rmtree
 import os

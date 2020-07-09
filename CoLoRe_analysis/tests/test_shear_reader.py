@@ -6,8 +6,8 @@ from mock import patch, call
 from shutil import rmtree
 import numpy as np
 import sys
-from CoLoRe_analysis.data_treatment import savetofile
-from CoLoRe_analysis.data_treatment import data_treatment
+from CoLoRe_analysis.compute_data_shear import savetofile
+from CoLoRe_analysis.compute_data_shear import data_treatment
 
 def mock_data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=None, output_path=None):
     if not output_path:

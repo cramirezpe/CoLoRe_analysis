@@ -1,0 +1,1 @@
+srun -N 1 -C haswell -c 64 -A desi /global/homes/c/cramirez/Codes/CoLoRe/CoLoRe_0707/CoLoRe_New/CoLoRe param.cfg
