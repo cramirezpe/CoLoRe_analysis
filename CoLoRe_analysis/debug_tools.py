@@ -2,7 +2,7 @@ import pdb
 import functools
 import traceback
 import sys
-def debug_on(*exceptions):
+def debug_on(*exceptions): #pragma: no cover
     if not exceptions:
         exceptions = (AssertionError, )
     def decorator(f):
