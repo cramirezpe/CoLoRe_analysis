@@ -145,12 +145,21 @@ def compute_data(sim_path,source=1, output_path=None):
 
     # Compute power spectra. I'm only doing delta-delta here.
     pairs=[(0,0), (0,1), (1,1)]
-    cl_dd_d = np.array([hp.anafast(dmap[p1], dmap[p2]) for p1, p2 in pairs])
     larr = np.arange(3*nside)
-    cl_dd_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_mm)
+    cl_dd_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dd)
+                        for p1, p2 in pairs])
+    cl_dm_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dm)
+                        for p1, p2 in pairs])
+    cl_mm_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_mm)
                         for p1, p2 in pairs])
 
-    savetofile(output_path, (larr, pairs, shotnoise, cl_dd_d, cl_dd_t, nz_tot, z_nz), ('larr', 'pairs', 'shotnoise', 'cl_dd_d', 'cl_dd_t', 'nz_tot', 'z_nz') )
+    output = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asarray([dmap[p2],e1map[p2],e2map[p2]])) for p1,p2 in pairs])
+
+    cl_dd_d = output[:,0]
+    cl_dm_d = output[:,3]
+    cl_mm_d = output[:,1]
+
+    savetofile(output_path, (pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_mm_d, cl_mm_t), ('pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t') )
 
 if __name__ == '__main__': #pragma: no cover
     parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")

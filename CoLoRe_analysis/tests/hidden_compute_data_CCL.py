@@ -16,12 +16,12 @@ class TestComputeDataCCL(unittest.TestCase):
 
     def test_normal_output_data(self):
         with open(self.sim_path+ '/all_data.pkl','rb') as input:
-            target_values = pickle.load(input) #larr, pairs, shotnoise, cl_dd_d, cl_dd_t, nz_tot, z_nz
-
+            target_values = pickle.load(input) 
+            
         np.random.seed(1)
         compute_data(self.sim_path)
 
-        values = ['larr', 'pairs', 'shotnoise', 'cl_dd_d', 'cl_dd_t', 'nz_tot', 'z_nz']
+        values = ['pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t']
 
         for i, value in enumerate(values):
             np.testing.assert_equal(target_values[i], np.loadtxt(self.output_path + f'/{value}.dat'))

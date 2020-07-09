@@ -194,7 +194,7 @@ class MemoryReader:
         non_decimal = re.compile(r'[^\d.]+')
         return non_decimal.sub('', x)
    
-def translate_into_MB(number,unit):
+def translate_into_MB(number,unit): #pragma: no cover
     ''' This function will transalte expressions of type 79.729 GB, TB into MB '''
    
     if unit == "GB":

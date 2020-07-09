@@ -1,10 +1,11 @@
-mport numpy as np
+import numpy as np
 import healpy as hp
 import matplotlib.pyplot as plt
 import pyccl as ccl
 import os
 from astropy.io import fits
 
+np.random.seed(1)
 # Hubble constant
 h = 0.7
 
@@ -117,8 +118,8 @@ tr_l = [ccl.WeakLensingTracer(cosmo, (z_nz, nz_tot[i])) for i in range(nbins)]
 
 # Compute power spectra. I'm only doing delta-delta here.
 pairs=[(0,0), (0,1), (1,1)]
-cl_dd_d = np.array([hp.anafast(dmap[p1], dmap[p2]) for p1, p2 in pairs])
 larr = np.arange(3*nside)
+
 cl_dd_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dd)
                     for p1, p2 in pairs])
 cl_dm_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dm)
@@ -135,6 +136,6 @@ cl_mm_d = output[:,1]
 
 data = pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_mm_d, cl_mm_t
 import pickle
-with open('all_data','rb') as f:
+with open('all_data.pkl','wb') as f:
 	pickle.dump(data, f)
 	
