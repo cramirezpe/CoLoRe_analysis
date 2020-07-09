@@ -129,7 +129,7 @@ def data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=N
                     savetofile(output_path, [cld_kk, cld_kd], ["cld_kk", "cld_kd"] )
         savetofile(output_path, [mp_k], ["mp_k"] )
     
-if __name__ == "__main__":     
+if __name__ == "__main__": #pragma: no cover
     parser = argparse.ArgumentParser(description="Save useful parameters into .dat files")
     parser.add_argument("-p","--path", required=True, type=str, help="Path of CoLoRe run")
     parser.add_argument("-c","--cls", action='store_true', help="Compute cls (it should be provided by simulation")
