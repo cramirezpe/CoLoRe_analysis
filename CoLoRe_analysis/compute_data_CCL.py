@@ -32,7 +32,7 @@ def compute_data(sim_path,source=1, output_path=None):
     
     os.makedirs(output_path, exist_ok = True)
 
-    log.debug(f'Computing datça for:\nsim_path: { sim_path }\nsource: { source }\noutput_path: { output_path }')
+    log.debug(f'Computing data for:\nsim_path: { sim_path }\nsource: { source }\noutput_path: { output_path }')
 
     # Hubble constant
     h = 0.7
