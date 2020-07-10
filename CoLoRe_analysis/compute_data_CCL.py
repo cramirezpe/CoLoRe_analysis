@@ -16,23 +16,17 @@ from astropy.io import fits
 
 import argparse
 
+def compute_all_cls(sim_path, source=1):
+    '''Method to compute all cls from the anafast function using output from CoLoRe.
 
-
-def compute_data(sim_path,source=1, output_path=None):
-    ''' Method to compute the values needed for CCL test plots.
-    
     Args:
         sim_path (str): Path where the CoLoRe simulation is located.
         source (int, optional): Source of which to compute data (default: 1)
-        output_path (str, optional): Output where to save the data (default: { sim_path }/ccl_data/source_{ source }/)
-    '''
-
-    if not output_path:
-        output_path = sim_path + f'/ccl_data/source_{ source }'
     
-    os.makedirs(output_path, exist_ok = True)
-
-    log.debug(f'Computing data for:\nsim_path: { sim_path }\nsource: { source }\noutput_path: { output_path }')
+    Returns: 
+        Tuple given by (shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t):
+            d_values: Array of shape (3,6,384) with all the pairs in [(0,0),(0,1),(1,1)] for all the combinations TT, TE, TB, EE, EB, BB for the anafast function. 
+    '''
 
     # Hubble constant
     h = 0.7
@@ -153,11 +147,31 @@ def compute_data(sim_path,source=1, output_path=None):
     cl_mm_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_mm)
                         for p1, p2 in pairs])
 
-    output = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asarray([dmap[p2],e1map[p2],e2map[p2]])) for p1,p2 in pairs])
+    d_values = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asarray([dmap[p2],e1map[p2],e2map[p2]])) for p1,p2 in pairs])
 
-    cl_dd_d = output[:,0]
-    cl_dm_d = output[:,3]
-    cl_mm_d = output[:,1]
+    return shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t
+
+def compute_data(sim_path,source=1, output_path=None):
+    ''' Method to compute the values needed for CCL test plots.
+    
+    Args:
+        sim_path (str): Path where the CoLoRe simulation is located.
+        source (int, optional): Source of which to compute data (default: 1)
+        output_path (str, optional): Output where to save the data (default: { sim_path }/ccl_data/source_{ source }/)
+    '''
+
+    if not output_path:
+        output_path = sim_path + f'/ccl_data/source_{ source }'
+    
+    os.makedirs(output_path, exist_ok = True)
+
+    log.debug(f'Computing data for:\nsim_path: { sim_path }\nsource: { source }\noutput_path: { output_path }')
+
+    shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t = compute_all_cls(sim_path, source)
+
+    cl_dd_d = d_values[:,0]
+    cl_dm_d = d_values[:,3]
+    cl_mm_d = d_values[:,1]
 
     savetofile(output_path, (pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_mm_d, cl_mm_t), ('pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t') )
 
