@@ -16,12 +16,13 @@ from astropy.io import fits
 
 import argparse
 
-def compute_all_cls(sim_path, source=1):
+def compute_all_cls(sim_path, source=1, nside=128):
     '''Method to compute all cls from the anafast function using output from CoLoRe.
 
     Args:
         sim_path (str): Path where the CoLoRe simulation is located.
         source (int, optional): Source of which to compute data (default: 1)
+        nside (int, optional): nside to use (default:128)
     
     Returns: 
         Tuple given by (shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t):
@@ -31,7 +32,7 @@ def compute_all_cls(sim_path, source=1):
     # Hubble constant
     h = 0.7
 
-    nside = 128
+    nside = nside
     npix = hp.nside2npix(nside)
 
     # We will make two bins (z_photo < 0.15 and z_photo > 0.15)
@@ -142,12 +143,12 @@ def compute_all_cls(sim_path, source=1):
     larr = np.arange(3*nside)
     cl_dd_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dd)
                         for p1, p2 in pairs])
-    cl_dm_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dm)
+    cl_dm_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_l[p2], larr, p_of_k_a=pk2d_dm)
                         for p1, p2 in pairs])
-    cl_mm_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_mm)
+    cl_mm_t = np.array([ccl.angular_cl(cosmo, tr_l[p1], tr_l[p2], larr, p_of_k_a=pk2d_mm)
                         for p1, p2 in pairs])
 
-    d_values = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asarray([dmap[p2],e1map[p2],e2map[p2]])) for p1,p2 in pairs])
+    d_values = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asarray([dmap[p2],e1map[p2],e2map[p2]]), pol=True) for p1,p2 in pairs])
 
     return shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t
 
