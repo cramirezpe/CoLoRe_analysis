@@ -24,17 +24,26 @@ class Simulation:
         self.factor  = config.getfloat('SIM_CONFIG','factor')
         self.template= config.get('SIM_CONFIG','template')
         self.status  = config.get('SIM_CONFIG','status')
-        self.nodes   = config.getint('SIM_CONFIG','nodes')
+        self.nodes   = config.getint('SIM_CONFIG','nodes', fallback=1)
         self.preparation_time = config.get('SIM_CONFIG','preparation_time')
         self.shear   = config.getint('SIM_CONFIG', 'shear', fallback=None)
         self.nside   = config.getint('SIM_CONFIG', 'nside', fallback=None)
         self.commit  = config.get('SIM_CONFIG', 'commit', fallback=None)
 
         if self.status != 'prepared':
-            self.terminal_file = glob.glob(location + '/script/terminal*')[-1]
-            self.error_file =    glob.glob(location + '/script/*.error')[-1]
-            self.output_file =   glob.glob(location + '/script/*.out')[-1]
-        
+            try:
+                self.terminal_file =glob.glob(location + '/script/terminal*')[-1]
+            except:
+                self.terminal_file =None
+            try:
+                self.error_file =   glob.glob(location + '/script/*.error')[-1]
+            except:
+                self.error_file =   None
+            try:
+                self.output_file =  glob.glob(location + '/script/*.out')[-1]
+            except:
+                self.output_file =  None
+
     def __str__(self): # pragma: no cover
         if self.__name__:
             return str(self.__name__)
