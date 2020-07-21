@@ -16,13 +16,15 @@ from astropy.io import fits
 
 import argparse
 
-def compute_all_cls(sim_path, source=1, nside=128):
+def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=1):
     '''Method to compute all cls from the anafast function using output from CoLoRe.
 
     Args:
         sim_path (str): Path where the CoLoRe simulation is located.
         source (int, optional): Source of which to compute data (default: 1)
         nside (int, optional): nside to use (default:128)
+        max_files (int, optional): number of srcs files to consider (default: None, consider all the files) 
+        downsampling (float, optional): downsampling to apply to the data (from 0 to 1) (default: 1)
     
     Returns: 
         Tuple given by (shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t):
@@ -50,8 +52,13 @@ def compute_all_cls(sim_path, source=1, nside=128):
     e2map = np.zeros([nbins, npix])
 
     # Now we loop over all source files
+    if max_files is None:
+        file_limit = False
+    else:
+        file_limit = True
+
     ifile = 0
-    while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile):
+    while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile) and ( (not file_limit) or ifile <= max_files):
         hdulist = fits.open(sim_path + '/out_srcs_s1_%d.fits' % ifile)
         d = hdulist[1].data
         n_g = len(d)
@@ -59,9 +66,16 @@ def compute_all_cls(sim_path, source=1, nside=128):
         # Generate random photo-z
         z_photo = d['Z_COSMO'] + sigz*(1+d['Z_COSMO'])*np.random.randn(n_g)
 
+        if downsampling != 1:
+            d_mask = np.random.random(len(z_photo)) < downsampling
+        else:
+            d_mask = np.full(len(z_photo), True, dtype=bool)
+
         # Split into 2
         msk1 = z_photo <= zsplit
+        msk1 = msk1 & d_mask
         msk2 = z_photo > zsplit
+
 
         # For each bin, add to the number and ellipticity maps
         for ibin, msk in enumerate([msk1, msk2]):
