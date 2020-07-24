@@ -44,3 +44,5 @@ geckodriver.log
 *.iml
 
 htmlcov*
+.vscode/*
+.vscode
