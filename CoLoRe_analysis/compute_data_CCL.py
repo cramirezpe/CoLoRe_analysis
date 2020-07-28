@@ -13,10 +13,12 @@ import healpy as hp
 import pyccl as ccl
 import os
 from astropy.io import fits
+from itertools import combinations_with_replacement
 
 import argparse
+from LyaPlotter.sims import CoLoReSim
 
-def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=1):
+def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50):
     '''Method to compute all cls from the anafast function using output from CoLoRe.
 
     Args:
@@ -25,6 +27,8 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
         nside (int, optional): nside to use (default:128)
         max_files (int, optional): number of srcs files to consider (default: None, consider all the files) 
         downsampling (float, optional): downsampling to apply to the data (from 0 to 1) (default: 1)
+        zbins (array of floats, optional): defines the binning in redshift of the analysis (default: [0,0.15,0.5])
+        nz_h (int, optional): pixelization of the redshift analysis (default: 50)
     
     Returns: 
         Tuple given by (shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t):
@@ -37,10 +41,9 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
     nside = nside
     npix = hp.nside2npix(nside)
 
-    # We will make two bins (z_photo < 0.15 and z_photo > 0.15)
-    nbins = 2
-    nz_h = 50
-    zsplit = 0.15
+    nbins   = len(zbins) - 1
+    pairs   = list(combinations_with_replacement(range(nbins), r=2))
+
 
     # This will contain the N(z) of the different bins
     nz_tot = np.zeros([nbins, nz_h])
@@ -71,14 +74,14 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
         else:
             d_mask = np.full(len(z_photo), True, dtype=bool)
 
-        # Split into 2
-        msk1 = z_photo <= zsplit
-        msk1 = msk1 & d_mask
-        msk2 = z_photo > zsplit
-
+        masks = []
+        for i in range(nbins):
+            masks.append( (zbins[i] <= z_photo) & (z_photo < zbins[i+1]) )
+        
+        masks = [(mask & d_mask) for mask in masks]  # applying downsampling here
 
         # For each bin, add to the number and ellipticity maps
-        for ibin, msk in enumerate([msk1, msk2]):
+        for ibin, msk in enumerate( masks ):
             dd = d[msk]
 
             pix = hp.ang2pix(nside,
@@ -93,7 +96,7 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
 
             # Add also to N(z)
             nz, z_edges = np.histogram(dd['Z_COSMO'], bins=nz_h,
-                                    range=[0., 0.5])
+                                    range=[zbins[0], zbins[-1]])
             nz_tot[ibin, :] += nz
         ifile += 1
 
@@ -153,7 +156,6 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
     tr_l = [ccl.WeakLensingTracer(cosmo, (z_nz, nz_tot[i])) for i in range(nbins)]
 
     # Compute power spectra. I'm only doing delta-delta here.
-    pairs=[(0,0), (0,1), (1,1)]
     larr = np.arange(3*nside)
     cl_dd_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dd)
                         for p1, p2 in pairs])
