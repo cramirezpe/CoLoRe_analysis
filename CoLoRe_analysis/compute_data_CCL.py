@@ -18,7 +18,7 @@ from itertools import combinations_with_replacement
 import argparse
 from LyaPlotter.sims import CoLoReSim
 
-def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50):
+def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None):
     '''Method to compute all cls from the anafast function using output from CoLoRe.
 
     Args:
@@ -29,6 +29,8 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
         downsampling (float, optional): downsampling to apply to the data (from 0 to 1) (default: 1)
         zbins (array of floats, optional): defines the binning in redshift of the analysis (default: [0,0.15,0.5])
         nz_h (int, optional): pixelization of the redshift analysis (default: 50)
+        nz_min (float, optional): min redshift for the redshfit analysis (default: None (set to the min value in zbins))
+        nz_max (float, optional): max redshift for the redshfit analysis (default: None (set to the max value in zbins))
     
     Returns: 
         Tuple given by (shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t):
@@ -47,6 +49,9 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
 
     # This will contain the N(z) of the different bins
     nz_tot = np.zeros([nbins, nz_h])
+    nz_min = nz_min if nz_min is not None else zbins[0]
+    nz_max = nz_max if nz_max is not None else zbins[-1]
+    
     sigz = 0.03
 
     # These will be the density and ellipticity maps
@@ -96,7 +101,7 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
 
             # Add also to N(z)
             nz, z_edges = np.histogram(dd['Z_COSMO'], bins=nz_h,
-                                    range=[zbins[0], zbins[-1]])
+                                    range=[nz_min, nz_max])
             nz_tot[ibin, :] += nz
         ifile += 1
 
