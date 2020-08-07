@@ -14,6 +14,7 @@ import pyccl as ccl
 import os
 from astropy.io import fits
 from itertools import combinations_with_replacement
+from multiprocessing import Pool
 
 import argparse
 from LyaPlotter.sims import CoLoReSim
@@ -197,16 +198,32 @@ def compute_data(sim_path,source=1, output_path=None):
 
     savetofile(output_path, (pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_mm_d, cl_mm_t), ('pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t') )
 
-if __name__ == '__main__': #pragma: no cover
+def main(): #pragma: no cover
     parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")
-    parser.add_argument("-p","--path", required=True, type=str, help="Path of ColoRe run")
+    parser.add_argument("-p","--paths", nargs='+', required=True, type=str, help="Path(s) of ColoRe run(s)")
     parser.add_argument("-s","--source", required=False, type=int, default=1, help="Sources to be computed")
     parser.add_argument("-o","--output", required=False, type=str, default=None, help="Path for output files")
+    parser.add_argument("-pr","--processes", required=False, default=None, help='Number of processes for the multiprocessing tool (default: None, selected by Pool)')
 
     args = parser.parse_args()
     
-    path    = args.path
+    paths   = args.paths
     source  = args.source
     output  = args.output
+    proc    = args.processes
 
-    compute_data(path, source, output)
+    args = [(path, source, output) for path in paths]
+
+    pool = Pool(processes = proc)
+    x = [pool.apply_async(compute_data, arg, 
+                callback=lambda x: print('Result:',x), 
+                error_callback=lambda x: print('Error:',x)) 
+            for arg in args]
+
+    pool.close()
+    pool.join()
+    print('Closing pool')
+    [print(p.get()) for p in x]
+
+if __name__ == '__main__': #pragma: no cover
+    main()
