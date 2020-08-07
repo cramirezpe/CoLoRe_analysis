@@ -19,4 +19,12 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
+    entry_points={
+        'console_scripts' : [
+            'CoLoRe_compute_correlations = CoLoRe_analysis.scripts.compute_correlations:main',
+            'CoLoRe_compute_data = CoLoRe_analysis.scripts.compute_data:main',
+            'CoLoRe_compute_data_shear_test = CoLoRe_analysis.scripts.compute_data_shear_test:main',
+            'CoLoRe_compute_regressions = CoLoRe_analysis.scripts.compute_regressions:main'
+        ]
+    }
 )
