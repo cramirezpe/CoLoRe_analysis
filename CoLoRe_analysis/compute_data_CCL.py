@@ -15,8 +15,11 @@ import os
 from astropy.io import fits
 from itertools import combinations_with_replacement
 from multiprocessing import Pool
+from datetime import datetime
 
 import argparse
+import json
+
 from LyaPlotter.sims import CoLoReSim
 
 def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None):
@@ -174,29 +177,46 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
 
     return shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t
 
-def compute_data(sim_path,source=1, output_path=None):
+def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None):
     ''' Method to compute the values needed for CCL test plots.
     
     Args:
         sim_path (str): Path where the CoLoRe simulation is located.
         source (int, optional): Source of which to compute data (default: 1)
-        output_path (str, optional): Output where to save the data (default: { sim_path }/ccl_data/source_{ source }/)
+        output_path (str, optional): Output where to save the data (default: { sim_path }/ccl_data/{ datetime.now() }/)
     '''
 
+    id_ = datetime.today().strftime('%Y%m%d_%H%M%S')
     if not output_path:
-        output_path = sim_path + f'/ccl_data/source_{ source }'
+        output_path = sim_path + f"/ccl_data/{ id_ }"
     
     os.makedirs(output_path, exist_ok = True)
 
     log.debug(f'Computing data for:\nsim_path: { sim_path }\nsource: { source }\noutput_path: { output_path }')
 
-    shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t = compute_all_cls(sim_path, source)
+    shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t = compute_all_cls(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max)
 
     cl_dd_d = d_values[:,0]
     cl_dm_d = d_values[:,3]
     cl_mm_d = d_values[:,1]
 
     savetofile(output_path, (pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_mm_d, cl_mm_t), ('pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t') )
+
+    info = {
+        'id'            : id_,
+        'source'        : source,
+        'nside'         : nside,
+        'max_files'     : max_files,
+        'downsampling'  : downsampling,
+        'zbins'         : zbins,
+        'nz_h'          : nz_h,
+        'nz_min'        : nz_min,
+        'nz_max'        : nz_max
+    }
+
+    with open(output_path + '/INFO.json','w') as outfile:
+        json.dump(info, outfile)
+
 
 def main(): #pragma: no cover
     parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")
