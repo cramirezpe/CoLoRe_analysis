@@ -221,18 +221,25 @@ def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None,
 def main(): #pragma: no cover
     parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")
     parser.add_argument("-p","--paths", nargs='+', required=True, type=str, help="Path(s) of ColoRe run(s)")
-    parser.add_argument("-s","--source", required=False, type=int, default=1, help="Sources to be computed")
     parser.add_argument("-o","--output", required=False, type=str, default=None, help="Path for output files")
     parser.add_argument("-pr","--processes", required=False, default=None, help='Number of processes for the multiprocessing tool (default: None, selected by Pool)')
+    
+    parser.add_argument("--source",       required=False, type=int, default=1, help="Sources to be computed")
+    parser.add_argument("--nside",        required=False, type=int , default=128 , help="nside to use ")
+    parser.add_argument("--max_files",    required=False, type=int, default=None , help="number of srcs files to consider (default: None, consider all the files)")
+    parser.add_argument("--downsampling", required=False, type=float , default=1 , help="downsampling to apply to the data")
+    parser.add_argument("--zbins",        required=False, type=float, nargs='+', default=[0,0.15,1] , help="defines the binning in redshift of the analysis")
+    parser.add_argument("--nz_h",         required=False, type=int , default=50 , help="pixelization of the redshift analysis ")
+    parser.add_argument("--nz_min",       required=False, type=float , default=None , help="min redshift for the redshfit analysis")
+    parser.add_argument("--nz_max",       required=False, type=float , default=None , help="max redshift for the redshfit analysis")
 
     args = parser.parse_args()
     
     paths   = args.paths
-    source  = args.source
     output  = args.output
     proc    = args.processes
 
-    args = [(path, source, output) for path in paths]
+    args = [(path, args.source, output, args.nside, args.max_files, args.downsampling, args.zbins, args.nz_h, args.nz_min, args.nz_max) for path in paths]
 
     pool = Pool(processes = proc)
     x = [pool.apply_async(compute_data, arg, 
