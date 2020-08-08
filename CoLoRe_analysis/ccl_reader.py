@@ -49,9 +49,9 @@ class CCLReader:
         Returns:
             Array of desired value. Raises an exception if the compute option is set to False but the value was not computed. 
         '''
-        matched_sims = self.search_output(info_dict=kwargs)
+        matched_sims = self.search_output(**kwargs)
         if len(matched_sims) == 0 and not compute:
-            raise FileNotFoundError('Simulation with the given parameters does not exist')
+            raise FileNotFoundError('Simulation with the given parameters does not exist. Pass the argument compute=True to compute it.')
 
         elif len(matched_sims) == 1: 
             id_ = matched_sims[0]['id']
@@ -67,11 +67,11 @@ class CCLReader:
             self.do_data_computations(**kwargs)
 
 
-    def search_output(self, info_dict):
+    def search_output(self, **kwargs):
         ''' Searches into the output directory to see if any of the outputs saved matches the data dictionary given as input. This data dictionary consists in the arguments given to the function do_data_computations.
     
         Args:
-            info_dict (dict): Data dictionary with each key being an argument for the do_data_computations function.
+            **kwargs: Parameters of the simulations that we want to match (they should be parameters given in the self.do_data_computations function).
 
         Returns:
             List of dicts with the info of each run.
@@ -90,8 +90,8 @@ class CCLReader:
             try:
                 with open(f'{self.location}/ccl_data/{id_}/INFO.json') as json_file:
                     data = json.load(json_file)
-                    for key in info_dict.keys():
-                        if info_dict[key] != data[key]:
+                    for key in kwargs.keys():
+                        if kwargs[key] != data[key]:
                             break
                     else: 
                         compatible.append(data)

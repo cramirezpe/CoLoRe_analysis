@@ -94,24 +94,24 @@ class TestCCLReader(unittest.TestCase):
             rmtree(self.computed_data_path)
 
     def test_search_ccl_output(self):
-        self.assertEqual( self.cr.search_output(self.data1), [self.data1])
-        self.assertEqual( self.cr.search_output(self.data_mixed), [self.data1,self.data4])
-        self.assertEqual( self.cr.search_output(self.data_false), []  )
+        self.assertEqual( self.cr.search_output(**self.data1), [self.data1])
+        self.assertEqual( self.cr.search_output(**self.data_mixed), [self.data1,self.data4])
+        self.assertEqual( self.cr.search_output(**self.data_false), []  )
         
     def test_no_raises_when_no_info(self):
         os.makedirs(self.computed_data_path + '/8')
-        self.assertEqual( self.cr.search_output(self.data1), [self.data1]) 
+        self.assertEqual( self.cr.search_output(**self.data1), [self.data1]) 
 
 
     def test_search_with_nothing_to_search(self):
         if os.path.isdir(self.computed_data_path):
             rmtree(self.computed_data_path)
-        self.assertEqual( self.cr.search_output(self.data1), [] )
+        self.assertEqual( self.cr.search_output(**self.data1), [] )
     
     def test_search_without_results(self):
         for dir_ in os.scandir(self.computed_data_path):
             rmtree(dir_)
-        self.assertEqual( self.cr.search_output(self.data1), [] )
+        self.assertEqual( self.cr.search_output(**self.data1), [] )
         
     
     @patch('CoLoRe_analysis.ccl_reader.compute_data', side_effect=mock_compute_data)
