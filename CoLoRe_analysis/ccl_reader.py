@@ -2,6 +2,7 @@ from CoLoRe_analysis.compute_data_CCL import compute_data
 import numpy as np
 from shutil import rmtree
 import os
+import json
 
 import logging
 log = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ class CCLReader:
         '''
         self.location = location
 
-    def do_data_computations(self, source=1, output_path=None):
+    def do_data_computations(self, source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None):
         '''Computes the Cls from CCL and for the sim.
 
         Args:
@@ -25,9 +26,9 @@ class CCLReader:
             output_path (str, optional): Set the output path (default: { sim_path }/ccl_data/source_{ source }/)
         '''
         log.info(f'Computing data for source: { source }')
-        compute_data(self.location, source, output_path)
+        compute_data(self.location, source, output_path, nside, None, downsampling, zbins, nz_h, nz_min, nz_max)
 
-    def get_values(self, value, source=1, compute=False):
+    def get_values(self, value, compute=False, **kwargs):
         '''Obtain values for Cls (CCL or sim)
 
         Args:
@@ -42,21 +43,63 @@ class CCLReader:
                 cl_dm_t:
                 cl_mm_d:
                 cl_mm_t:
-            source (int, optional): CoLoRe output used as input (default: 1)
             compute (bool, optional): Whether to compute the values if they are not available or not (default: False)
+            kwargs (): Parameters for the ccl script. The full list is given at help(do_data_computations)
 
         Returns:
             Array of desired value. Raises an exception if the compute option is set to False but the value was not computed. 
         '''
-        path = self.location + f'/ccl_data/source_{ source }'
+        matched_sims = self.search_output(info_dict=kwargs)
+        if len(matched_sims) == 0 and not compute:
+            raise FileNotFoundError('Simulation with the given parameters does not exist')
 
-        try:
-            return np.loadtxt( f'{ path }/{ value }.dat')
-        except OSError:
-            if not compute:
-                raise
-            self.do_data_computations(source=source, output_path=path)
-            return np.loadtxt(f'{ path }/{ value }.dat')
+        elif len(matched_sims) == 1: 
+            id_ = matched_sims[0]['id']
+            return np.loadtxt(self.location + f'/ccl_data/{id_}/{ value }.dat')
+
+        elif len(matched_sims) > 1:
+            print('Multiple simulations does exist with the given parameters:')
+            for x in matched_sims:
+                print(x)
+            return matched_sims
+
+        else:
+            self.do_data_computations(**kwargs)
+
+
+    def search_output(self, info_dict):
+        ''' Searches into the output directory to see if any of the outputs saved matches the data dictionary given as input. This data dictionary consists in the arguments given to the function do_data_computations.
+    
+        Args:
+            info_dict (dict): Data dictionary with each key being an argument for the do_data_computations function.
+
+        Returns:
+            List of dicts with the info of each run.
+        '''
+
+        if not os.path.isdir(self.location + f'/ccl_data'): 
+            return []
+
+        ids = [f.name for f in os.scandir(self.location + f'/ccl_data') if f.is_dir()]
+
+        if len(ids) == 0: 
+            return []
+
+        compatible = []
+        for id_ in sorted(ids):
+            try:
+                with open(f'{self.location}/ccl_data/{id_}/INFO.json') as json_file:
+                    data = json.load(json_file)
+                    for key in info_dict.keys():
+                        if info_dict[key] != data[key]:
+                            break
+                    else: 
+                        compatible.append(data)
+
+            except FileNotFoundError:
+                pass
+        
+        return compatible
 
     def remove_computed_data(self):
         if os.path.isdir(self.location + '/ccl_data'):
