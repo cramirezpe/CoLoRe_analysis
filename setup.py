@@ -24,7 +24,8 @@ setuptools.setup(
             'CoLoRe_compute_correlations = CoLoRe_analysis.scripts.compute_correlations:main',
             'CoLoRe_compute_data = CoLoRe_analysis.scripts.compute_data:main',
             'CoLoRe_compute_data_shear_test = CoLoRe_analysis.scripts.compute_data_shear_test:main',
-            'CoLoRe_compute_regressions = CoLoRe_analysis.scripts.compute_regressions:main'
+            'CoLoRe_compute_regressions = CoLoRe_analysis.scripts.compute_regressions:main',
+            'CoLoRe_compute_shear_CCL = CoLoRe_analysis.compute_data_CCL:main'
         ]
     }
 )
