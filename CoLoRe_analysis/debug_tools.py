@@ -2,6 +2,8 @@ import pdb
 import functools
 import traceback
 import sys
+import time
+
 def debug_on(*exceptions): #pragma: no cover
     if not exceptions:
         exceptions = (AssertionError, )
@@ -16,3 +18,28 @@ def debug_on(*exceptions): #pragma: no cover
                 pdb.post_mortem(info[2])
         return wrapper
     return decorator
+
+class Stopwatch():
+    def __init__(self):
+        self.start_time = time.process_time()
+        self.lap_times = []
+    
+    def lap(self, message=None):
+        try:
+            lap_time = time.process_time() - self.lap_times[-1]
+        except IndexError:
+            lap_time = time.process_time() - self.start_time
+        self.lap_times.append(lap_time)
+        if message is None:
+            print('Stopwatch Lap\t', lap_time)
+        else:
+            print('Stopwatch Lap. ', message, ':\t', lap_time)
+        return lap_time
+
+    def full(self, message=None):
+        full_time = time.process_time() - self.start_time
+        if message is None:
+            print('Stopwatch Global\t', full_time)
+        else:
+            print('Stopwatch Global. ', message, ':\t', full_time)
+        return full_time
