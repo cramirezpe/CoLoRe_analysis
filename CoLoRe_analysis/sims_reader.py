@@ -5,7 +5,7 @@ import re
 import shutil
 import subprocess
 import CoLoRe_analysis.shear_reader as shear_reader
-import configparser
+import json
 import logging
 log = logging.getLogger(__name__)
 
@@ -17,18 +17,19 @@ class Simulation:
         self.location = location
         self.__name__ = name
         
-        config = configparser.ConfigParser()
-        config.read(self.location + '/sim_info.INI')
-        self.version = config.get('SIM_CONFIG','version')
-        self.seed    = config.getint('SIM_CONFIG','seed')
-        self.factor  = config.getfloat('SIM_CONFIG','factor')
-        self.template= config.get('SIM_CONFIG','template')
-        self.status  = config.get('SIM_CONFIG','status')
-        self.nodes   = config.getint('SIM_CONFIG','nodes', fallback=1)
-        self.preparation_time = config.get('SIM_CONFIG','preparation_time')
-        self.shear   = config.getint('SIM_CONFIG', 'shear', fallback=None)
-        self.nside   = config.getint('SIM_CONFIG', 'nside', fallback=None)
-        self.commit  = config.get('SIM_CONFIG', 'commit', fallback=None)
+        with open(f'{self.location}/sim_info.json') as json_file:
+            info = json.load(json_file)
+        
+        self.version = info['version']
+        self.seed    = info['seed']
+        self.factor  = info['factor']
+        self.template= info['template']
+        self.status  = info['status']
+        self.nodes   = info['nodes']
+        self.preparation_time = info['preparation_time']
+        self.shear   = info['shear']
+        self.nside   = info['nside']
+        self.commit  = info['commit']
 
         if self.status != 'prepared':
             try:
@@ -51,27 +52,29 @@ class Simulation:
             return str(self.location)
         
     def write_ini_file(self): # pragma: no cover
-        config = configparser.ConfigParser()
-        config['SIM_CONFIG'] = {
-            'factor': str(self.factor),
-            'nodes': str(self.nodes),
-            'seed': str(self.seed),
-            'version': str(self.version),
-            'template': str(self.template),
-            'status': str(self.status),
-            'preparation_time': str(self.preparation_time)
+        info = {
+            'version' : self.version,
+            'seed'    : self.seed,
+            'factor'  : self.factor,
+            'template': self.template,
+            'status'  : self.status,
+            'nodes'   : self.nodes,
+            'preparation_time': self.preparation_time, 
+            'shear' : self.shear,
+            'nside' : self.nside, 
+            'commit' : self.commit
         }
-        for name,opt_value in zip(['shear','nside','commit'],[self.shear,self.nside,self.commit]):
-            if not opt_value is None: config['SIM_CONFIG'][name] = str(opt_value)
 
-        with open(self.location+'/sim_info.INI','w') as configfile:
-            config.write(configfile)
+        with open(f'{self.location}/sim_info.json', 'w') as json_file:
+            json.dump(info, json_file)
      
-    def set_time_reader(self):
+    def set_time_reader(self): 
+        #pylint: disable=no-member    
         self.time_reader = TimeReader(self.version,self.commit,self.terminal_file,self.positions_time_def, self.nodes)
         self.time_reader.get_times()
         
-    def set_memory_reader(self):      
+    def set_memory_reader(self): 
+        #pylint: disable=no-member    
         self.memory_reader = MemoryReader(self.terminal_file,self.positions_memory_def,self.memory_line_key)
         self.memory_reader.get_memory_values_from_file()
         self.used_nodes = len(self.memory_reader.tasks) - 1
@@ -214,7 +217,6 @@ def translate_into_MB(number,unit): #pragma: no cover
         factor = 1
     else:
         raise ValueError('Invalid unit', unit)
-        factor = 0
         
     return float(number)*factor
 
@@ -240,7 +242,7 @@ def search_1st_string_in_file(filepath,string,ocurrence=1,startline=0):
     line_number = 0 
     found = 0
     with open(filepath, 'r') as f:
-        for i in range(startline):
+        for i in range(startline): #pylint: disable=unused-variable
             line_number += 1
             next(f)
         for line in f:

@@ -1,7 +1,7 @@
 import os
 import shutil 
 from CoLoRe_analysis.sims_reader import Sim0404
-import configparser
+import json
 
 # The class FileManager should be understood as a group of functions (a FileManager object would be totally unuseful). 
 # All the file handling system relies in the existence of a info_file in each Simulation. This info_file will contain the basic information of the Simulation and it is included by default in the scripts located in Shs/CoLoRe_LSST/. 
@@ -13,7 +13,7 @@ class FileManager:
 
     @staticmethod
     def remove_empty_dirs(path):
-        for root, dirs, files in os.walk(path, topdown=False):
+        for root, dirs, files in os.walk(path, topdown=False): #pylint: disable=unused-variable
             for name in dirs:
                 try:
                     if len(os.listdir( os.path.join(root, name) )) == 0: #check whether the directory is empty
@@ -30,7 +30,7 @@ class FileManager:
     @classmethod
     def get_simulations(cls,path,param_filter=None):
         sims = []
-        for folder, subfolder, files in os.walk(path):
+        for folder, subfolder, files in os.walk(path): #pylint: disable=unused-variable
             for file in files:
                 # If an info_file exist, 
                 if file == cls.info_file:
@@ -55,35 +55,66 @@ class FileManager:
     
     @classmethod
     def filter_parameters(cls,path,param_filter):
-        config = configparser.ConfigParser()
-        config.read(path + '/' + cls.info_file)
+        with open(f'{path}/sim_info.json') as json_file:
+            info = json.load(json_file)
+        
+        for key in param_filter.keys():
+            if info[key] not in param_filter[key]:
+                break
+        else:
+            return True
 
-        for item in param_filter.items():
-            # Translate single values into list
-            if type(item[1]) != list:
-                values = [item[1]]
-            else:
-                values = item[1]
-            
-            # For the item, check if our Simulation has one of the values:
-            if config.get('SIM_CONFIG',item[0],fallback=None) not in map(str,values):
-                return False
-        return True
-    
+        return False
+        
     @classmethod
     def get_parameter(cls,path,param):
-        config = configparser.ConfigParser()
-        config.read(path + '/' + cls.info_file)
-        return config.get('SIM_CONFIG', param)
+        with open(f'{path}/sim_info.json') as json_file:
+            info = json.load(json_file)
+        return info[param]
     
     @classmethod
     def change_parameter(cls, path, param, value):
+        with open(f'{path}/sim_info.json') as json_file:
+            info = json.load(json_file)
+
+        info[param] = value
+
+        with open(f'{path}/sim_info.json','w') as json_file:
+            json.dump(info, json_file)
+           
+    @classmethod
+    def convert_ini_into_json(cls, path): #pragma: no cover
+        import configparser
         config = configparser.ConfigParser()
-        config.read(path + '/' + cls.info_file )
-        config.set('SIM_CONFIG',param,value)
-        with open(path + '/' + cls.info_file, 'w') as configfile:
-            config.write(configfile)
-            
+        config.read(path + '/sim_info.INI')
+        version = config.get('SIM_CONFIG','version')
+        seed    = config.getint('SIM_CONFIG','seed')
+        factor  = config.getfloat('SIM_CONFIG','factor')
+        template= config.get('SIM_CONFIG','template')
+        status  = config.get('SIM_CONFIG','status')
+        nodes   = config.getint('SIM_CONFIG','nodes', fallback=1)
+        preparation_time = config.get('SIM_CONFIG','preparation_time')
+        shear   = config.getint('SIM_CONFIG', 'shear', fallback=None)
+        nside   = config.getint('SIM_CONFIG', 'nside', fallback=None)
+        commit  = config.get('SIM_CONFIG', 'commit', fallback=None)
+
+        info = {
+            'version' : version,
+            'seed'    : seed,
+            'factor'  : factor,
+            'template': template,
+            'status'  : status,
+            'nodes'   : nodes,
+            'preparation_time': preparation_time, 
+            'shear' : shear,
+            'nside' : nside, 
+            'commit' : commit
+        }
+
+        with open(f'{path}/sim_info.json', 'w') as json_file:
+            json.dump(info, json_file)
+
+
     @classmethod
     def print_sims_table(cls,path,param_filter):
         sims = {}
@@ -114,25 +145,29 @@ class FileManager:
         return sims
 
 class FilterList:
-    def prepared():
+    @classmethod
+    def prepared(cls):
         prepared = {
             "status" : "prepared"
         }
         return ["Prepared",prepared]
     
-    def crashed():
+    @classmethod
+    def crashed(cls):
         crashed = {
             "status" : ["crashed","crashed on data treatment"]
         }
         return ["Crashed",crashed]
 
-    def running():
+    @classmethod
+    def running(cls):
         running = {
             "status" : ["running","running data treatment"]
         }
         return ["Running",running]
     
-    def done():
+    @classmethod
+    def done(cls):
         done = {
             "status" : "done"
         }
