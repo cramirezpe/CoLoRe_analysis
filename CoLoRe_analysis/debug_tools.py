@@ -19,7 +19,7 @@ def debug_on(*exceptions): #pragma: no cover
         return wrapper
     return decorator
 
-class Stopwatch():
+class Stopwatch(): #pragma: no cover
     def __init__(self):
         self.start_time = time.process_time()
         self.lap_times = []
