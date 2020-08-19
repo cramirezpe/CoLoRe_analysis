@@ -1,8 +1,8 @@
 #!/bin/bash -l
 
-#SBATCH --partition debug
+#SBATCH --partition regular
 #SBATCH --nodes 1
-#SBATCH --time 00:30:00
+#SBATCH --time 01:30:00
 #SBATCH --job-name CoLoRe_CCL
 #SBATCH --error=%x-%j.error
 #SBATCH --output=%x-%j.out
