@@ -31,18 +31,18 @@ class Simulation:
         self.nside   = info['nside']
         self.commit  = info['commit']
 
-        if self.status != 'prepared':
+        if self.status != 'prepared': 
             try:
                 self.terminal_file =glob.glob(location + '/script/terminal*')[-1]
-            except:
+            except: #pragma: no cover
                 self.terminal_file =None
             try:
                 self.error_file =   glob.glob(location + '/script/*.error')[-1]
-            except:
+            except: #pragma: no cover
                 self.error_file =   None
             try:
                 self.output_file =  glob.glob(location + '/script/*.out')[-1]
-            except:
+            except: #pragma: no cover
                 self.output_file =  None
 
     def __str__(self): # pragma: no cover
