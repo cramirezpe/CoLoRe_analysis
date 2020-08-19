@@ -78,8 +78,8 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
         # Generate random photo-z
         z_photo = d['Z_COSMO'] + sigz*(1+d['Z_COSMO'])*np.random.randn(n_g)
 
-        if downsampling != 1:
-            d_mask = np.random.random(len(z_photo)) < downsampling
+        if downsampling != 1: 
+            d_mask = np.random.random(len(z_photo)) < downsampling #pylint: disable=no-member
         else:
             d_mask = np.full(len(z_photo), True, dtype=bool)
 
