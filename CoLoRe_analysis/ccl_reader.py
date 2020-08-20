@@ -18,7 +18,7 @@ class CCLReader:
         '''
         self.location = location
 
-    def do_data_computations(self, source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None):
+    def do_data_computations(self, source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
         '''Computes the Cls from CCL and for the sim.
 
         Args:
@@ -54,7 +54,7 @@ class CCLReader:
                 confirmation = input('Simulation with the given parameters does not exist. Do you want to compute it? (y/n)?')
                 if confirmation == 'y':
                     self.do_data_computations(**kwargs)
-                    return np.loadtxt(self.location + f'/ccl_data/{id_}/{value}.dat')
+                    return self.get_values(value, **kwargs)
                 elif confirmation == 'n':
                     break
 
