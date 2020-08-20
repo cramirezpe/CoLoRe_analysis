@@ -50,6 +50,13 @@ class ShearReader:
             _ = self.get_values('mp_e1', minz=minz+b*step, maxz= minz + (1+b)*step, do_cls=do_cls, do_kappa=do_kappa, source=source, compute=True)
     
     def remove_data_treated(self):
-        log.info(f'Removing treated data for sim: { self.location }')
-        if os.path.isdir(self.location + '/data_treated'):
-            rmtree(self.location + '/data_treated')
+        while True:
+            confirmation = input(f'Remove all shear data from sim {self.location}? (y/n)')
+            if confirmation == 'y':
+                log.info(f'Removing treated data for sim: { self.location }')
+                if os.path.isdir(self.location + '/data_treated'):
+                    rmtree(self.location + '/data_treated')
+                break
+            elif confirmation == 'n':
+                print('Cancelling')
+                return

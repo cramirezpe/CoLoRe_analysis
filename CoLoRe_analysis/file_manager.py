@@ -8,7 +8,7 @@ import json
 # With the built-in function get_simulations, it searches for every info_file below the given path and therefore any Simulation. This is very useful because hierarchy in the directories is no longer needed. 
 # Simulations can be deleted by using the classmethod remove_sim or the method .remove in Simulation objects (from Simulation class). 
 class FileManager:
-    info_file = "sim_info.INI"
+    info_file = "sim_info.json"
     # This will remove empty folders below path
 
     @staticmethod
@@ -47,8 +47,14 @@ class FileManager:
     @classmethod
     def remove_sim(cls,path):
         if os.path.isfile(path+'/'+cls.info_file):
-            shutil.rmtree(path)
-            print("Simulation in path {} removed".format(path))
+            while True:
+                confirmation = input(f'Remove full simulation from {path}? (y/n)')
+                if confirmation == 'y':
+                    shutil.rmtree(path)
+                    print("Simulation in path {} removed".format(path)) 
+                elif confirmation == 'n':
+                    print('Cancelling')
+                    return
         else:
             raise ValueError("The path {} does not contain an info file".format(path))
         return
