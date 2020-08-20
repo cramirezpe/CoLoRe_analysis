@@ -88,7 +88,15 @@ class Simulation:
   
     def remove(self): # pragma: no cover
         # After run this, remember to remove it from any array that contains it.
-        shutil.rmtree(self.location)
+        while True:
+            confirmation = input(f'Remove full simulation from {self.location}? (y/n)')
+            if confirmation == 'y':
+                print('Removing simulation')
+                shutil.rmtree(self.location)
+                break
+            elif confirmation == 'n':
+                print('Cancelling')
+                return
            
     @property
     def version(self):
