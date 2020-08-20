@@ -28,7 +28,7 @@ class CCLReader:
         log.info(f'Computing data for source: { source }')
         compute_data(self.location, source, output_path, nside, None, downsampling, zbins, nz_h, nz_min, nz_max)
 
-    def get_values(self, value, compute=False, **kwargs):
+    def get_values(self, value, **kwargs):
         '''Obtain values for Cls (CCL or sim)
 
         Args:
@@ -43,15 +43,20 @@ class CCLReader:
                 cl_dm_t:
                 cl_mm_d:
                 cl_mm_t:
-            compute (bool, optional): Whether to compute the values if they are not available or not (default: False)
             kwargs (): Parameters for the ccl script. The full list is given at help(do_data_computations)
 
         Returns:
             Array of desired value. Raises an exception if the compute option is set to False but the value was not computed. 
         '''
         matched_sims = self.search_output(**kwargs)
-        if len(matched_sims) == 0 and not compute:
-            raise FileNotFoundError('Simulation with the given parameters does not exist. Pass the argument compute=True to compute it.')
+        if len(matched_sims) == 0:
+            while True:
+                confirmation = input('Simulation with the given parameters does not exist. Do you want to compute it? (y/n)?')
+                if confirmation == 'y':
+                    self.do_data_computations(**kwargs)
+                    break
+                elif confirmation == 'n':
+                    break
 
         elif len(matched_sims) == 1: 
             id_ = matched_sims[0]['id']
@@ -102,5 +107,15 @@ class CCLReader:
         return compatible
 
     def remove_computed_data(self):
-        if os.path.isdir(self.location + '/ccl_data'):
-            rmtree(self.location + '/ccl_data')
+        while True:
+            confirmation = input(f'Remove all computed ccl data from sim {self.location}? (y/n)')
+            if confirmation == 'y':
+                print('Removing all computed data')
+                if os.path.isdir(self.location + '/ccl_data'):
+                    rmtree(self.location + '/ccl_data')
+                break
+            
+            elif confirmation == 'n':
+                print('Cancelling')
+                return
+
