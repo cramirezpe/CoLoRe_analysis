@@ -38,7 +38,7 @@ while os.path.isfile('out_srcs_s1_%d.fits' % ifile):
     z_photo = d['Z_COSMO'] + sigz*(1+d['Z_COSMO'])*np.random.randn(n_g)
 
     # Split into 2
-    msk1 = z_photo <= zsplit
+    msk1 = (z_photo <= zsplit) & (z_photo > 0)
     msk2 = z_photo > zsplit
 
     # For each bin, add to the number and ellipticity maps
@@ -57,7 +57,7 @@ while os.path.isfile('out_srcs_s1_%d.fits' % ifile):
 
         # Add also to N(z)
         nz, z_edges = np.histogram(dd['Z_COSMO'], bins=nz_h,
-                                   range=[0., 0.5])
+                                   range=[0., 1])
         nz_tot[ibin, :] += nz
     ifile += 1
 
@@ -124,6 +124,8 @@ cl_dd_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2
                     for p1, p2 in pairs])
 cl_dm_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_l[p2], larr, p_of_k_a=pk2d_dm)
                     for p1, p2 in pairs])
+# cl_md_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_l[p2], larr, p_of_k_a=pk2d_dm)
+#                     for p2, p1 in pairs])
 cl_mm_t = np.array([ccl.angular_cl(cosmo, tr_l[p1], tr_l[p2], larr, p_of_k_a=pk2d_mm)
                     for p1, p2 in pairs])
 
@@ -133,7 +135,13 @@ output = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asar
 cl_dd_d = output[:,0]
 cl_dm_d = output[:,3]
 cl_mm_d = output[:,1]
+# cl_md_d = cl_dm_d
 
+# for i, (p1,p2) in enumerate(pairs):
+#     if p1 != p2:
+#         cl_md_d[i] = np.array(hp.anafast(np.asarray([dmap[p2],e1map[p2],e2map[p2]]), np.asarray([dmap[p1],e1map[p1],e2map[p1]])))[3]
+
+# data = pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_md_d, cl_md_t, cl_mm_d, cl_mm_t
 data = pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_mm_d, cl_mm_t
 import pickle
 with open('all_data.pkl','wb') as f:
