@@ -68,10 +68,6 @@ class CCLReader:
                 print(x)
             return matched_sims
 
-        else:
-            self.do_data_computations(**kwargs)
-
-
     def search_output(self, **kwargs):
         ''' Searches into the output directory to see if any of the outputs saved matches the data dictionary given as input. This data dictionary consists in the arguments given to the function do_data_computations.
     
@@ -115,7 +111,7 @@ class CCLReader:
                     rmtree(self.location + '/ccl_data')
                 break
             
-            elif confirmation == 'n':
+            elif confirmation == 'n': # pragma: no cover
                 print('Cancelling')
                 return
 
