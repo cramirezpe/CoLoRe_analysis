@@ -35,8 +35,9 @@ class TestComputeDataCCL(unittest.TestCase):
         np.random.seed(1)
         mocked_time.today.return_value = date(2020,1,1)
         mocked_time.side_effect = lambda *args, **kw: date(*args, **kw)
-        compute_data(self.sim_path)
+        compute_data(self.sim_path, nz_max=0.5)
 
+        # values = ['pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_md_d', 'cl_md_t', 'cl_mm_d', 'cl_mm_t']
         values = ['pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t']
 
 
@@ -45,7 +46,7 @@ class TestComputeDataCCL(unittest.TestCase):
 
         with open(self.output_path + '/INFO.json') as json_file:
             data = json.load(json_file)
-            self.assertEqual( data['zbins'], [0,0.15,1])
+            self.assertEqual( data['zbins'], [-1,0.15,1])
             self.assertEqual( data['id'], '20200101_000000')
 
     

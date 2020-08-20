@@ -22,7 +22,7 @@ import json
 
 from LyaPlotter.sims import CoLoReSim
 
-def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None):
+def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
     '''Method to compute all cls from the anafast function using output from CoLoRe.
 
     Args:
@@ -33,7 +33,7 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
         downsampling (float, optional): downsampling to apply to the data (from 0 to 1) (default: 1)
         zbins (array of floats, optional): defines the binning in redshift of the analysis (default: [0,0.15,0.5])
         nz_h (int, optional): pixelization of the redshift analysis (default: 50)
-        nz_min (float, optional): min redshift for the redshfit analysis (default: None (set to the min value in zbins))
+        nz_min (float, optional): min redshift for the redshfit analysis (default: 0)
         nz_max (float, optional): max redshift for the redshfit analysis (default: None (set to the max value in zbins))
     
     Returns: 
@@ -53,7 +53,6 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
 
     # This will contain the N(z) of the different bins
     nz_tot = np.zeros([nbins, nz_h])
-    nz_min = nz_min if nz_min is not None else zbins[0]
     nz_max = nz_max if nz_max is not None else zbins[-1]
     
     sigz = 0.03
@@ -172,12 +171,21 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
                         for p1, p2 in pairs])
     cl_mm_t = np.array([ccl.angular_cl(cosmo, tr_l[p1], tr_l[p2], larr, p_of_k_a=pk2d_mm)
                         for p1, p2 in pairs])
+    # cl_md_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_l[p2], larr, p_of_k_a=pk2d_dm)
+                        # for p2, p1 in pairs])
 
     d_values = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asarray([dmap[p2],e1map[p2],e2map[p2]]), pol=True) for p1,p2 in pairs])
 
+    # cl_md_d = d_values[:,3]
+
+    # for i, (p1,p2) in enumerate(pairs):
+    #     if p1 != p2:
+    #         cl_md_d[i] = np.array(hp.anafast(np.asarray([dmap[p2],e1map[p2],e2map[p2]]), np.asarray([dmap[p1],e1map[p1],e2map[p1]])))[3]
+
+    # return shotnoise, pairs, nz_tot, z_nz, d_values, cl_md_d, cl_dd_t, cl_dm_t, cl_md_t, cl_mm_t
     return shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t
 
-def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None):
+def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
     ''' Method to compute the values needed for CCL test plots.
     
     Args:
@@ -194,12 +202,14 @@ def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None,
 
     log.debug(f'Computing data for:\nsim_path: { sim_path }\nsource: { source }\noutput_path: { output_path }')
 
+    # shotnoise, pairs, nz_tot, z_nz, d_values, cl_md_d, cl_dd_t, cl_dm_t, cl_md_t, cl_mm_t = compute_all_cls(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max)
     shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t = compute_all_cls(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max)
 
     cl_dd_d = d_values[:,0]
     cl_dm_d = d_values[:,3]
     cl_mm_d = d_values[:,1]
 
+    # savetofile(output_path, (pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_md_d, cl_md_t, cl_mm_d, cl_mm_t), ('pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_md_d', 'cl_md_t', 'cl_mm_d', 'cl_mm_t') )
     savetofile(output_path, (pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_mm_d, cl_mm_t), ('pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t') )
 
     info = {
