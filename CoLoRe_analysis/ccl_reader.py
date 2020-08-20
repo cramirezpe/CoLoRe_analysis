@@ -54,7 +54,7 @@ class CCLReader:
                 confirmation = input('Simulation with the given parameters does not exist. Do you want to compute it? (y/n)?')
                 if confirmation == 'y':
                     self.do_data_computations(**kwargs)
-                    break
+                    return np.loadtxt(self.location + f'/ccl_data/{id_}/{value}.dat')
                 elif confirmation == 'n':
                     break
 
