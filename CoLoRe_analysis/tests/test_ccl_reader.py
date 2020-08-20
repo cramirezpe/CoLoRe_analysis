@@ -120,11 +120,11 @@ class TestCCLReader(unittest.TestCase):
         cl_mm_t = np.loadtxt(self.computed_data_path + '/20200101_000000/cl_mm_t.dat')
         np.testing.assert_equal(cl_mm_t, [1,2,3])
 
-
+    @patch('builtins.input', return_value='y')
     @patch('CoLoRe_analysis.ccl_reader.compute_data', side_effect=mock_compute_data)
-    def test_creation_when_does_not_exist(self, mock_func):
-        nz_tot = self.cr.get_values('nz_tot', compute=True, nside=128)
-        nz_tot = self.cr.get_values('nz_tot', compute=True, nside=128)
+    def test_creation_when_does_not_exist(self, mock_func, mocked_input):
+        nz_tot = self.cr.get_values('nz_tot', nside=128)
+        nz_tot = self.cr.get_values('nz_tot', nside=128)
         np.testing.assert_equal(nz_tot, [4,5,6])
 
     @patch('CoLoRe_analysis.ccl_reader.compute_data')
@@ -141,12 +141,16 @@ class TestCCLReader(unittest.TestCase):
         vals = self.cr.get_values('pairs', **self.data_mixed)
         self.assertEqual( vals, [self.data1, self.data4])
 
-    def test_raise_when_compute_false_and_dont_exist(self):
-        with self.assertRaises(FileNotFoundError):
-            a = self.cr.get_values('pairs', nz_max=666)
+    @patch('builtins.input', return_value='n')
+    @patch('CoLoRe_analysis.ccl_reader.CCLReader.do_data_computations')
+    def test_do_nothing_when_does_not_exist_and_not(self, mocked_computations, mocked_input):
+        a = self.cr.get_values('pairs', nz_max=666)
+        mocked_computations.assert_not_called()
 
 
-    def test_remove_computed_data(self): 
+    @patch('builtins.input', return_value='y')
+    @patch('builtins.print')
+    def test_remove_computed_data(self, mocked_print, mocked_input): 
         path = self.computed_data_path + '/zz/zz'
         os.makedirs(path)
         self.cr.remove_computed_data()

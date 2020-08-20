@@ -86,7 +86,9 @@ class TestShearReader(unittest.TestCase):
         a = np.loadtxt(expected_file)
         self.assertEqual(a[0], 21)
 
-    def test_raise_when_does_not_exist_and_no_compute(self):
+    @patch('builtins.input', return_value='y')
+    @patch('builtins.print')
+    def test_raise_when_does_not_exist_and_no_compute(self, mocked_print, mocked_input):
         self.sr.remove_data_treated()
 
         with self.assertRaises(OSError):
@@ -115,8 +117,9 @@ class TestShearReader(unittest.TestCase):
             self.assertEqual( vals[0], 1)
             self.assertTrue( os.path.isfile(path_head + str + path_tail), path_head+str+path_tail)
 
-
-    def test_removed_data_treated(self):
+    @patch('builtins.input', return_value='y')
+    @patch('builtins.print')
+    def test_removed_data_treated(self, mocked_print, mocked_input):
         path = self.sim_path + '/data_treated/zz/zz'
         os.makedirs(path)
         self.sr.remove_data_treated()
