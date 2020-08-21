@@ -136,7 +136,7 @@ class CCLPlotter():
         '''
         return self.raw_values[a+b][ self.get_index(pair1, pair2) ]
             
-    def get_values(self,a,b,pair1, pair2):
+    def get_values(self,a,b,pair1, pair2, mask=None):
         '''
         Get the rebinned values
 
@@ -145,11 +145,15 @@ class CCLPlotter():
             b (str): Second component (m or d)
             pair1 (int): First component region.
             pair2 (int): Second component region.
+            mask (array): Mask to apply 
 
         Returns:
             Array of length 3*nside/rebin with the rebinned values.
         '''
-        return self.values[a+b][ self.get_index(pair1, pair2) ]
+        if mask is None:
+            return self.values[a+b][ self.get_index(pair1, pair2) ]
+        else:  
+            return self.values[a+b][ self.get_index(pair1, pair2) ][mask]
     
     def get_raw_errors(self, a, b, pair1, pair2):
         '''
@@ -166,7 +170,7 @@ class CCLPlotter():
         '''
         return self.raw_errors[a+b][ self.get_index(pair1, pair2) ]
     
-    def get_errors(self, a, b, pair1, pair2):
+    def get_errors(self, a, b, pair1, pair2, mask=None):
         '''
         Get the rebinned errors
 
@@ -175,11 +179,15 @@ class CCLPlotter():
             b (str): Second component (m or d)
             pair1 (int): First component region.
             pair2 (int): Second component region.
+            mask (array): Mask to apply 
 
         Returns:
             Array of length 3*nside/rebin with the rebinned errors.
         '''
-        return self.errors[a+b][ self.get_index(pair1, pair2) ]
+        if mask is None:
+            return self.errors[a+b][ self.get_index(pair1, pair2) ]
+        else:
+            return self.errors[a+b][ self.get_index(pair1, pair2) ][mask]
     
     def get_index(self, pair1, pair2):
         ''' Get the index in the pairs array of a given pair:
