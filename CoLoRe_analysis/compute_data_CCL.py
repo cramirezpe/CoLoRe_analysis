@@ -69,6 +69,8 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
         file_limit = True
 
     ifile = 0
+
+    log.info('Reading output files...\n')
     while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile) and ( (not file_limit) or ifile <= max_files):
         hdulist = fits.open(sim_path + '/out_srcs_s1_%d.fits' % ifile)
         d = hdulist[1].data
@@ -111,6 +113,7 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
     # Midpoint of N(z) histogram
     z_nz = 0.5*(z_edges[1:] + z_edges[:-1])
 
+    log.info('Computing maps...\n')
     # Compute <e> map and overdensity map
     # Compute also shot noise level
     shotnoise = np.zeros(nbins)
@@ -129,6 +132,7 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
     pks_dm = []
     pks_mm = []
     z_pk = 0.
+    log.info('Reading pk files...\n')
     while os.path.isfile(sim_path + "/out_pk_srcs_pop0_z%.3lf.txt" % z_pk):
         ks, pdd, pdm, pmm = np.loadtxt(sim_path + "/out_pk_srcs_pop0_z%.3lf.txt" % z_pk, unpack=True)
         # The delta-delta prediction involves some Fourier transforms that make it unstable
@@ -147,6 +151,7 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
     pks_dm = np.array(pks_dm)[::-1, :] / h**3
     pks_mm = np.array(pks_mm)[::-1, :] / h**3
 
+    log.info('Creating CCL structures...\n')
     # Create CCL P(k) structures
     cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=h, n_s=0.96, sigma8=0.8)
     pk2d_dd = ccl.Pk2D(a_arr=1./(1+zs), lk_arr=np.log(ks), pk_arr=pks_dd,
@@ -163,6 +168,7 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
             for i in range(nbins)]
     tr_l = [ccl.WeakLensingTracer(cosmo, (z_nz, nz_tot[i])) for i in range(nbins)]
 
+    log.info('Computing CCL power spectra...\n')
     # Compute power spectra. I'm only doing delta-delta here.
     larr = np.arange(3*nside)
     cl_dd_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dd)
@@ -174,6 +180,7 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
     cl_md_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_l[p2], larr, p_of_k_a=pk2d_dm)
                         for p2, p1 in pairs])
 
+    log.info('Computing values from data...\n')
     d_values = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asarray([dmap[p2],e1map[p2],e2map[p2]]), pol=True) for p1,p2 in pairs])
 
     cl_md_d = np.copy(d_values[:,3])
