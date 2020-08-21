@@ -46,4 +46,149 @@ class ClsPlotter():
         ax.legend()
         return
 
+class CCLPlotter():
+    '''
+        Class to plot CCL values. 
+    '''
+    def __init__(self, dd, dm, md, mm, pairs, nside):    
+        '''
+            Args:
+                dd: Array with the values of the galaxy galaxy Cls. An array with shape (n. of pairs, 2, 3*nside) is expected.
+                dm: Array with the vales of the galaxy matter Cls. An array with shape (n. of pairs, 2, 3*nside) is expected.
+                md: Array with the values of the matter galaxy Cls. An array with shape (n. of pairs, 2, 3*nside) is expected.
+                mm: Array with the values of matter matter Cls.  An array with shape (n. of pairs, 2, 3*nside) is expected.
+                pairs: Pairs used. Array of arrays is expected (e.g: [(0,0),(0,1),(1,0)])
+                nside (int): Nside to use.
+        '''
 
+        self.raw_values = dict()
+        self.raw_values['dd'] = dd
+        self.raw_values['dm'] = dm/2
+        self.raw_values['md'] = md/2
+        self.raw_values['mm'] = mm/4
+        
+        self.values = dict()
+        self.values['dd'] = dd
+        self.values['dm'] = dm/2
+        self.values['md'] = md/2
+        self.values['mm'] = mm/4
+        
+        self.pairs = pairs
+        
+        self.nside = nside
+        self.larr  = np.arange(3*nside)
+        self.l     = np.arange(3*nside)
+        
+    def compute_error_bars(self):
+        '''
+            Compute the error bars associated with the Cls. 
+        '''
+        Dl = self.larr[1]-self.larr[0]
+        
+        self.raw_errors = dict()
+
+        for name in ('dd','dm','md','mm'):
+            self.raw_errors[name] = np.zeros_like(self.raw_values[name])
+            for i, (pair1,pair2) in enumerate(self.pairs):
+                a, b = name[0], name[1]
+                
+                self.raw_errors[name][i] = self.get_raw_values(a,a,pair1,pair1)*self.get_raw_values(b,b,pair2,pair2) + self.get_raw_values(a,b,pair1,pair2)**2
+                self.raw_errors[name][i] = self.raw_errors[name][i] / (Dl*(2*self.larr+1))
+                self.raw_errors[name][i] = np.sqrt(self.raw_errors[name][i])           
+                
+    def reshape(self, rebin):
+        '''
+            Reshape the values averaging over the rebinning.
+
+        Args:
+            rebin (int): Number of bins to average within.
+        '''
+        for name in ('dd','dm','md','mm'):
+            self.values[name] = np.mean( self.raw_values[name].reshape([3,-1,rebin]), axis=2)
+                
+        self.l = np.mean( self.larr.reshape([-1,rebin]), axis=1)
+                                                         
+    
+    def reshape_error_bars(self, rebin):
+        '''
+            Reshape the errors averaging over the rebinning.
+
+        Args:
+            rebin (int): Number of bins to average within.
+        '''
+
+        self.errors = dict()
+        for name in ('dd', 'dm', 'md', 'mm'):
+            self.errors[name] = np.mean( self.raw_errors[name].reshape([3,-1,rebin]), axis=2)
+            
+    def get_raw_values(self, a, b, pair1, pair2):
+        '''
+        Get the values without rebinning.
+
+        Args:
+            a (str): First component (m or d)
+            b (str): Second component (m or d)
+            pair1 (int): First component region.
+            pair2 (int): Second component region.
+
+        Returns:
+            Array of length 3*nside with the values without rebinning.
+        '''
+        return self.raw_values[a+b][ self.get_index(pair1, pair2) ]
+            
+    def get_values(self,a,b,pair1, pair2):
+        '''
+        Get the rebinned values
+
+        Args:
+            a (str): First component (m or d)
+            b (str): Second component (m or d)
+            pair1 (int): First component region.
+            pair2 (int): Second component region.
+
+        Returns:
+            Array of length 3*nside/rebin with the rebinned values.
+        '''
+        return self.values[a+b][ self.get_index(pair1, pair2) ]
+    
+    def get_raw_errors(self, a, b, pair1, pair2):
+        '''
+        Get the errors without rebinning.
+
+        Args:
+            a (str): First component (m or d)
+            b (str): Second component (m or d)
+            pair1 (int): First component region.
+            pair2 (int): Second component region.
+
+        Returns:
+            Array of length 3*nside with the errors without rebinning.
+        '''
+        return self.raw_errors[a+b][ self.get_index(pair1, pair2) ]
+    
+    def get_errors(self, a, b, pair1, pair2):
+        '''
+        Get the rebinned errors
+
+        Args:
+            a (str): First component (m or d)
+            b (str): Second component (m or d)
+            pair1 (int): First component region.
+            pair2 (int): Second component region.
+
+        Returns:
+            Array of length 3*nside/rebin with the rebinned errors.
+        '''
+        return self.errors[a+b][ self.get_index(pair1, pair2) ]
+    
+    def get_index(self, pair1, pair2):
+        ''' Get the index in the pairs array of a given pair:
+
+        Args:
+            pair1 (int): First pair region
+            pair2 (int): Second pair region
+
+        Returns:
+            Index of the element (pair1,pair2) in the pairs array.
+        '''
+        return np.where((self.pairs == [pair1, pair2]).all(axis=1))[0][0]
