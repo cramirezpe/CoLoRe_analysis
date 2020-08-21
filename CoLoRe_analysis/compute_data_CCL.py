@@ -245,7 +245,7 @@ def main(): #pragma: no cover
     parser.add_argument("--downsampling", required=False, type=float , default=1 , help="downsampling to apply to the data")
     parser.add_argument("--zbins",        required=False, type=float, nargs='+', default=[0,0.15,1] , help="defines the binning in redshift of the analysis")
     parser.add_argument("--nz_h",         required=False, type=int , default=50 , help="pixelization of the redshift analysis ")
-    parser.add_argument("--nz_min",       required=False, type=float , default=None , help="min redshift for the redshfit analysis")
+    parser.add_argument("--nz_min",       required=False, type=float , default=0 , help="min redshift for the redshfit analysis")
     parser.add_argument("--nz_max",       required=False, type=float , default=None , help="max redshift for the redshfit analysis")
 
     args = parser.parse_args()
