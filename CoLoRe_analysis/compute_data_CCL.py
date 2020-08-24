@@ -24,6 +24,8 @@ from LyaPlotter.sims import CoLoReSim
 
 def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
     '''Method to compute all cls from the anafast function using output from CoLoRe.
+    
+    MODIFIED TO RETURN TO THE SINGLE_SPLIT BEHAVIOUR and compare the result with the binned one.
 
     Args:
         sim_path (str): Path where the CoLoRe simulation is located.
@@ -47,14 +49,13 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
     nside = nside
     npix = hp.nside2npix(nside)
 
-    nbins   = len(zbins) - 1
-    pairs   = list(combinations_with_replacement(range(nbins), r=2))
+    nbins   = 2
+    pairs   = [(0,0), (0,1), (1,1)]
 
+    zsplit = 0.15 
 
     # This will contain the N(z) of the different bins
     nz_tot = np.zeros([nbins, nz_h])
-    nz_max = nz_max if nz_max is not None else zbins[-1]
-    
     sigz = 0.03
 
     # These will be the density and ellipticity maps
@@ -62,16 +63,10 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
     e1map = np.zeros([nbins, npix])
     e2map = np.zeros([nbins, npix])
 
-    # Now we loop over all source files
-    if max_files is None:
-        file_limit = False
-    else:
-        file_limit = True
-
     ifile = 0
 
     log.info('Reading output files...\n')
-    while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile) and ( (not file_limit) or ifile <= max_files):
+    while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile):
         hdulist = fits.open(sim_path + '/out_srcs_s1_%d.fits' % ifile)
         d = hdulist[1].data
         n_g = len(d)
@@ -79,19 +74,12 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
         # Generate random photo-z
         z_photo = d['Z_COSMO'] + sigz*(1+d['Z_COSMO'])*np.random.randn(n_g)
 
-        if downsampling != 1: 
-            d_mask = np.random.random(len(z_photo)) < downsampling #pylint: disable=no-member
-        else:
-            d_mask = np.full(len(z_photo), True, dtype=bool)
-
-        masks = []
-        for i in range(nbins):
-            masks.append( (zbins[i] <= z_photo) & (z_photo < zbins[i+1]) )
+        # split into 2
+        msk1 = z_photo <= zsplit
+        msk2 = z_photo > zsplit
         
-        masks = [(mask & d_mask) for mask in masks]  # applying downsampling here
-
-        # For each bin, add to the number and ellipticity maps
-        for ibin, msk in enumerate( masks ):
+        # for each bin, add to the number and ellipticity maps
+        for ibin, msk in enumerate([msk1, msk2]):
             dd = d[msk]
 
             pix = hp.ang2pix(nside,
@@ -106,7 +94,7 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
 
             # Add also to N(z)
             nz, z_edges = np.histogram(dd['Z_COSMO'], bins=nz_h,
-                                    range=[nz_min, nz_max])
+                                        range=[0., 0.5])
             nz_tot[ibin, :] += nz
         ifile += 1
 
