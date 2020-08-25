@@ -212,10 +212,13 @@ def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None,
     shotnoise, pairs, nz_tot, z_nz, d_values, cl_md_d, cl_dd_t, cl_dm_t, cl_md_t, cl_mm_t = compute_all_cls(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max)
 
     cl_dd_d = d_values[:,0]
-    cl_dm_d = d_values[:,3]
     cl_mm_d = d_values[:,1]
+    cl_bb_d = d_values[:,2]
+    cl_dm_d = d_values[:,3]
+    cl_mb_d = d_values[:,4]
+    cl_db_d = d_values[:,5]
 
-    savetofile(output_path, (pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_md_d, cl_md_t, cl_mm_d, cl_mm_t), ('pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_md_d', 'cl_md_t', 'cl_mm_d', 'cl_mm_t') )
+    savetofile(output_path, (pairs, shotnoise, nz_tot, z_nz, cl_dd_d, cl_dd_t, cl_dm_d, cl_dm_t, cl_md_d, cl_md_t, cl_mm_d, cl_mm_t, cl_bb_d, cl_mb_d, cl_db_d), ('pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_md_d', 'cl_md_t', 'cl_mm_d', 'cl_mm_t','cl_bb_d','cl_mb_d','cl_db_d'))
 
     info = {
         'id'            : id_,
