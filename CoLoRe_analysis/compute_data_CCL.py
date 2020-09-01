@@ -14,27 +14,25 @@ import pyccl as ccl
 import os
 from astropy.io import fits
 from itertools import combinations_with_replacement
-from multiprocessing import Pool
 from datetime import datetime
 
 import argparse
 import json
 
-from LyaPlotter.sims import CoLoReSim
 
 def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
     '''Method to compute all cls from the anafast function using output from CoLoRe.
 
     Args:
         sim_path (str): Path where the CoLoRe simulation is located.
-        source (int, optional): Source of which to compute data (default: 1)
+        source (int, optional): Source from which to compute data (default: 1)
         nside (int, optional): nside to use (default:128)
         max_files (int, optional): number of srcs files to consider (default: None, consider all the files) 
         downsampling (float, optional): downsampling to apply to the data (from 0 to 1) (default: 1)
-        zbins (array of floats, optional): defines the binning in redshift of the analysis (default: [0,0.15,0.5])
+        zbins (array of floats, optional): defines the binning in redshift of the data analysis (default: [0,0.15,0.5])
         nz_h (int, optional): pixelization of the redshift analysis (default: 50)
-        nz_min (float, optional): min redshift for the redshfit analysis (default: 0)
-        nz_max (float, optional): max redshift for the redshfit analysis (default: None (set to the max value in zbins))
+        nz_min (float, optional): min redshift for the N(z) histogram (default: 0)
+        nz_max (float, optional): max redshift for the N(z) histogram (default: None (set to the max value in zbins))
     
     Returns: 
         Tuple given by (shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t):
@@ -238,9 +236,8 @@ def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None,
 
 def main(): #pragma: no cover
     parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")
-    parser.add_argument("-p","--paths", nargs='+', required=True, type=str, help="Path(s) of ColoRe run(s)")
+    parser.add_argument("-p","--path", required=True, type=str, help="Path of ColoRe run")
     parser.add_argument("-o","--output", required=False, type=str, default=None, help="Path for output files")
-    parser.add_argument("-pr","--processes", required=False, default=None, help='Number of processes for the multiprocessing tool (default: None, selected by Pool)')
     
     parser.add_argument("--source",       required=False, type=int, default=1, help="Sources to be computed")
     parser.add_argument("--nside",        required=False, type=int , default=128 , help="nside to use ")
@@ -253,22 +250,10 @@ def main(): #pragma: no cover
 
     args = parser.parse_args()
     
-    paths   = args.paths
+    path   = args.path
     output  = args.output
-    proc    = args.processes
 
-    args = [(path, args.source, output, args.nside, args.max_files, args.downsampling, args.zbins, args.nz_h, args.nz_min, args.nz_max) for path in paths]
-
-    pool = Pool(processes = proc)
-    x = [pool.apply_async(compute_data, arg, 
-                callback=lambda x: print('Result:',x), 
-                error_callback=lambda x: print('Error:',x)) 
-            for arg in args]
-
-    pool.close()
-    pool.join()
-    print('Closing pool')
-    [print(p.get()) for p in x]
+    compute_data(path, args.source, output, args.nside, args.max_files, args.downsampling, args.zbins, args.nz_h, args.nz_min, args.nz_max )
 
 if __name__ == '__main__': #pragma: no cover
     main()
