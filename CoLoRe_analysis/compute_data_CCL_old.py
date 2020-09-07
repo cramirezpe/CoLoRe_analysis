@@ -209,7 +209,7 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
     return shotnoise, pairs, nz_tot, z_nz, d_values, cl_md_d, cl_dd_t, cl_dm_t, cl_md_t, cl_mm_t
 
 
-def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
+def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, code=None):
     ''' Method to compute the values needed for CCL test plots.
     
     Args:
@@ -217,6 +217,9 @@ def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None,
         source (int, optional): Source of which to compute data (default: 1)
         output_path (str, optional): Output where to save the data (default: { sim_path }/ccl_data/{ datetime.now() }/)
     '''
+
+    if code != 'anafast':
+        raise ValueError('Configuration set to run anafasts code.')
 
     id_ = datetime.today().strftime('%Y%m%d_%H%M%S')
     if not output_path:
