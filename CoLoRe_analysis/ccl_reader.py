@@ -18,7 +18,7 @@ class CCLReader:
         '''
         self.location = location
 
-    def do_data_computations(self, source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
+    def do_data_computations(self, source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, **kwargs):
         '''Computes the Cls from CCL and for the sim.
 
         Args:
@@ -26,7 +26,7 @@ class CCLReader:
             output_path (str, optional): Set the output path (default: { sim_path }/ccl_data/source_{ source }/)
         '''
         log.info(f'Computing data for source: { source }')
-        compute_data(self.location, source, output_path, nside, None, downsampling, zbins, nz_h, nz_min, nz_max)
+        compute_data(self.location, source, output_path, nside, None, downsampling, zbins, nz_h, nz_min, nz_max, **kwargs)
 
     def get_values(self, value, **kwargs):
         '''Obtain values for Cls (CCL or sim)
