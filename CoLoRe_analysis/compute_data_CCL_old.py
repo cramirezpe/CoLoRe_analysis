@@ -249,7 +249,8 @@ def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None,
         'zbins'         : zbins,
         'nz_h'          : nz_h,
         'nz_min'        : nz_min,
-        'nz_max'        : nz_max
+        'nz_max'        : nz_max,
+        'code'          : 'anafast'
     }
 
     with open(output_path + '/INFO.json','w') as outfile:
