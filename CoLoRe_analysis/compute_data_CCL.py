@@ -210,13 +210,20 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
     f2 = [nmt.NmtField(n, [e1, e2], n_iter=0) for n, e1, e2 in zip(nmap, e1map, e2map)]
 
     # DD power spectra
-    w_dd = nmt.NmtWorkspace()
-    w_dd.compute_coupling_matrix(f0, f0, b)
-    cl_dd = np.array([w_dd.decouple_cell(nmt.compute_coupled_cell(f0[p1], f0[p2]))[0]
-                      for p1, p2 in pairs])
+    w_dd = {}
+    for p in range(nbins):
+        w_dd[p] = nmt.NmtWorkspace()
+        w_dd[p].compute_coupling_matrix(f0[p],f0[p], b)
+    cl_dd = np.array([w_dd[p2].decouple_cell(nmt.compute_coupled_cell(f0[p1], f0[p2]))[0] 
+                        for p1, p2 in pairs])
+
+    # w_dd = nmt.NmtWorkspace()
+    # w_dd.compute_coupling_matrix(f0, f0, b)
+    # cl_dd = np.array([w_dd.decouple_cell(nmt.compute_coupled_cell(f0[p1], f0[p2]))[0]
+    #                   for p1, p2 in pairs])
         
     # DM power spectra
-    w_dl = []
+    w_dl = {}
     for p in range(nbins):
         w_dl[p] = nmt.NmtWorkspace()
         w_dl[p].compute_coupling_matrix(f0[p], f2[p], b)
@@ -226,10 +233,10 @@ def compute_all_cls(sim_path, source=1, nside=128, max_files=None, downsampling=
 
     # MM power spectra
     w_ll = {}
-    for p1, p2 in pairs:
-        w_ll[f'{p1}{p2}'] = nmt.NmtWorkspace()
-        w_ll[f'{p1}{p2}'].compute_coupling_matrix(f2[p1], f2[p2], b)
-    cl_mm = np.array([w_ll['{p1}{p2}'].decouple_cell(nmt.compute_coupled_cell(f2[p1], f2[p2]))
+    for p in range(nbins):
+        w_ll[p] = nmt.NmtWorkspace()
+        w_ll[p].compute_coupling_matrix(f2[p], f2[p], b)
+    cl_mm = np.array([w_ll[p2].decouple_cell(nmt.compute_coupled_cell(f2[p1], f2[p2]))
                        for p1, p2 in pairs])
         
     #d_values = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asarray([dmap[p2],e1map[p2],e2map[p2]]), pol=True) for p1,p2 in pairs])
