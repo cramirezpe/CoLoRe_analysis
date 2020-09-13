@@ -1,0 +1,105 @@
+MPI task 0 has 64 OMP threads
+MPI task 0, OMP thread count starts at 0
+ MPIThreadsOK = 1
+
+|-------------------------------------------------|
+|                      CoLoRe                     |
+|-------------------------------------------------|
+
+The cosmological model is:
+ O_M=0.300 O_L=0.700 O_K=0.000
+ O_B=0.050 w=-1.000 h=0.700
+ Flat universe, standard cosmological constant
+
+ Time of equality: a_eq=0.75416
+ Particle horizon: chi_H(0)=9.908E+03 Mpc/h
+ Present growth factor: D_0=0.779
+
+Reading P_k from file: Pk_CAMB_test.dat
+  Original sigma8=0.803913
+  Sigma_Gauss should be 0.623890
+Node 0 will allocate 1.587 GB [1.509 GB (Gaussian), 0.058 GB (srcs), 1.500 MB (kappa), 18.469 MB (shear), 1.500 MB (isw)]
+
+Run parameters: 
+  0.001 < z < 0.400
+  2.997 < r/(Mpc/h) < 1086.082
+  L_box = 2180.650 Mpc/h, N_grid = 512 
+  Scales resolved: 2.881E-03 < k < 7.362E-01 h/Mpc
+  Fourier-space resolution: dk = 2.881E-03 h/Mpc
+  Real-space resolution: dx = 4.259E+00 Mpc/h
+  Density field pre-smoothed on scales: x_s = 5.000E+00 Mpc/h
+  1 galaxy populations
+  1 lensing source planes
+  11 lensing source planes
+  1 ISW source planes
+  Will include lensing shear in source catalog
+
+Seed : 1001
+*** Writing predictions
+Writing predictions of redshift 0:
+       Population 0, bias 1. 
+Writing predictions of redshift 0.1:
+       Population 0, bias 1. 
+Writing predictions of redshift 0.2:
+       Population 0, bias 1. 
+Writing predictions of redshift 0.3:
+       Population 0, bias 1. 
+Writing predictions of redshift 0.4:
+       Population 0, bias 1. 
+*** Creating Gaussian density field 
+Creating Fourier-space density and Newtonian potential 
+>    Relative time ellapsed 452.2 ms
+Transforming density and Newtonian potential
+>    Relative time ellapsed 209.6 ms
+Normalizing density and Newtonian potential 
+>    Relative time ellapsed 41.2 ms
+ <d>=1.417E-11, <d^2>=6.533E-01
+
+*** Creating physical matter density
+Lognormalizin'
+>    Relative time ellapsed 127.6 ms
+
+*** Computing normalization of density field
+z=0.000E+00, <d^2_0>=1.023E+00, 00000000000
+z=3.760E-02, <d^2_0>=1.023E+00, 00000179080
+z=8.054E-02, <d^2_0>=9.870E-01, 00001201000
+z=1.286E-01, <d^2_0>=1.007E+00, 00003111032
+z=1.779E-01, <d^2_0>=9.993E-01, 00005766488
+z=2.276E-01, <d^2_0>=1.001E+00, 00009033384
+z=2.775E-01, <d^2_0>=9.999E-01, 00012780408
+z=3.275E-01, <d^2_0>=1.003E+00, 00016906456
+z=3.775E-01, <d^2_0>=9.964E-01, 00021299152
+z=4.017E-01, <d^2_0>=9.964E-01, 00021752168
+>    Relative time ellapsed 117.7 ms
+
+*** Getting point sources
+ 0-th galaxy population
+   Poisson-sampling
+   There will be 1406503 objects in total 
+   Assigning coordinates
+>    Relative time ellapsed 1163.3 ms
+
+*** Re-distributing sources across nodes
+>    Relative time ellapsed 13.8 ms
+
+*** Getting LOS information
+Communication 0, MPI task 0 is now MPI task 0
+>    Relative time ellapsed 541.2 ms
+
+*** Writing kappa source maps
+>    Relative time ellapsed 7.2 ms
+
+*** Writing shear source maps
+>    Relative time ellapsed 187.9 ms
+
+*** Writing isw source maps
+>    Relative time ellapsed 5.5 ms
+
+*** Writing source catalogs
+ 0-th population (FITS)
+>    Relative time ellapsed 123.3 ms
+
+
+|-------------------------------------------------|
+
+>    Total time ellapsed 3446.7 ms

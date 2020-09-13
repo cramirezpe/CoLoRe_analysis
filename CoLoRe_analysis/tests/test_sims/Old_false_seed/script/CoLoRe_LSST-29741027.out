@@ -1,0 +1,1 @@
+srun -N 10 -C haswell -c 64 -A desi /global/homes/c/cramirez/Codes/faster_shear_0404/CoLoRe_Old/CoLoRe param.cfg
