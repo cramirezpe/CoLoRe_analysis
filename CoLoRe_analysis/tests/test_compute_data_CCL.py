@@ -10,12 +10,13 @@ import sys
 from mock import patch, call
 from datetime import date
 import json
-from unittest import skip
+from unittest import skipUnless
 
 import logging
 log = logging.getLogger(__name__)
 
-@skip('Skipping CCL tests')
+
+@skipUnless('RUN_CCL_TESTS' in os.environ, 'Only run when activated in environment')
 class TestComputeDataCCL(unittest.TestCase):
     sim_path    = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/New_CCL'
     output_path = sim_path + '/ccl_data/20200101_000000'
