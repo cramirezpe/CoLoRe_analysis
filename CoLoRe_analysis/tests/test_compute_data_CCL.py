@@ -10,10 +10,12 @@ import sys
 from mock import patch, call
 from datetime import date
 import json
+from unittest import skip
 
 import logging
 log = logging.getLogger(__name__)
 
+@skip('Skipping CCL tests')
 class TestComputeDataCCL(unittest.TestCase):
     sim_path    = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/New_CCL'
     output_path = sim_path + '/ccl_data/20200101_000000'
@@ -28,14 +30,14 @@ class TestComputeDataCCL(unittest.TestCase):
 
     @patch('CoLoRe_analysis.compute_data_CCL.datetime')
     @patch('builtins.print')
-    def test_normal_output_data(self, mocked_print, mocked_time):
-        with open(self.sim_path+ '/all_data.pkl','rb') as input:
+    def test_normal_output_data_anafast(self, mocked_print, mocked_time):
+        with open(self.sim_path+ '/all_data_anafast.pkl','rb') as input:
             target_values = pickle.load(input) 
             
         np.random.seed(1)
         mocked_time.today.return_value = date(2020,1,1)
         mocked_time.side_effect = lambda *args, **kw: date(*args, **kw)
-        compute_data(self.sim_path, zbins=[0,0.15,1])
+        compute_data(self.sim_path, zbins=[0,0.15,1],code='anafast')
 
         # values = ['pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_md_d', 'cl_md_t', 'cl_mm_d', 'cl_mm_t']
         values = ['pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t']
@@ -48,5 +50,27 @@ class TestComputeDataCCL(unittest.TestCase):
             data = json.load(json_file)
             self.assertEqual( data['zbins'], [0,0.15,1])
             self.assertEqual( data['id'], '20200101_000000')
-
+            self.assertEqual( data['code'], 'anafast')
     
+    @patch('CoLoRe_analysis.compute_data_CCL.datetime')
+    @patch('builtins.print')
+    def test_normal_output_data_namaster(self, mocked_print, mocked_time):
+        with open(self.sim_path+ '/all_data_namaster.pkl','rb') as input:
+            target_values = pickle.load(input) 
+
+        np.random.seed(1)
+        mocked_time.today.return_value = date(2020,1,1)
+        mocked_time.side_effect = lambda *args, **kw: date(*args, **kw)
+        compute_data(self.sim_path, zbins=[0, 0.15, 1], code='namaster')
+
+        names = ['pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t']
+
+        for i, value in enumerate(names):
+            np.testing.assert_almost_equal(target_values[i], np.loadtxt(self.output_path + f'/{value}.dat'),err_msg=f'Mismatching value: { value }')
+
+        with open(self.output_path + '/INFO.json') as json_file:
+            data = json.load(json_file)
+            self.assertEqual( data['zbins'], [0, 0.15, 1] )
+            self.assertEqual( data['id'], '20200101_000000')
+            self.assertEqual( data['code'], 'namaster')
+

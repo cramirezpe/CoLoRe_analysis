@@ -6,7 +6,9 @@ import CoLoRe_analysis.compute_data_shear
 from CoLoRe_analysis.compute_data_shear import data_treatment
 import numpy as np
 import glob
+from unittest import skip
 
+@skip("Skipping shear tests")
 class TestDataTreatment(unittest.TestCase):
     def setUp(self):
         self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/0404'
