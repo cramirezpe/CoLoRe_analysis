@@ -18,27 +18,28 @@ log = logging.getLogger(__name__)
 
 @skipUnless('RUN_CCL_TESTS' in os.environ, 'Only run when activated in environment')
 class TestComputeDataCCL(unittest.TestCase):
-    sim_path    = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/New_CCL'
-    output_path = sim_path + '/ccl_data/20200101_000000'
+    sim_path    = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/sims/New_CCL'
+    analysis_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/New_CCL'
+    output_path = analysis_path + '/ccl_data/20200101_000000'
 
     def setUp(self):
         warnings.simplefilter('ignore', category=RuntimeWarning)
         warnings.simplefilter('ignore', category=ResourceWarning)
         
     def tearDown(self):
-        if os.path.isdir(self.output_path):
-            rmtree(self.output_path)
+        if os.path.isdir(self.analysis_path + '/ccl_data'):
+            rmtree(self.analysis_path + '/ccl_data')
 
     @patch('CoLoRe_analysis.compute_data_CCL.datetime')
     @patch('builtins.print')
     def test_normal_output_data_anafast(self, mocked_print, mocked_time):
-        with open(self.sim_path+ '/all_data_anafast.pkl','rb') as input:
+        with open(self.analysis_path+ '/all_data_anafast.pkl','rb') as input:
             target_values = pickle.load(input) 
             
         np.random.seed(1)
         mocked_time.today.return_value = date(2020,1,1)
         mocked_time.side_effect = lambda *args, **kw: date(*args, **kw)
-        compute_data(self.sim_path, zbins=[0,0.15,1],code='anafast')
+        compute_data(self.sim_path, self.analysis_path, zbins=[0,0.15,1],code='anafast')
 
         # values = ['pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_md_d', 'cl_md_t', 'cl_mm_d', 'cl_mm_t']
         values = ['pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t']
@@ -56,13 +57,13 @@ class TestComputeDataCCL(unittest.TestCase):
     @patch('CoLoRe_analysis.compute_data_CCL.datetime')
     @patch('builtins.print')
     def test_normal_output_data_namaster(self, mocked_print, mocked_time):
-        with open(self.sim_path+ '/all_data_namaster.pkl','rb') as input:
+        with open(self.analysis_path+ '/all_data_namaster.pkl','rb') as input:
             target_values = pickle.load(input) 
 
         np.random.seed(1)
         mocked_time.today.return_value = date(2020,1,1)
         mocked_time.side_effect = lambda *args, **kw: date(*args, **kw)
-        compute_data(self.sim_path, zbins=[0, 0.15, 1], code='namaster')
+        compute_data(self.sim_path, self.analysis_path, zbins=[0, 0.15, 1], code='namaster')
 
         names = ['pairs', 'shotnoise', 'nz_tot', 'z_nz', 'cl_dd_d', 'cl_dd_t', 'cl_dm_d', 'cl_dm_t', 'cl_mm_d', 'cl_mm_t']
 

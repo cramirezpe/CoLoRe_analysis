@@ -9,7 +9,7 @@ import sys
 from CoLoRe_analysis.compute_data_shear import savetofile
 from CoLoRe_analysis.compute_data_shear import data_treatment
 
-def mock_data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=None, output_path=None):
+def mock_data_treatment(path, source=1, do_cls=False, do_kappa=False, minz=None, maxz=None, output_path=None):
     if not output_path:
         output_path = path + f'/data_treated/source_{ source }'
     os.makedirs(output_path, exist_ok=True)
@@ -33,8 +33,9 @@ def mock_data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,m
 
 class TestShearReader(unittest.TestCase):
     def setUp(self):
-        self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/0404'
-        self.sr = ShearReader( self.sim_path )
+        self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/sims/0404'
+        self.analysis_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis'
+        self.sr = ShearReader( self.sim_path , self.analysis_path)
 
     def tearDown(self):
         data_treated_path = self.sim_path + '/data_treated'
@@ -44,24 +45,24 @@ class TestShearReader(unittest.TestCase):
     @patch('CoLoRe_analysis.shear_reader.data_treatment',side_effect=mock_data_treatment)
     def test_creation_when_does_not_exist(self, mock_func):
         a = self.sr.get_values('mp_E', source=1, compute=True)
-        self.assertTrue( os.path.isfile(self.sim_path + '/data_treated/source_1/mp_E.dat') )
+        self.assertTrue( os.path.isfile(self.analysis_path + '/data_treated/source_1/mp_E.dat') )
         self.assertEqual(a[0], 21)
 
     @patch('CoLoRe_analysis.shear_reader.data_treatment',side_effect=mock_data_treatment)
     def test_get_cls_and_kappa(self, mock_func):
         a = self.sr.get_values('mp_k', source=1, minz=1, maxz=2.10, compute=True)
-        expected_file = self.sim_path + '/data_treated/binned/100_210/source_1/mp_k.dat'
+        expected_file = self.analysis_path + '/data_treated/binned/100_210/source_1/mp_k.dat'
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)
         self.assertEqual(a[0],7)
     
         a = self.sr.get_values('cld_dd', source=1, minz=1, maxz=2.10, compute=True, do_kappa=True)
-        expected_file = self.sim_path + '/data_treated/binned/100_210/source_1/cld_dd.dat'
+        expected_file = self.analysis_path + '/data_treated/binned/100_210/source_1/cld_dd.dat'
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)
         self.assertEqual(a[0],4)
   
-        expected_file = self.sim_path + '/data_treated/binned/100_210/source_1/cld_kk.dat'
+        expected_file = self.analysis_path + '/data_treated/binned/100_210/source_1/cld_kk.dat'
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)
         self.assertEqual(a[0],10)
@@ -69,7 +70,7 @@ class TestShearReader(unittest.TestCase):
 
     @patch.object(ShearReader, "do_data_treatment")
     def test_not_created_when_exists(self, mock_func):
-        path = self.sim_path + '/data_treated/source_2'
+        path = self.analysis_path + '/data_treated/source_2'
         os.makedirs( path )
         with open( path + '/mp_e1.dat', 'a') as the_file:
             the_file.write('3141592653\n')
@@ -80,7 +81,7 @@ class TestShearReader(unittest.TestCase):
     @patch('CoLoRe_analysis.shear_reader.data_treatment',side_effect=mock_data_treatment)
     def test_creation_when_does_not_exist_binned(self, mock_func):
         a = self.sr.get_values('mp_E', source=1, minz=1, maxz=2.10, compute=True)
-        expected_file = self.sim_path + '/data_treated/binned/100_210/source_1/mp_E.dat'
+        expected_file = self.analysis_path + '/data_treated/binned/100_210/source_1/mp_E.dat'
         
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)
@@ -97,7 +98,7 @@ class TestShearReader(unittest.TestCase):
 
     @patch.object(ShearReader, "do_data_treatment")
     def test_not_created_when_exists_binned(self, mock_func):
-        path = self.sim_path + '/data_treated/binned/300_301/source_3'
+        path = self.analysis_path + '/data_treated/binned/300_301/source_3'
         os.makedirs(path)
         with open( path + '/mp_e1.dat', 'a') as the_file:
             the_file.write('3141592653\n')
@@ -109,7 +110,7 @@ class TestShearReader(unittest.TestCase):
     def test_binned_statistics(self, mock_func):
         self.sr.compute_binned_statistics(1,1.1,2)
 
-        path_head   = self.sim_path + f'/data_treated/binned/'
+        path_head   = self.analysis_path + f'/data_treated/binned/'
         path_tail    = '/source_1/mp_E.dat'
 
         vals = self.sr.get_values('mp_e1',source=1,minz=1,maxz=1.05)
@@ -120,7 +121,7 @@ class TestShearReader(unittest.TestCase):
     @patch('builtins.input', return_value='y')
     @patch('builtins.print')
     def test_removed_data_treated(self, mocked_print, mocked_input):
-        path = self.sim_path + '/data_treated/zz/zz'
+        path = self.analysis_path + '/data_treated/zz/zz'
         os.makedirs(path)
         self.sr.remove_data_treated()
         self.assertFalse( os.path.isdir(path) )

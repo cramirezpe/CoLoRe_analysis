@@ -11,21 +11,22 @@ def redshift_to_str_for_path(redshift):
 
 # The class shear reader is used to get data from data_treatment, it will always be shear information but it can also treat with cl information.
 class ShearReader:
-    def __init__(self,location):
-        self.location = location
+    def __init__(self, sim_location, analysis_location):
+        self.sim_location = sim_location
+        self.analysis_location = analysis_location
     
-    def do_data_treatment(self,source=1, do_cls=False, do_kappa=False, minz=None, maxz=None, output_path=None):
+    def do_data_treatment(self, source=1, do_cls=False, do_kappa=False, minz=None, maxz=None, output_path=None):
         log.info(f'Doing data treatment for source: { source }. cls: { do_cls }, kappa: { do_kappa }, minz: { minz }, maxz: { maxz }')
-        data_treatment(self.location,source, do_cls, do_kappa, minz, maxz, output_path)
+        data_treatment(self.sim_location, source, do_cls, do_kappa, minz, maxz, output_path)
 
     def get_values(self, parameter, source=1, minz=None, maxz=None, do_cls=False, do_kappa=False, compute=False):
-        log.info(f'Getting values for sim: { self.location }. Parameter: { parameter }')
+        log.info(f'Getting values for sim: { self.sim_location }. Parameter: { parameter }')
         if minz != None and maxz != None:
             minz_str    = redshift_to_str_for_path(minz)
             maxz_str    = redshift_to_str_for_path(maxz)
-            path    = self.location + f'/data_treated/binned/{ str(minz_str) }_{ str(maxz_str) }/source_{ source }'
+            path    = self.analysis_location + f'/data_treated/binned/{ str(minz_str) }_{ str(maxz_str) }/source_{ source }'
         else:
-            path    = self.location + f'/data_treated/source_{ source }'
+            path    = self.analysis_location + f'/data_treated/source_{ source }'
 
         try:
             return np.loadtxt( path + '/'+parameter+'.dat')
@@ -43,7 +44,7 @@ class ShearReader:
 
     
     def compute_binned_statistics(self, minz, maxz, bins, source=1, do_cls=False, do_kappa=False):
-        log.info(f'Computing binned statistics for sim: { self.location }')
+        log.info(f'Computing binned statistics for sim: { self.sim_location }')
         # I use mp_e1 to not compute if values already exist
         step = (maxz-minz)/bins
         for b in range(bins):
@@ -51,11 +52,11 @@ class ShearReader:
     
     def remove_data_treated(self):
         while True:
-            confirmation = input(f'Remove all shear data from sim {self.location}? (y/n)')
+            confirmation = input(f'Remove all shear data from sim {self.sim_location}? (y/n)')
             if confirmation == 'y':
-                log.info(f'Removing treated data for sim: { self.location }')
-                if os.path.isdir(self.location + '/data_treated'):
-                    rmtree(self.location + '/data_treated')
+                log.info(f'Removing treated data for sim: { self.sim_location }')
+                if os.path.isdir(self.analysis_location + '/data_treated'):
+                    rmtree(self.analysis_location + '/data_treated')
                 break
             elif confirmation == 'n':
                 print('Cancelling')

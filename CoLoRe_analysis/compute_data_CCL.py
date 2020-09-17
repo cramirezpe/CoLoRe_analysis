@@ -38,7 +38,7 @@ def suppress_stdout():
 def fxn():
     warnings.warn("deprecrated", DeprecationWarning)
 
-def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, code=None):
+def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, code=None):
     ''' Method to compute the values needed for CCL test plots.
     
     Args:
@@ -47,10 +47,9 @@ def compute_data(sim_path,source=1, output_path=None, nside=128, max_files=None,
         output_path (str, optional): Output where to save the data (default: { sim_path }/ccl_data/{ datetime.now() }/)
     '''
     id_ = datetime.today().strftime('%Y%m%d_%H%M%S')
-    if not output_path:
-        output_path = sim_path + f"/ccl_data/{ id_ }"
-    
+    output_path = analysis_path + f"/ccl_data/{ id_ }"
     os.makedirs(output_path, exist_ok = True)
+    
     log.debug(f'Computing data for:\nsim_path: { sim_path }\nsource: { source }\noutput_path: { output_path }')
 
     if code == 'anafast':

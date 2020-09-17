@@ -53,7 +53,7 @@ class CorrelateTwoShears:
                         break
             self.sims[seed] = matched_sims
     
-    def correlation_in_bin(self,parameter='mp_e1',source=1, minz=None, maxz=None):
+    def correlation_in_bin(self, parameter='mp_e1', source=1, minz=None, maxz=None):
         correlations = []
         for seed in self.sims.keys():
             Avals = self.sims[seed][0].shear_reader.get_values(parameter=parameter, source=source, minz=minz, maxz=maxz)
@@ -83,7 +83,7 @@ class CorrelateTwoShears:
             if not os.path.exists(out):
                 os.makedirs(out)
             seed = list(self.seeds)[0]
-            copy2(self.sims[seed][1].location+'/sim_info.dat',out+'/compared_to_info.dat')         
+            copy2(self.sims[seed][1].analysis_location+'/sim_info.json',out+'/compared_to_info.json')         
 
         correlation = self.correlation_in_bin(parameter=parameter, source=source, minz=minz, maxz=maxz)
 
@@ -99,7 +99,7 @@ class CorrelateTwoShears:
             if not os.path.exists(out):
                 os.makedirs(out)
             seed = list(self.seeds)[0]
-            copy2(self.sims[seed][1].location+'/sim_info.dat',out+'/compared_to_info.dat')         
+            copy2(self.sims[seed][1].analysis_location+'/sim_info.json',out+'/compared_to_info.json')         
 
         coef, intercept = self.regression_in_bin(parameter=parameter, source=source, minz=minz, maxz=maxz)
 
@@ -132,9 +132,9 @@ class CorrelateTwoShears:
         if minz != None and maxz != None:
             minz_str = redshift_to_str_for_path(minz)
             maxz_str = redshift_to_str_for_path(maxz)
-            out = self.sims[seed][0].location + f'/data_treated/correlations/' + self.sims[seed][1].preparation_time +f'/binned/{ minz_str }_{ maxz_str }/source_{ source }/'
+            out = self.sims[seed][0].analysis_location + f'/data_treated/correlations/' + self.sims[seed][1].preparation_time +f'/binned/{ minz_str }_{ maxz_str }/source_{ source }/'
         else:
-            out = self.sims[seed][0].location + f'/data_treated/correlations/source_{ source }/' + self.sims[seed][1].preparation_time +'/'
+            out = self.sims[seed][0].analysis_location + f'/data_treated/correlations/source_{ source }/' + self.sims[seed][1].preparation_time +'/'
         return out
 
     def path_to_regression(self, parameter='mp_e1', source=1, minz=None, maxz=None):

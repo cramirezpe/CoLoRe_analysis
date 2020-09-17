@@ -9,13 +9,14 @@ from mock import patch, call
 
 class TestSimulationMaster(unittest.TestCase):
     def setUp(self):
-        self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/0404'
-        self.Sim      = Sim0404( self.sim_path, 'testname')
+        self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/sims/0404'
+        self.sim_analysis_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/0404'
+        self.Sim      = Sim0404( self.sim_analysis_path, 'testname')
     
     def tearDown(self):
-        self.data_treated_path = self.sim_path + '/data_treated'
+        self.data_treated_path = self.sim_analysis_path + '/data_treated'
         if os.path.isdir(self.data_treated_path):
-            rmtree(self.sim_path + '/data_treated')
+            rmtree(self.data_treated_path)
 
         if os.path.isfile('out_temp.txt'):
             os.remove('out_temp.txt')

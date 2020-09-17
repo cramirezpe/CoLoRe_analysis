@@ -10,23 +10,26 @@ log = logging.getLogger(__name__)
 class CCLReader:
     '''Class made to handle QA tests using CCL theoretical values'''
 
-    def __init__(self, location):
+    def __init__(self, sim_location, analysis_location):
         '''Inits the class with a sim path
 
         Args: 
-            location (str): Path to the simulation
+            sim_location (str): Path to the simulation
+            analysis_location (str): Path to the analysis of the simulation
         '''
-        self.location = location
+        self.sim_location = sim_location
+        self.analysis_location = analysis_location
 
-    def do_data_computations(self, source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, **kwargs):
+    def do_data_computations(self, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, **kwargs):
         '''Computes the Cls from CCL and for the sim.
 
         Args:
             source (int, optional): CoLoRe output source to use as input (default: 1)
-            output_path (str, optional): Set the output path (default: { sim_path }/ccl_data/source_{ source }/)
+            output_path (str, optional): Set the output path (default: { analysis_path }/ccl_data/{datetime}/
         '''
         log.info(f'Computing data for source: { source }')
-        compute_data(self.location, source, output_path, nside, None, downsampling, zbins, nz_h, nz_min, nz_max, **kwargs)
+
+        compute_data(self.sim_location, self.analysis_location, source, nside, None, downsampling, zbins, nz_h, nz_min, nz_max, **kwargs)
 
     def get_values(self, value, **kwargs):
         '''Obtain values for Cls (CCL or sim)
@@ -60,7 +63,7 @@ class CCLReader:
 
         elif len(matched_sims) == 1: 
             id_ = matched_sims[0]['id']
-            return np.loadtxt(self.location + f'/ccl_data/{id_}/{ value }.dat')
+            return np.loadtxt(self.analysis_location + f'/ccl_data/{id_}/{ value }.dat')
 
         elif len(matched_sims) > 1:
             print('Multiple simulations does exist with the given parameters:')
@@ -78,10 +81,10 @@ class CCLReader:
             List of dicts with the info of each run.
         '''
 
-        if not os.path.isdir(self.location + f'/ccl_data'): 
+        if not os.path.isdir(self.analysis_location + f'/ccl_data'): 
             return []
 
-        ids = [f.name for f in os.scandir(self.location + f'/ccl_data') if f.is_dir()]
+        ids = [f.name for f in os.scandir(self.analysis_location + f'/ccl_data') if f.is_dir()]
 
         if len(ids) == 0: 
             return []
@@ -89,7 +92,7 @@ class CCLReader:
         compatible = []
         for id_ in sorted(ids):
             try:
-                with open(f'{self.location}/ccl_data/{id_}/INFO.json') as json_file:
+                with open(f'{self.analysis_location}/ccl_data/{id_}/INFO.json') as json_file:
                     data = json.load(json_file)
                     for key in kwargs.keys():
                         if kwargs[key] != data[key]:
@@ -104,11 +107,11 @@ class CCLReader:
 
     def remove_computed_data(self):
         while True:
-            confirmation = input(f'Remove all computed ccl data from sim {self.location}? (y/n)')
+            confirmation = input(f'Remove all computed ccl data from sim {self.sim_location}? (y/n)')
             if confirmation == 'y':
                 print('Removing all computed data')
-                if os.path.isdir(self.location + '/ccl_data'):
-                    rmtree(self.location + '/ccl_data')
+                if os.path.isdir(self.analysis_location + '/ccl_data'):
+                    rmtree(self.analysis_location + '/ccl_data')
                 break
             
             elif confirmation == 'n': # pragma: no cover

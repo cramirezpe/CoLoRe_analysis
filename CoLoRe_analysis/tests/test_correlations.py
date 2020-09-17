@@ -11,12 +11,12 @@ class TestCorrelations(unittest.TestCase):
     def setUp(self):
         # Prepare the sim objects
         self.location    = os.path.dirname(os.path.realpath(__file__))
-        self.simNew      = Sim0404(self.location + '/test_sims/New', "New")
-        self.simNew_rep  = Sim0404(self.location + '/test_sims/New', "Newrep")
-        self.simNew_s2   = Sim0404(self.location + '/test_sims/New_s2', "New_s2")
-        self.simOld      = Sim0404(self.location + '/test_sims/Old', "Old")
-        self.simOld_wrong= Sim0404(self.location + '/test_sims/Old_false_seed',    "Old_wrong")  
-        self.simOld_s2   = Sim0404(self.location + '/test_sims/Old_s2', 'Old_s2')
+        self.simNew      = Sim0404(self.location + '/test_sims/analysis/New', "New")
+        self.simNew_rep  = Sim0404(self.location + '/test_sims/analysis/New', "Newrep")
+        self.simNew_s2   = Sim0404(self.location + '/test_sims/analysis/New_s2', "New_s2")
+        self.simOld      = Sim0404(self.location + '/test_sims/analysis/Old', "Old")
+        self.simOld_wrong= Sim0404(self.location + '/test_sims/analysis/Old_false_seed',    "Old_wrong")  
+        self.simOld_s2   = Sim0404(self.location + '/test_sims/analysis/Old_s2', 'Old_s2')
 
         # Prepare corrleations object
         self.corr_sims   = corrlib.CorrelateTwoShears([self.simNew, self.simNew_rep, self.simNew_s2],[self.simOld,self.simOld_wrong, self.simOld_s2])
@@ -25,14 +25,14 @@ class TestCorrelations(unittest.TestCase):
     def tearDown(self):
         sims = (self.simNew, self.simNew_rep, self.simNew_s2, self.simOld, self.simOld_wrong, self.simOld_s2)
         for sim in sims:
-            if os.path.isdir(sim.location + '/data_treated'):
-                rmtree(sim.location + '/data_treated')
+            if os.path.isdir(sim.analysis_location + '/data_treated'):
+                rmtree(sim.analysis_location + '/data_treated')
 
     def prepare_mock_data(self):
-        path_a = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/Old/data_treated/binned/100_105/source_1'
-        path_b = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/Old_s2/data_treated/binned/100_105/source_1'
-        path_c = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/New/data_treated/binned/100_105/source_1'
-        path_d = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/New_s2/data_treated/binned/100_105/source_1'
+        path_a = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/Old/data_treated/binned/100_105/source_1'
+        path_b = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/Old_s2/data_treated/binned/100_105/source_1'
+        path_c = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/New/data_treated/binned/100_105/source_1'
+        path_d = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/New_s2/data_treated/binned/100_105/source_1'
         
         for path in path_a,path_b,path_c,path_d:
             os.makedirs(path)
@@ -66,9 +66,9 @@ class TestCorrelations(unittest.TestCase):
     def test_correlation_regression_tiny_bin(self, mock_func):
         self.prepare_mock_data()
         cs = self.corr_sims
-        corr = cs.correlation_in_bin(parameter='mp_e2',minz=1,maxz=1.05)
+        corr = cs.correlation_in_bin(parameter='mp_e2', minz=1, maxz=1.05)
 
-        first_sim_path = cs.sims[300][0].location
+        first_sim_path = cs.sims[300][0].analysis_location
 
         # Check data was computed
         self.assertTrue( os.path.isdir(first_sim_path + '/data_treated/binned/100_105/source_1'))
@@ -93,8 +93,8 @@ class TestCorrelations(unittest.TestCase):
         with self.assertRaises(ValueError):
             mult_cs.store_correlation(parameter='mp_e2',minz=1,maxz=1.05)
         
-        mult_cs.store_correlation(parameter='mp_e2',minz=1,maxz=1.05, out= mult_cs.sims[300][0].location + '/data_treated')
-        x = np.loadtxt(mult_cs.sims[300][0].location + '/data_treated/mp_e2.dat')
+        mult_cs.store_correlation(parameter='mp_e2', minz=1, maxz=1.05, out=mult_cs.sims[300][0].analysis_location + '/data_treated')
+        x = np.loadtxt(mult_cs.sims[300][0].analysis_location + '/data_treated/mp_e2.dat')
 
         self.assertEqual(x, 0.6855447840406176)
 
@@ -112,9 +112,9 @@ class TestCorrelations(unittest.TestCase):
         with self.assertRaises(ValueError):
             mult_cs.store_regression(parameter='mp_e2',minz=1,maxz=1.05)
         
-        mult_cs.store_regression(parameter='mp_e2',minz=1,maxz=1.05, out= mult_cs.sims[300][0].location + '/data_treated')
-        x = np.loadtxt(mult_cs.sims[300][0].location + '/data_treated/coef_mp_e2.dat')
-        y = np.loadtxt(mult_cs.sims[300][0].location + '/data_treated/intercept_mp_e2.dat')
+        mult_cs.store_regression(parameter='mp_e2',minz=1,maxz=1.05, out= mult_cs.sims[300][0].analysis_location + '/data_treated')
+        x = np.loadtxt(mult_cs.sims[300][0].analysis_location + '/data_treated/coef_mp_e2.dat')
+        y = np.loadtxt(mult_cs.sims[300][0].analysis_location + '/data_treated/intercept_mp_e2.dat')
         self.assertEqual(x, 1.4440203562340965)
         self.assertEqual(y, 0.2659033078880413)
 
@@ -129,7 +129,7 @@ class TestCorrelations(unittest.TestCase):
         self.prepare_mock_data()
 
         cs = corrlib.CorrelateTwoShears([self.simNew],[self.simOld])
-        self.assertEqual(cs.path_to_regression(parameter=param, source=source), self.simNew.location + f'/data_treated/regressions/source_2/{ self.simNew.preparation_time }/')
+        self.assertEqual(cs.path_to_regression(parameter=param, source=source), self.simNew.analysis_location + f'/data_treated/regressions/source_2/{ self.simNew.preparation_time }/')
 
     def test_get_regression(self):
         with self.assertRaises(ValueError):
@@ -142,7 +142,7 @@ class TestCorrelations(unittest.TestCase):
         self.prepare_mock_data()
         
         cs = corrlib.CorrelateTwoShears([self.simNew],[self.simOld])
-        self.assertEqual(cs.path_to_correlation(parameter=param, source=source), self.simNew.location + f'/data_treated/correlations/source_2/{ self.simNew.preparation_time }/')
+        self.assertEqual(cs.path_to_correlation(parameter=param, source=source), self.simNew.analysis_location + f'/data_treated/correlations/source_2/{ self.simNew.preparation_time }/')
 
 if __name__ == '__main__':
     unittest.main()

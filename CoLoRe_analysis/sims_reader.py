@@ -81,7 +81,7 @@ class Simulation:
         self.used_nodes = len(self.memory_reader.tasks) - 1
 
     def set_shear_reader(self):
-        self.shear_reader = shear_reader.ShearReader(self.location)
+        self.shear_reader = shear_reader.ShearReader(self.location, self.analysis_location)
         
     def set_size(self):
         # in Mb

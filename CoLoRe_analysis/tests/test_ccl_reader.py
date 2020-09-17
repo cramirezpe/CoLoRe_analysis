@@ -12,9 +12,9 @@ import CoLoRe_analysis.compute_data_CCL
 
 from CoLoRe_analysis.debug_tools import debug_on
 
-def mock_compute_data(path,source=1, output_path=None, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None):
-    if not output_path:
-        output_path = path + f'/ccl_data/20200101_000000/'
+def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None):
+    
+    output_path = analysis_path + f'/ccl_data/20200101_000000/'
         
     os.makedirs(output_path, exist_ok=True)
 
@@ -43,9 +43,10 @@ def mock_compute_data(path,source=1, output_path=None, nside=128, max_files=None
 
 class TestCCLReader(unittest.TestCase):
     def setUp(self):
-        self.sim_path    = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/New_CCL'
-        self.cr     =  CCLReader( self.sim_path )
-        self.computed_data_path = self.sim_path + '/ccl_data'
+        self.sim_path    = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/sims/New_CCL'
+        self.analysis_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/New_CCL'
+        self.cr     =  CCLReader( self.sim_path, self.analysis_path)
+        self.computed_data_path = self.analysis_path + '/ccl_data'
 
         os.makedirs(self.computed_data_path + '/1')
         os.makedirs(self.computed_data_path + '/4')
