@@ -110,9 +110,25 @@ class TestSimulationMaster(unittest.TestCase):
         self.assertEqual( self.Sim.size, '13M')
 
 
+class TestConfig(unittest.TestCase):
+    def setUp(self):
+        self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/sims/New'
+        self.sim_analysis_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/New'
+        self.Sim      = Sim0404( self.sim_analysis_path, 'testname')
+    
+    def tearDown(self):
+        self.shear_data_path = self.sim_analysis_path + '/shear_data'
+        if os.path.isdir(self.shear_data_path):
+            rmtree(self.shear_data_path)
 
+        if os.path.isfile('out_temp.txt'):
+            os.remove('out_temp.txt')
 
+    def test_read_config_file(self):
+        config = self.Sim.get_config_file('param.cfg')
 
+        self.assertEqual(config['srcs2']['store_skewers'], False)
+        self.assertEqual(config['shear']['nside'], 512)
 
 if __name__ == '__main__':
     unittest.main()
