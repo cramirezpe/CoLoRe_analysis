@@ -4,6 +4,7 @@ from CoLoRe_analysis.sims_reader import Sim0404
 import json
 from pathlib import Path
 import shutil
+from tabulate import tabulate
 
 # The class FileManager should be understood as a group of functions (a FileManager object would be totally unuseful). 
 # All the file handling system relies in the existence of a info_file in each Simulation. This info_file will contain the basic information of the Simulation and it is included by default in the scripts located in Shs/CoLoRe_LSST/. 
@@ -159,10 +160,20 @@ class FileManager:
 
 
     @classmethod
-    def print_sims_table(cls,path,param_filter):
+    def print_sims_table(cls,path,param_filter=dict()):
+        '''
+        Get sims and a printable table with the information of all sims:
+
+        Args:
+            path (str): Path where to search for sims.
+            param_filter (dict): Filter simulations to search
+        
+        Returns:
+            Tuple (sims, table)
+        '''
         sims = {}
-        print('| id | commit | Status | Nodes | Seed | Version | Template | Factor | Shear | Nside | Memory (GB) | Disk  | Time (s)| Preparation Date')
-        print(' |:---:|:----:|:----:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:----:|:----:|')
+        t_header = ['id','commit','status','nodes','seed','version','template','factor','shear','nside', 'memory (GB)','Disk',' Time(s)','Date', 'Made by']
+        t_rows = []
 
         # Delete empty directories
         FileManager.remove_empty_dirs(path)
@@ -174,18 +185,22 @@ class FileManager:
         
         # Getting informations    
         for x in sims.keys():
-            if sims[x].status == 'done': 
-                sims[x].set_time_reader()
-                
-            sims[x].set_memory_reader()
+            if sims[x].terminal_file is not None:
+                if sims[x].status == 'done': 
+                    sims[x].set_time_reader()
+                    sims[x].set_memory_reader()
+                    sims[x].set_shear_reader()
             sims[x].set_size()
-            sims[x].set_shear_reader()
             
-        for sim in sims.items():
-            x = sim[1]
-            total_time = round(x.time_reader.times["Total"]/1000 if x.status == 'done' else 0,4)
-            print('| {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} | {} |'.format(x.__name__,x.commit,x.status,x.nodes,x.seed,x.version,x.template,x.factor,x.shear,x.nside,x.memory_reader.tasks['Total']['Memory']/1000, x.size,total_time, x.preparation_time))
-        return sims
+        for name, x in sims.items():
+            madeby = x.info['made_by']
+            if x.terminal_file is None or x.status != 'done':
+                t_rows.append((x.__name__,x.commit,x.status,x.nodes,x.seed,x.version,x.template,x.factor,x.shear,x.nside,None, x.size,None,x.preparation_time, madeby))
+            else:
+                total_time = round(x.time_reader.times["Total"]/1000 if x.status == 'done' else 0,4)
+                t_rows.append((x.__name__,x.commit,x.status,x.nodes,x.seed,x.version,x.template,x.factor,x.shear,x.nside,x.memory_reader.tasks['Total']['Memory']/1000, x.size,total_time,x.preparation_time, madeby))
+
+        return sims, tabulate(t_rows, t_header, tablefmt='pretty')
 
 class FilterList:
     @classmethod
