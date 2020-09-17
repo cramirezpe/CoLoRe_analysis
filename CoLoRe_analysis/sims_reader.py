@@ -13,13 +13,14 @@ log = logging.getLogger(__name__)
 # Simulation class is the responsible of handling Simulations within the LSST framework. 
 # Each Simulation object will contain information of an individual Simulation and the methods to obtain it.
 class Simulation:
-    def __init__(self, location, name=None):
-        self.location = location
+    def __init__(self, analysis_location, name=None):
+        self.analysis_location = analysis_location
         self.__name__ = name
         
-        with open(f'{self.location}/sim_info.json') as json_file:
+        with open(f'{self.analysis_location}/sim_info.json') as json_file:
             info = json.load(json_file)
         
+        self.location= info['path']
         self.version = info['version']
         self.seed    = info['seed']
         self.factor  = info['factor']
@@ -33,15 +34,15 @@ class Simulation:
 
         if self.status != 'prepared': 
             try:
-                self.terminal_file =glob.glob(location + '/script/terminal*')[-1]
+                self.terminal_file =glob.glob(self.location + '/script/terminal*')[-1]
             except: #pragma: no cover
                 self.terminal_file =None
             try:
-                self.error_file =   glob.glob(location + '/script/*.error')[-1]
+                self.error_file =   glob.glob(self.location + '/script/*.error')[-1]
             except: #pragma: no cover
                 self.error_file =   None
             try:
-                self.output_file =  glob.glob(location + '/script/*.out')[-1]
+                self.output_file =  glob.glob(self.location + '/script/*.out')[-1]
             except: #pragma: no cover
                 self.output_file =  None
 
