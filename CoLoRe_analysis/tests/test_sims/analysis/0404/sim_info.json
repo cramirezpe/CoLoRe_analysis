@@ -1,1 +1,57 @@
-{"version": "master", "seed": 1003, "factor": 0.01, "template": "master_with_shear", "status": "done", "nodes": 10, "preparation_time": "20200416090110", "shear": null, "nside": null, "commit": null, "path": "/global/u2/c/cramirez/Codes/CoLoRe_analysis/CoLoRe_analysis/tests/test_sims/sims/0404"}
+{
+    "_param_cfg": {
+        "cosmo_par": {
+            "h": 0.7,
+            "ns": 0.96,
+            "omega_B": 0.05,
+            "omega_L": 0.7,
+            "omega_M": 0.3,
+            "sigma_8": 0.803869,
+            "w": -1.0
+        },
+        "field_par": {
+            "dens_type": 0,
+            "lpt_buffer_fraction": 0.6,
+            "lpt_interp_type": 1,
+            "n_grid": 4096,
+            "output_lpt": 0,
+            "r_smooth": 2.0,
+            "smooth_potential": true
+        },
+        "global": {
+            "just_write_pred": false,
+            "output_density": false,
+            "output_format": "FITS",
+            "pk_filename": "Pk_CAMB_test.dat",
+            "pred_dz": 0.1,
+            "prefix_out": "out",
+            "seed": 1003,
+            "write_pred": false,
+            "z_max": 2.5,
+            "z_min": 0.001
+        },
+        "srcs1": {
+            "bias_filename": "BzRed.txt",
+            "include_shear": true,
+            "nz_filename": "new_NzRed.txt",
+            "store_skewers": false
+        },
+        "srcs2": {
+            "bias_filename": "BzBlue.txt",
+            "include_shear": true,
+            "nz_filename": "new_NzBlue.txt",
+            "store_skewers": false
+        }
+    },
+    "commit": null,
+    "factor": 0.01,
+    "nodes": 10,
+    "nside": null,
+    "path": "/global/u2/c/cramirez/Codes/CoLoRe_analysis/CoLoRe_analysis/tests/test_sims/sims/0404",
+    "preparation_time": "20200416090110",
+    "seed": 1003,
+    "shear": null,
+    "status": "done",
+    "template": "master_with_shear",
+    "version": "master"
+}
