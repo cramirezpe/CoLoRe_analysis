@@ -2,6 +2,8 @@ import os
 import shutil 
 from CoLoRe_analysis.sims_reader import Sim0404
 import json
+from pathlib import Path
+import shutil
 
 # The class FileManager should be understood as a group of functions (a FileManager object would be totally unuseful). 
 # All the file handling system relies in the existence of a info_file in each Simulation. This info_file will contain the basic information of the Simulation and it is included by default in the scripts located in Shs/CoLoRe_LSST/. 
@@ -25,7 +27,42 @@ class FileManager:
                             pass
                 except:
                     pass
-    
+
+    @classmethod
+    def import_simulations(cls, path, analysis_path, extra_sim_info=dict()):
+        '''
+        This method will import simulations that are located outside the analysis path into the analysis path.
+
+        Args:
+            path (str): Path where to search for simulations (it will search for sim_info.json files).
+            analysis_path (str): Path for the analysis.
+            extra_sim_info (dict): Extra information to add to the sim_info.json file (in dict format).
+        '''
+        out_path = Path(analysis_path)
+        for path_object in Path(path).glob('**/'+ cls.info_file):
+            datetime = path_object.parent.name
+            path = str(path_object.parent)
+            (out_path / datetime).mkdir(parents=True, exist_ok=True)
+
+            if (path_object.parent / 'ccl_data').is_dir():
+                shutil.copytree(path_object.parent /'ccl_data', out_path / datetime / 'ccl_data')
+            if (path_object.parent / 'data_treated').is_dir():
+                shutil.copytree(path_object.parent / 'data_treated', out_path / datetime / 'data_treated' )
+            
+            shutil.copy2( path_object, out_path / datetime)
+            json_path = out_path / datetime / cls.info_file
+            with open(json_path) as json_file:
+                info = json.load(json_file)
+
+            info['path'] = path
+            for key, value in extra_sim_info.items()
+                info[key] = value
+
+            with open(json_path, 'w') as json_file:
+                json.dump(info, json_file)
+        
+        return
+        
     # This will find Simulations searching for info_file which must be included in any Simulation
     @classmethod
     def get_simulations(cls,path,param_filter=None):
