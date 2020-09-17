@@ -125,7 +125,7 @@ class TestConfig(unittest.TestCase):
             os.remove('out_temp.txt')
 
     def test_read_config_file(self):
-        config = self.Sim.get_config_file('param.cfg')
+        config = self.Sim.get_config_file(self.sim_path + '/param.cfg')
 
         self.assertEqual(config['srcs2']['store_skewers'], False)
         self.assertEqual(config['shear']['nside'], 512)
