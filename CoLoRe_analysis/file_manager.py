@@ -150,8 +150,8 @@ class FileManager:
             'status'  : status,
             'nodes'   : nodes,
             'preparation_time': preparation_time, 
-            'shear' : shear,
-            'nside' : nside, 
+            'shear_nshear' : shear,
+            'shear_nside' : nside, 
             'commit' : commit
         }
 
@@ -195,10 +195,10 @@ class FileManager:
         for name, x in sims.items():
             madeby = x.info['made_by']
             if x.terminal_file is None or x.status != 'done':
-                t_rows.append((x.__name__,x.commit,x.status,x.nodes,x.seed,x.version,x.template,x.factor,x.shear,x.nside,None, x.size,None,x.preparation_time, madeby))
+                t_rows.append((x.__name__,x.commit,x.status,x.nodes,x.seed,x.version,x.template,x.factor,x.shear_nshear,x.shear_nside,None, x.size,None,x.preparation_time, madeby))
             else:
                 total_time = round(x.time_reader.times["Total"]/1000 if x.status == 'done' else 0,4)
-                t_rows.append((x.__name__,x.commit,x.status,x.nodes,x.seed,x.version,x.template,x.factor,x.shear,x.nside,x.memory_reader.tasks['Total']['Memory']/1000, x.size,total_time,x.preparation_time, madeby))
+                t_rows.append((x.__name__,x.commit,x.status,x.nodes,x.seed,x.version,x.template,x.factor,x.shear_nshear,x.shear_nside,x.memory_reader.tasks['Total']['Memory']/1000, x.size,total_time,x.preparation_time, madeby))
 
         return sims, tabulate(t_rows, t_header, tablefmt='pretty')
 
