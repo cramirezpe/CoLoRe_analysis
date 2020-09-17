@@ -40,17 +40,17 @@ class FileManager:
         '''
         out_path = Path(analysis_path)
         for path_object in Path(path).glob('**/'+ cls.info_file):
-            datetime = path_object.parent.name
+            name = path_object.parent.name
             path = str(path_object.parent)
-            (out_path / datetime).mkdir(parents=True, exist_ok=True)
+            (out_path / name).mkdir(parents=True, exist_ok=True)
 
             if (path_object.parent / 'ccl_data').is_dir():
-                shutil.copytree(path_object.parent /'ccl_data', out_path / datetime / 'ccl_data')
+                shutil.copytree(path_object.parent /'ccl_data', out_path / name / 'ccl_data')
             if (path_object.parent / 'shear_data').is_dir():
-                shutil.copytree(path_object.parent / 'shear_data', out_path / datetime / 'shear_data' )
+                shutil.copytree(path_object.parent / 'shear_data', out_path / name / 'shear_data' )
             
-            shutil.copy2( path_object, out_path / datetime)
-            json_path = out_path / datetime / cls.info_file
+            shutil.copy2( path_object, out_path / name)
+            json_path = out_path / name / cls.info_file
             with open(json_path) as json_file:
                 info = json.load(json_file)
 
