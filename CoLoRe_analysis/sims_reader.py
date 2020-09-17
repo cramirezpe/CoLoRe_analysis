@@ -18,20 +18,32 @@ class Simulation:
         self.__name__ = name
         
         with open(f'{self.analysis_location}/sim_info.json') as json_file:
-            info = json.load(json_file)
+            self.info = json.load(json_file)                
         
-        self.info = info
-        self.location= info['path']
-        self.version = info['version']
-        self.seed    = info['seed']
-        self.factor  = info['factor']
-        self.template= info['template']
-        self.status  = info['status']
-        self.nodes   = info['nodes']
-        self.preparation_time = info['preparation_time']
-        self.shear   = info['shear']
-        self.nside   = info['nside']
-        self.commit  = info['commit']
+        self.location= self.info['path']
+        
+        if '_param_cfg' not in self.info:
+            try:
+                self.get_config_file(self.location + '/param.cfg')
+            except FileNotFoundError:
+                name = input('Configuration file for the new simulations not found. Please provide the param.cfg path')
+
+
+        self.seed               = self.info['_param_cfg']['global']['seed']
+        try: 
+            self.shear_nshear       = self.info['_param_cfg']['shear']['n_shear']
+            self.shear_nside        = self.info['_param_cfg']['shear']['nside']
+        except KeyError:
+            self.shear_nshear = None
+            self.shear_nside  = None
+        
+        self.version            = self.info['version']
+        self.factor             = self.info['factor']
+        self.template           = self.info['template']
+        self.status             = self.info['status']
+        self.nodes              = self.info['nodes']
+        self.preparation_time   = self.info['preparation_time']
+        self.commit             = self.info['commit']
 
         if self.status != 'prepared': 
             try:
@@ -47,29 +59,63 @@ class Simulation:
             except: #pragma: no cover
                 self.output_file =  None
 
+    def get_config_file(self, param_filename):
+        '''
+        Load the C libconfig file into a python dictionary.
+        
+        Args:
+            param_filename (str): Name of the param.cfg file inside the simulation path. 
+        
+        Returns:
+            config dictionary
+        '''
+        import libconf
+        with open(param_filename) as f:
+            config = libconf.load(f)
+
+        self.write_to_json_file('_param_cfg', config)
+        return config
+
+       
     def __str__(self): # pragma: no cover
         if self.__name__:
             return str(self.__name__)
         else:
             return str(self.location)
         
-    def write_ini_file(self): # pragma: no cover
+    def write_to_json_file(self, key, value):
+        self.info[key] = value
+
+        with open(f'{self.analysis_location}/sim_info.json', 'w') as json_file:
+            json.dump(self.info, json_file, indent=4, sort_keys=True)
+        
+    def overwrite_ini_file(self): # pragma: no cover
+        try:
+            madeby = self.info['made_by']
+        except Exception:
+            madeby = None
+
         info = {
-            'version' : self.version,
-            'seed'    : self.seed,
-            'factor'  : self.factor,
-            'template': self.template,
-            'status'  : self.status,
-            'nodes'   : self.nodes,
-            'preparation_time': self.preparation_time, 
-            'shear' : self.shear,
-            'nside' : self.nside, 
-            'commit' : self.commit
+            'version'           : self.version,
+            'seed'              : self.seed,
+            'factor'            : self.factor,
+            'template'          : self.template,
+            'status'            : self.status,
+            'nodes'             : self.nodes,
+            'preparation_time'  : self.preparation_time, 
+            'shear_nshear'      : self.shear_nshear,
+            'shear_nside'       : self.shear_nside, 
+            'commit'            : self.commit,
+            'path'              : self.location,
+            'made_by'           : madeby
         }
 
-        with open(f'{self.location}/sim_info.json', 'w') as json_file:
-            json.dump(info, json_file)
+        with open(f'{self.analysis_location}/sim_info.json', 'w') as json_file:
+            json.dump(info, json_file, indent=4, sort_keys=True)
      
+        with open(f'{self.analysis_location}/sim_info.json') as json_file:
+            self.info = json.load(json_file)
+        
     def set_time_reader(self): 
         #pylint: disable=no-member    
         self.time_reader = TimeReader(self.version,self.commit,self.terminal_file,self.positions_time_def, self.nodes)
@@ -86,8 +132,8 @@ class Simulation:
         
     def set_size(self):
         # in Mb
-        self.size = subprocess.check_output(['du','-sh', self.location]).split()[0].decode('utf-8')      
-  
+        self.size = subprocess.check_output(['du','-sh', self.location]).split()[0].decode('utf-8')
+ 
     def remove(self): # pragma: no cover
         # After run this, remember to remove it from any array that contains it.
         while True:
