@@ -55,7 +55,7 @@ class FileManager:
                 info = json.load(json_file)
 
             info['path'] = path
-            for key, value in extra_sim_info.items()
+            for key, value in extra_sim_info.items():
                 info[key] = value
 
             with open(json_path, 'w') as json_file:
