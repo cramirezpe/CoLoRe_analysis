@@ -4,6 +4,21 @@ import traceback
 import sys
 import time
 
+from contextlib import contextmanager
+
+@contextmanager
+def debug_on_context(*exceptions): #pragma: no cover
+    if not exceptions:
+        exceptions = (AssertionError, )
+    def context():
+        try:
+            yield
+        except exceptions:
+            info = sys.exc_info()
+            traceback.print_exception(*info)
+            pdb.post_mortem(info[2])
+    return context()
+
 def debug_on(*exceptions): #pragma: no cover
     if not exceptions:
         exceptions = (AssertionError, )
