@@ -20,6 +20,7 @@ class Simulation:
         with open(f'{self.analysis_location}/sim_info.json') as json_file:
             info = json.load(json_file)
         
+        self.info = info
         self.location= info['path']
         self.version = info['version']
         self.seed    = info['seed']
