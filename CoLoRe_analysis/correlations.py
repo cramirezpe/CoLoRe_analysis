@@ -132,9 +132,9 @@ class CorrelateTwoShears:
         if minz != None and maxz != None:
             minz_str = redshift_to_str_for_path(minz)
             maxz_str = redshift_to_str_for_path(maxz)
-            out = self.sims[seed][0].analysis_location + f'/data_treated/correlations/' + self.sims[seed][1].preparation_time +f'/binned/{ minz_str }_{ maxz_str }/source_{ source }/'
+            out = self.sims[seed][0].analysis_location + f'/shear_data/correlations/' + self.sims[seed][1].preparation_time +f'/binned/{ minz_str }_{ maxz_str }/source_{ source }/'
         else:
-            out = self.sims[seed][0].analysis_location + f'/data_treated/correlations/source_{ source }/' + self.sims[seed][1].preparation_time +'/'
+            out = self.sims[seed][0].analysis_location + f'/shear_data/correlations/source_{ source }/' + self.sims[seed][1].preparation_time +'/'
         return out
 
     def path_to_regression(self, parameter='mp_e1', source=1, minz=None, maxz=None):

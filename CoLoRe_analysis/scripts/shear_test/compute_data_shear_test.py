@@ -4,7 +4,7 @@ sys.path.insert(1,'..')
 from CoLoRe_analysis.shear_reader import ShearReader
 from CoLoRe_analysis.sims_reader import (FileManager, Sim0404)
 import shutil
-from CoLoRe_analysis.data_treatment import data_treatment
+from CoLoRe_analysis.compute_data_shear import compute_data_shear
 from multiprocessing import Pool
 
 import logging.config
@@ -29,7 +29,7 @@ def main():
         sims[simname] = Sim0404(sim, simname)
         print(f'Id. { simname }\tLocation: { sims[simname].location }')
 
-    data_treatment_args = []
+    compute_data_shear_args = []
 
 
     for sim in sims.values():
@@ -38,21 +38,21 @@ def main():
         #     shutil.copytree('/global/cscratch1/sd/cramirez/CoLoRe_LSST/templates/shear_test/pred_lj',sim.location + '/pred_lj')
 
         sim.set_shear_reader()
-        sim.shear_reader.remove_data_treated()
+        sim.shear_reader.remove_shear_data()
         
         for b in range(10):
             minz = 0 + b*0.25
             maxz = 0 + (1+b)*0.25
             minz_str    = round(float(minz)*100)
             maxz_str    = round(float(maxz)*100)
-            arguments = (sim.location, 2,False,True,minz,maxz,sim.location+ f'/data_treated/binned/{ str(minz_str) }_{ str(maxz_str) }/source_2')
+            arguments = (sim.location, 2,False,True,minz,maxz,sim.location+ f'/shear_data/binned/{ str(minz_str) }_{ str(maxz_str) }/source_2')
 
-            data_treatment_args.append(arguments)
+            compute_data_shear_args.append(arguments)
         #sim.shear_reader.compute_binned_statistics(minz=0, maxz=2.5, bins=10, source=2, do_cls=False, do_kappa=True)
 
     pool = Pool(processes = 64)
     
-    x= [pool.apply_async(data_treatment, args, error_callback=log_error) for args in data_treatment_args]
+    x= [pool.apply_async(compute_data_shear, args, error_callback=log_error) for args in compute_data_shear_args]
 
     pool.close()
     pool.join()

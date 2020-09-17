@@ -46,8 +46,8 @@ class FileManager:
 
             if (path_object.parent / 'ccl_data').is_dir():
                 shutil.copytree(path_object.parent /'ccl_data', out_path / datetime / 'ccl_data')
-            if (path_object.parent / 'data_treated').is_dir():
-                shutil.copytree(path_object.parent / 'data_treated', out_path / datetime / 'data_treated' )
+            if (path_object.parent / 'shear_data').is_dir():
+                shutil.copytree(path_object.parent / 'shear_data', out_path / datetime / 'shear_data' )
             
             shutil.copy2( path_object, out_path / datetime)
             json_path = out_path / datetime / cls.info_file
@@ -198,14 +198,14 @@ class FilterList:
     @classmethod
     def crashed(cls):
         crashed = {
-            "status" : ["crashed","crashed on data treatment"]
+            "status" : ["crashed","crashed on shear data computation"]
         }
         return ["Crashed",crashed]
 
     @classmethod
     def running(cls):
         running = {
-            "status" : ["running","running data treatment"]
+            "status" : ["running","running shear data computation"]
         }
         return ["Running",running]
     

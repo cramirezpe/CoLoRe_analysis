@@ -14,9 +14,9 @@ class TestSimulationMaster(unittest.TestCase):
         self.Sim      = Sim0404( self.sim_analysis_path, 'testname')
     
     def tearDown(self):
-        self.data_treated_path = self.sim_analysis_path + '/data_treated'
-        if os.path.isdir(self.data_treated_path):
-            rmtree(self.data_treated_path)
+        self.shear_data_path = self.sim_analysis_path + '/shear_data'
+        if os.path.isdir(self.shear_data_path):
+            rmtree(self.shear_data_path)
 
         if os.path.isfile('out_temp.txt'):
             os.remove('out_temp.txt')

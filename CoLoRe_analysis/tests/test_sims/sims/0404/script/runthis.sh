@@ -26,15 +26,15 @@ else
 	sed -i "s#status= running#status= crashed#g" /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.01/20200416090110/sim_info.dat
 fi
 
-cd /global/homes/c/cramirez/Shs/CoLoRe_data_treatment
+cd /global/homes/c/cramirez/Shs/CoLoRe_compute_data_shear
 if [ 0 = 1 ];then
-	echo "doing data treatment"
-	sed -i "s#status= done#status= running data treatment#g" /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.01/20200416090110/sim_info.dat
-	python3 data_treatment_1run.py -p /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.01/20200416090110
+	echo "doing shear data computation"
+	sed -i "s#status= done#status= running shear data computation#g" /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.01/20200416090110/sim_info.dat
+	python3 compute_data_shear_1run.py -p /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.01/20200416090110
 	if [ $? = 0 ]; then
-		sed -i "s#status= running data treatment#status= done#g" /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.01/20200416090110/sim_info.dat
+		sed -i "s#status= running shear data computation#status= done#g" /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.01/20200416090110/sim_info.dat
 	else
-		sed -i "s#status= running data treatment#status= crashed on data treatment#g" /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.01/20200416090110/sim_info.dat
+		sed -i "s#status= running shear data computation#status= crashed on shear data computation#g" /global/cscratch1/sd/cramirez/CoLoRe_LSST/master/0.01/20200416090110/sim_info.dat
 	fi
 fi
 

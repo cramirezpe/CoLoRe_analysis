@@ -34,9 +34,9 @@ def suppress_stdout():
 def fxn():
     warnings.warn("deprecrated", DeprecationWarning)
 
-def data_treatment(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=None, output_path=None):
+def compute_data_shear(path,source=1, do_cls=False, do_kappa=False, minz=None,maxz=None, output_path=None):
     if not output_path:
-        output_path = path + f'/data_treated/source_{ source }'
+        output_path = path + f'/shear_data/source_{ source }'
     os.makedirs(output_path, exist_ok=True)
     
     log.debug(f'path: { path }, source: { source }, do_cls: { do_cls }, do_kapa: { do_kappa }, minz: { minz }, maxz: { maxz }, output_path: { output_path }')
@@ -149,4 +149,4 @@ if __name__ == "__main__": #pragma: no cover
     maxz    = args.maxz 
     output  = args.output
    
-    data_treatment(path, source, do_cls, do_kappa, minz, maxz, output)
+    compute_data_shear(path, source, do_cls, do_kappa, minz, maxz, output)

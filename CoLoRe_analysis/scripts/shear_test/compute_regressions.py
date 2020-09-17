@@ -60,17 +60,17 @@ def main():
     corrobjs.append(CorrelateTwoShears([old_01_sim],[master_01_sim]))
     corrobjs.append(CorrelateTwoShears([old_001_sim],[master_001_sim]))
 
-    data_treatment_args = []
+    compute_data_shear_args = []
     for x in corrobjs:
         for b in range(10):
             minz= 0 + b*0.25
             maxz= 0 + (1+b)*0.25
-            data_treatment_args.append((x, minz,maxz))
+            compute_data_shear_args.append((x, minz,maxz))
 
 
     pool = Pool(processes = 64)
     print('starting pool')
-    x= [pool.apply_async(do_correlation, args,callback=log_result, error_callback=log_error) for args in data_treatment_args]
+    x= [pool.apply_async(do_correlation, args,callback=log_result, error_callback=log_error) for args in compute_data_shear_args]
 
     pool.close()
     pool.join()
