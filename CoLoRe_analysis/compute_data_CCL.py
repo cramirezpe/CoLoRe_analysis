@@ -20,6 +20,28 @@ from datetime import datetime
 import argparse
 import json
 
+def main(): #pragma: no cover
+    parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")
+    parser.add_argument("-p","--path", required=True, type=str, help="Path of ColoRe run")
+    parser.add_argument("-o","--output", required=False, type=str, default=None, help="Path for output files")
+    
+    parser.add_argument("--source",       required=False, type=int, default=1, help="Sources to be computed")
+    parser.add_argument("--nside",        required=False, type=int , default=128 , help="nside to use ")
+    parser.add_argument("--max_files",    required=False, type=int, default=None , help="number of srcs files to consider (default: None, consider all the files)")
+    parser.add_argument("--downsampling", required=False, type=float , default=1 , help="downsampling to apply to the data")
+    parser.add_argument("--zbins",        required=False, type=float, nargs='+', default=[0,0.15,1] , help="defines the binning in redshift of the analysis")
+    parser.add_argument("--nz_h",         required=False, type=int , default=50 , help="pixelization of the redshift analysis ")
+    parser.add_argument("--nz_min",       required=False, type=float , default=0 , help="min redshift for the redshfit analysis")
+    parser.add_argument("--nz_max",       required=False, type=float , default=None , help="max redshift for the redshfit analysis")
+    parser.add_argument('--code',         required=False, choices=['anafast','namaster'], default='namaster', help='Which code use to compute the cls')
+
+    args = parser.parse_args()
+    
+    path   = args.path
+    output  = args.output
+
+    compute_data(path, args.source, output, args.nside, args.max_files, args.downsampling, args.zbins, args.nz_h, args.nz_min, args.nz_max )
+    
 def savetofile(location,variables,variables_names):
     for i,variable in enumerate(variables):
         np.savetxt( location + '/' + variables_names[i] + '.dat', variable)
@@ -77,29 +99,6 @@ def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, d
 
     with open(output_path + '/INFO.json','w') as outfile:
         json.dump(info, outfile)
-
-
-def main(): #pragma: no cover
-    parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")
-    parser.add_argument("-p","--path", required=True, type=str, help="Path of ColoRe run")
-    parser.add_argument("-o","--output", required=False, type=str, default=None, help="Path for output files")
-    
-    parser.add_argument("--source",       required=False, type=int, default=1, help="Sources to be computed")
-    parser.add_argument("--nside",        required=False, type=int , default=128 , help="nside to use ")
-    parser.add_argument("--max_files",    required=False, type=int, default=None , help="number of srcs files to consider (default: None, consider all the files)")
-    parser.add_argument("--downsampling", required=False, type=float , default=1 , help="downsampling to apply to the data")
-    parser.add_argument("--zbins",        required=False, type=float, nargs='+', default=[0,0.15,1] , help="defines the binning in redshift of the analysis")
-    parser.add_argument("--nz_h",         required=False, type=int , default=50 , help="pixelization of the redshift analysis ")
-    parser.add_argument("--nz_min",       required=False, type=float , default=0 , help="min redshift for the redshfit analysis")
-    parser.add_argument("--nz_max",       required=False, type=float , default=None , help="max redshift for the redshfit analysis")
-    parser.add_argument('--code',         required=False, choices=['anafast','namaster'], default='namaster', help='Which code use to compute the cls')
-
-    args = parser.parse_args()
-    
-    path   = args.path
-    output  = args.output
-
-    compute_data(path, args.source, output, args.nside, args.max_files, args.downsampling, args.zbins, args.nz_h, args.nz_min, args.nz_max )
 
 def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
     '''Method to compute all cls from the anafast function using output from CoLoRe.
