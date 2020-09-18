@@ -12,18 +12,20 @@ import warnings
 import numpy as np
 import healpy as hp
 import pyccl as ccl
-import os, sys
+import os, sys, io
 from astropy.io import fits
 from itertools import combinations_with_replacement
 from datetime import datetime
+import CoLoRe_analysis.sims_reader as sims_reader
 
 import argparse
 import json
 
-def main(): #pragma: no cover
+if __name__ == '__main__': #pragma: no cover
     parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")
-    parser.add_argument("-p","--path", required=True, type=str, help="Path of ColoRe run")
-    parser.add_argument("-o","--output", required=False, type=str, default=None, help="Path for output files")
+    parser.add_argument("--input", required=True, type=str, help="Path of ColoRe run")
+    parser.add_argument("--output", required=True, type=str, default=None, help="Path for output files")
+    parser.add_argument("--param", required=True, type=str, help="Path of ColoRe param.cfg file")
     
     parser.add_argument("--source",       required=False, type=int, default=1, help="Sources to be computed")
     parser.add_argument("--nside",        required=False, type=int , default=128 , help="nside to use ")
@@ -36,12 +38,60 @@ def main(): #pragma: no cover
     parser.add_argument('--code',         required=False, choices=['anafast','namaster'], default='namaster', help='Which code use to compute the cls')
 
     args = parser.parse_args()
-    
-    path   = args.path
+    main(args)
+
+def main(args):
+    path   = args.input
     output  = args.output
 
-    compute_data(path, args.source, output, args.nside, args.max_files, args.downsampling, args.zbins, args.nz_h, args.nz_min, args.nz_max )
-    
+    options = dict(vars(args))
+    options.pop('input')
+    options.pop('output')
+    options.pop('param')
+
+    if not os.path.isfile(args.param):
+        raise FileNotFoundError('Param cfg not found')
+
+    if os.path.isdir(output):
+        if not os.path.isfile(output + '/sim_info.json'):
+            raise FileNotFoundError("Output path already exists but doesn't contain a sim_info.json file. Select an empty output")
+        elif sims_reader.Sim0404(output).location != path:
+            raise ValueError("Output path already exists with a different simulation analysis")
+        else:
+            sim = sims_reader.Sim0404(output)
+            sim.set_ccl_reader()
+            f1 = sys.stdin 
+            f = io.StringIO('y') # "mocking" input to force a yes
+            sys.stdin = f
+            _ = sim.ccl_reader.get_values('cl_mm_t', **options)
+            sys.stdin = f1
+    else:
+        os.makedirs(output)
+        info = {
+            'version': None,
+            'factor': 1,
+            'template': None,
+            'status': 'done',
+            'nodes': None,
+            'path': args.input,
+            'preparation_time': datetime.today().strftime('%Y%m%d_%H%M%S'),
+            'commit': None
+        }
+
+        with open(output + '/sim_info.json', 'w') as json_file:
+            json.dump(info, json_file, indent=4, sort_keys=True)
+
+        f1 = sys.stdin
+        f = io.StringIO(args.param)
+        sys.stdin = f
+        sim = sims_reader.Sim0404(output)
+
+        sim.set_ccl_reader()
+        f = io.StringIO('y')
+        sys.stdin = f
+        sim.ccl_reader.get_values('cl_mm_t', **options)
+        sys.stdin = f1
+
 def savetofile(location,variables,variables_names):
     for i,variable in enumerate(variables):
         np.savetxt( location + '/' + variables_names[i] + '.dat', variable)
@@ -538,6 +588,3 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
     }
 
     return values
-
-if __name__ == '__main__': #pragma: no cover
-    main()
