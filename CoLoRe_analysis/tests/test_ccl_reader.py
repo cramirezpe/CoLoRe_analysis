@@ -12,7 +12,7 @@ import CoLoRe_analysis.compute_data_CCL
 
 from CoLoRe_analysis.debug_tools import debug_on
 
-def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None):
+def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None, code='anafast'):
     
     output_path = analysis_path + f'/ccl_data/20200101_000000/'
         
@@ -33,7 +33,8 @@ def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, 
         'zbins'         : zbins,
         'nz_h'          : nz_h,
         'nz_min'        : nz_min,
-        'nz_max'        : nz_max
+        'nz_max'        : nz_max,
+        'code'          : code
     }
 
     with open(output_path + '/INFO.json','w') as outfile:
