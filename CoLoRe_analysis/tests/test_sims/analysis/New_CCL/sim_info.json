@@ -1,1 +1,69 @@
-{"version": "New", "seed": 1003, "factor": 1.0, "template": "tiny_test", "status": "done", "nodes": 1, "preparation_time": "20200708_174453", "shear": 11, "nside": 128, "commit": "0707", "path": "/global/u2/c/cramirez/Codes/CoLoRe_analysis/CoLoRe_analysis/tests/test_sims/sims/New_CCL"}
+{
+    "_param_cfg": {
+        "cosmo_par": {
+            "h": 0.7,
+            "ns": 0.96,
+            "omega_B": 0.05,
+            "omega_L": 0.7,
+            "omega_M": 0.3,
+            "sigma_8": 0.8,
+            "w": -1.0
+        },
+        "field_par": {
+            "dens_type": 0,
+            "lpt_buffer_fraction": 0.6,
+            "lpt_interp_type": 1,
+            "n_grid": 512,
+            "output_lpt": 0,
+            "r_smooth": 5.0,
+            "smooth_potential": true
+        },
+        "global": {
+            "just_write_pred": false,
+            "output_density": false,
+            "output_format": "FITS",
+            "pk_filename": "Pk_CAMB_test.dat",
+            "pred_dz": 0.1,
+            "prefix_out": "out",
+            "seed": 1003,
+            "write_pred": true,
+            "z_max": 0.4,
+            "z_min": 0.001
+        },
+        "isw": {
+            "nside": 128,
+            "z_out": [
+                0.38
+            ]
+        },
+        "kappa": {
+            "nside": 128,
+            "z_out": [
+                0.38
+            ]
+        },
+        "shear": {
+            "n_shear": 11,
+            "nside": 128,
+            "spacing_type": "r",
+            "write": true
+        },
+        "srcs1": {
+            "bias_filename": "Bz_test.txt",
+            "include_shear": true,
+            "nz_filename": "Nz_test.txt",
+            "store_skewers": false
+        }
+    },
+    "commit": "0707",
+    "factor": 1.0,
+    "nodes": 1,
+    "nside": 128,
+    "path": "/global/u2/c/cramirez/Codes/CoLoRe_analysis/CoLoRe_analysis/tests/test_sims/sims/New_CCL",
+    "preparation_time": "20200708_174453",
+    "seed": 1003,
+    "shear": 11,
+    "status": "done",
+    "template": "tiny_test",
+    "version": "New"
+}
