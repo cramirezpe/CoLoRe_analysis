@@ -5,6 +5,7 @@ import re
 import shutil
 import subprocess
 import CoLoRe_analysis.shear_reader as shear_reader
+import CoLoRe_analysis.ccl_reader as ccl_reader
 import json
 import logging
 log = logging.getLogger(__name__)
@@ -23,17 +24,21 @@ class Simulation:
         self.location= self.info['path']
         
         if '_param_cfg' not in self.info:
-            try:
-                self.get_config_file(self.location + '/param.cfg')
-            except FileNotFoundError:
-                name = input('Configuration file for the new simulations not found. Please provide the param.cfg path')
+            param_file = self.location + '/param.cfg'
+            while True:
+                try:
+                    self.get_config_file(param_file)
+                    break
+                except FileNotFoundError:
+                    param_file = input(f'Configuration file for simulation {self.location} not found. Please provide the param.cfg path')
 
-
-        self.seed               = self.info['_param_cfg']['global']['seed']
+        
         try: 
+            self.seed               = self.info['_param_cfg']['global']['seed']
             self.shear_nshear       = self.info['_param_cfg']['shear']['n_shear']
             self.shear_nside        = self.info['_param_cfg']['shear']['nside']
         except KeyError:
+            self.seed         = None
             self.shear_nshear = None
             self.shear_nside  = None
         
@@ -129,6 +134,9 @@ class Simulation:
 
     def set_shear_reader(self):
         self.shear_reader = shear_reader.ShearReader(self.location, self.analysis_location)
+
+    def set_ccl_reader(self):
+        self.ccl_reader = ccl_reader.CCLReader(self.location, self.analysis_location)
         
     def set_size(self):
         # in Mb
