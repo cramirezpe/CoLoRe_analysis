@@ -30,15 +30,17 @@ class Simulation:
                     self.get_config_file(param_file)
                     break
                 except FileNotFoundError:
-                    param_file = input(f'Configuration file for simulation {self.location} not found. Please provide the param.cfg path')
+                    param_file = input(f'Configuration file for simulation {self.location} not found. Please provide the param.cfg path/s to skip')
+                    
 
-        
         try: 
             self.seed               = self.info['_param_cfg']['global']['seed']
+        except KeyError:
+            self.seed  = None
+        try:
             self.shear_nshear       = self.info['_param_cfg']['shear']['n_shear']
             self.shear_nside        = self.info['_param_cfg']['shear']['nside']
         except KeyError:
-            self.seed         = None
             self.shear_nshear = None
             self.shear_nside  = None
         
