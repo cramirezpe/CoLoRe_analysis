@@ -1,6 +1,8 @@
-from CoLoRe_analysis.file_manager import FileManager, FilterList
-import unittest
 import os
+import unittest
+
+from CoLoRe_analysis.file_manager import FileManager, FilterList
+
 
 class TestFileManager(unittest.TestCase):
     def setUp(self):

@@ -1,13 +1,12 @@
-import CoLoRe_analysis.shear_reader as module
-import unittest
 import os
-from CoLoRe_analysis.shear_reader import ShearReader
-from mock import patch, call
-from shutil import rmtree
-import numpy as np
 import sys
-from CoLoRe_analysis.compute_data_shear import savetofile
-from CoLoRe_analysis.compute_data_shear import compute_data_shear
+import unittest
+from shutil import rmtree
+
+import numpy as np
+from mock import call, patch
+
+from CoLoRe_analysis import shear_reader, compute_data_shear, shear_reader
 
 def mock_compute_data_shear(path, source=1, do_cls=False, do_kappa=False, minz=None, maxz=None, output_path=None):
     if not output_path:
@@ -19,23 +18,23 @@ def mock_compute_data_shear(path, source=1, do_cls=False, do_kappa=False, minz=N
 
     mp_e1 = [1,2,3]
     mp_E  = [21,22,23]
-    savetofile(output_path, [mp_e1,mp_E],['mp_e1','mp_E'])
+    compute_data_shear.savetofile(output_path, [mp_e1,mp_E],['mp_e1','mp_E'])
     if do_cls:
         cld_dd = [4,5,6]
-        savetofile(output_path, [cld_dd],['cld_dd'])
+        compute_data_shear.savetofile(output_path, [cld_dd],['cld_dd'])
     
     if do_kappa:
         mp_k   = [7,8,9]
         if do_cls:
             cld_kk = [10,11,12]
-            savetofile(output_path, [cld_kk],['cld_kk'])
-        savetofile(output_path, [mp_k],["mp_k"])
+            compute_data_shear.savetofile(output_path, [cld_kk],['cld_kk'])
+        compute_data_shear.savetofile(output_path, [mp_k],["mp_k"])
 
 class TestShearReader(unittest.TestCase):
     def setUp(self):
         self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/sims/0404'
         self.analysis_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis'
-        self.sr = ShearReader( self.sim_path , self.analysis_path)
+        self.sr = shear_reader.ShearReader( self.sim_path , self.analysis_path)
 
     def tearDown(self):
         shear_data_path = self.sim_path + '/shear_data'
@@ -68,7 +67,7 @@ class TestShearReader(unittest.TestCase):
         self.assertEqual(a[0],10)
 
 
-    @patch.object(ShearReader, "do_compute_data_shear")
+    @patch.object(shear_reader.ShearReader, "do_compute_data_shear")
     def test_not_created_when_exists(self, mock_func):
         path = self.analysis_path + '/shear_data/source_2'
         os.makedirs( path )
@@ -96,7 +95,7 @@ class TestShearReader(unittest.TestCase):
             a = self.sr.get_values('mp_E', source=1, minz=1, maxz=2.10)
 
 
-    @patch.object(ShearReader, "do_compute_data_shear")
+    @patch.object(shear_reader.ShearReader, "do_compute_data_shear")
     def test_not_created_when_exists_binned(self, mock_func):
         path = self.analysis_path + '/shear_data/binned/300_301/source_3'
         os.makedirs(path)

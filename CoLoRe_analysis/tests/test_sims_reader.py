@@ -1,17 +1,17 @@
-import CoLoRe_analysis.sims_reader as module
-import unittest
-from CoLoRe_analysis.file_manager import (FileManager) 
-from CoLoRe_analysis.sims_reader import  (MemoryReader, Simulation, Sim0404)
-import os
 import filecmp
+import os
+import unittest
 from shutil import rmtree
-from mock import patch, call
+
+from mock import call, patch
+
+from CoLoRe_analysis import sims_reader, file_manager, sims_reader
 
 class TestSimulationMaster(unittest.TestCase):
     def setUp(self):
         self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/sims/0404'
         self.sim_analysis_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/0404'
-        self.Sim      = Sim0404( self.sim_analysis_path, 'testname')
+        self.Sim      = sims_reader.Sim0404( self.sim_analysis_path, 'testname')
     
     def tearDown(self):
         self.shear_data_path = self.sim_analysis_path + '/shear_data'
@@ -48,10 +48,10 @@ class TestSimulationMaster(unittest.TestCase):
 
     @patch('builtins.print') #suppress print statements
     def test_get_time_from_string(self, mock_func):
-        self.assertEqual(module.get_time_from_string(None),0)
-        self.assertEqual(module.get_time_from_string('hola'),0)
+        self.assertEqual(sims_reader.get_time_from_string(None),0)
+        self.assertEqual(sims_reader.get_time_from_string('hola'),0)
         with self.assertRaises(ValueError):
-            module.get_time_from_string('3 ms and 4 ms')
+            sims_reader.get_time_from_string('3 ms and 4 ms')
 
     @patch('builtins.print')
     def test_search_string_in_file(self, mock_func):
@@ -59,7 +59,7 @@ class TestSimulationMaster(unittest.TestCase):
         with open(file_path, 'w') as f:
             f.write("Firstline\nsecondline\nthirdline\netc")
         
-        self.assertEqual(module.search_1st_string_in_file(file_path, 'ñ23ñlkjqrñkwle'), (None,None))
+        self.assertEqual(sims_reader.search_1st_string_in_file(file_path, 'ñ23ñlkjqrñkwle'), (None,None))
 
         os.remove(file_path)
 
@@ -68,8 +68,8 @@ class TestSimulationMaster(unittest.TestCase):
         with open(file_path, 'w') as f:
             f.write("Firstline\nsecondline\nthirdline\netc")
         
-        module.replace_in_file('thirdline','thisislinethree',file_path)
-        self.assertEqual(module.search_1st_string_in_file(file_path, 'thisis'), (3,'thisislinethree\n'))
+        sims_reader.replace_in_file('thirdline','thisislinethree',file_path)
+        self.assertEqual(sims_reader.search_1st_string_in_file(file_path, 'thisis'), (3,'thisislinethree\n'))
 
         os.remove(file_path)
 
@@ -114,7 +114,7 @@ class TestConfig(unittest.TestCase):
     def setUp(self):
         self.sim_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/sims/New'
         self.sim_analysis_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/New'
-        self.Sim      = Sim0404( self.sim_analysis_path, 'testname')
+        self.Sim      = sims_reader.Sim0404( self.sim_analysis_path, 'testname')
     
     def tearDown(self):
         self.shear_data_path = self.sim_analysis_path + '/shear_data'

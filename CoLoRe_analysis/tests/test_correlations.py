@@ -1,25 +1,25 @@
-import CoLoRe_analysis.correlations as corrlib
-from CoLoRe_analysis.sims_reader import Sim0404
-from CoLoRe_analysis.shear_reader import ShearReader
-import unittest
 import os
+import unittest
 from shutil import rmtree
+
 import numpy as np
 from mock import patch
+
+from CoLoRe_analysis import correlations, shear_reader, sims_reader
 
 class TestCorrelations(unittest.TestCase):
     def setUp(self):
         # Prepare the sim objects
         self.location    = os.path.dirname(os.path.realpath(__file__))
-        self.simNew      = Sim0404(self.location + '/test_sims/analysis/New', "New")
-        self.simNew_rep  = Sim0404(self.location + '/test_sims/analysis/New', "Newrep")
-        self.simNew_s2   = Sim0404(self.location + '/test_sims/analysis/New_s2', "New_s2")
-        self.simOld      = Sim0404(self.location + '/test_sims/analysis/Old', "Old")
-        self.simOld_wrong= Sim0404(self.location + '/test_sims/analysis/Old_false_seed',    "Old_wrong")  
-        self.simOld_s2   = Sim0404(self.location + '/test_sims/analysis/Old_s2', 'Old_s2')
+        self.simNew      = sims_reader.Sim0404(self.location + '/test_sims/analysis/New', "New")
+        self.simNew_rep  = sims_reader.Sim0404(self.location + '/test_sims/analysis/New', "Newrep")
+        self.simNew_s2   = sims_reader.Sim0404(self.location + '/test_sims/analysis/New_s2', "New_s2")
+        self.simOld      = sims_reader.Sim0404(self.location + '/test_sims/analysis/Old', "Old")
+        self.simOld_wrong= sims_reader.Sim0404(self.location + '/test_sims/analysis/Old_false_seed',    "Old_wrong")  
+        self.simOld_s2   = sims_reader.Sim0404(self.location + '/test_sims/analysis/Old_s2', 'Old_s2')
 
         # Prepare corrleations object
-        self.corr_sims   = corrlib.CorrelateTwoShears([self.simNew, self.simNew_rep, self.simNew_s2],[self.simOld,self.simOld_wrong, self.simOld_s2])
+        self.corr_sims   = correlations.CorrelateTwoShears([self.simNew, self.simNew_rep, self.simNew_s2],[self.simOld,self.simOld_wrong, self.simOld_s2])
         self.all_names    = [i[x].__name__ for x in range(2) for i in self.corr_sims.sims.values()]
 
     def tearDown(self):
@@ -45,9 +45,9 @@ class TestCorrelations(unittest.TestCase):
 
     def test_input(self):
         with self.assertRaises(ValueError):
-            _ = corrlib.CorrelateTwoShears(self.simNew, [self.simOld, self.simOld_wrong])
+            _ = correlations.CorrelateTwoShears(self.simNew, [self.simOld, self.simOld_wrong])
         with self.assertRaises(ValueError):
-            _ = corrlib.CorrelateTwoShears((self.simNew), "he")
+            _ = correlations.CorrelateTwoShears((self.simNew), "he")
 
     def test_repeated_seed_is_eliminated(self):
         self.assertFalse( 'Newrep' in self.all_names and 'New' in self.all_names, f'Newrep and New in sims: { self.all_names }')
@@ -62,7 +62,7 @@ class TestCorrelations(unittest.TestCase):
         # Program should match simulations run with the same seed. 
         self.assertEqual( ['New_s2', 'Old_s2'] , [x.__name__ for x in self.corr_sims.sims[300]])
     
-    @patch.object(ShearReader, "do_compute_data_shear")
+    @patch.object(shear_reader.ShearReader, "do_compute_data_shear")
     def test_correlation_regression_tiny_bin(self, mock_func):
         self.prepare_mock_data()
         cs = self.corr_sims
@@ -87,7 +87,7 @@ class TestCorrelations(unittest.TestCase):
         self.prepare_mock_data()
 
         mult_cs = self.corr_sims
-        good_cs = corrlib.CorrelateTwoShears([self.simNew],[self.simOld])
+        good_cs = correlations.CorrelateTwoShears([self.simNew],[self.simOld])
         
         # Multiple simulations won't have a defined place to be stored
         with self.assertRaises(ValueError):
@@ -106,7 +106,7 @@ class TestCorrelations(unittest.TestCase):
         self.prepare_mock_data()
 
         mult_cs = self.corr_sims
-        good_cs = corrlib.CorrelateTwoShears([self.simNew],[self.simOld])
+        good_cs = correlations.CorrelateTwoShears([self.simNew],[self.simOld])
         
         # Multiple simulations won't have a defined place to be stored
         with self.assertRaises(ValueError):
@@ -128,7 +128,7 @@ class TestCorrelations(unittest.TestCase):
         source    = 2
         self.prepare_mock_data()
 
-        cs = corrlib.CorrelateTwoShears([self.simNew],[self.simOld])
+        cs = correlations.CorrelateTwoShears([self.simNew],[self.simOld])
         self.assertEqual(cs.path_to_regression(parameter=param, source=source), self.simNew.analysis_location + f'/shear_data/regressions/source_2/{ self.simNew.preparation_time }/')
 
     def test_get_regression(self):
@@ -141,7 +141,7 @@ class TestCorrelations(unittest.TestCase):
         source = 2
         self.prepare_mock_data()
         
-        cs = corrlib.CorrelateTwoShears([self.simNew],[self.simOld])
+        cs = correlations.CorrelateTwoShears([self.simNew],[self.simOld])
         self.assertEqual(cs.path_to_correlation(parameter=param, source=source), self.simNew.analysis_location + f'/shear_data/correlations/source_2/{ self.simNew.preparation_time }/')
 
 if __name__ == '__main__':

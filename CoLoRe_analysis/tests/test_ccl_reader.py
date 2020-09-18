@@ -1,16 +1,12 @@
-import CoLoRe_analysis.ccl_reader as ccl_reader
-from CoLoRe_analysis.compute_data_shear import savetofile
-import unittest
-from mock import patch, call
-from shutil import rmtree
-import os
-import numpy as np
 import json
+import os
+import unittest
+from shutil import rmtree
 
-from CoLoRe_analysis.ccl_reader import CCLReader
-import CoLoRe_analysis.compute_data_CCL
+import numpy as np
+from mock import call, patch
 
-from CoLoRe_analysis.debug_tools import debug_on
+from CoLoRe_analysis import ccl_reader, compute_data_CCL, compute_data_shear
 
 def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None, code='anafast'):
     
@@ -22,7 +18,7 @@ def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, 
     pairs   = [(0,0), (0,1), (1,1)]
     nz_tot  = [4,5,6]
 
-    savetofile(output_path, [cl_mm_t,pairs,nz_tot],['cl_mm_t','pairs','nz_tot'])
+    compute_data_shear.savetofile(output_path, [cl_mm_t,pairs,nz_tot],['cl_mm_t','pairs','nz_tot'])
 
     info = {
         'id'            : '20200101_000000',
@@ -46,7 +42,7 @@ class TestCCLReader(unittest.TestCase):
     def setUp(self):
         self.sim_path    = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/sims/New_CCL'
         self.analysis_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/New_CCL'
-        self.cr     =  CCLReader( self.sim_path, self.analysis_path)
+        self.cr     =  ccl_reader.CCLReader( self.sim_path, self.analysis_path)
         self.computed_data_path = self.analysis_path + '/ccl_data'
 
         os.makedirs(self.computed_data_path + '/1')
@@ -157,4 +153,3 @@ class TestCCLReader(unittest.TestCase):
         os.makedirs(path)
         self.cr.remove_computed_data()
         self.assertFalse( os.path.isdir(path) )
-
