@@ -21,7 +21,7 @@ import CoLoRe_analysis.sims_reader as sims_reader
 import argparse
 import json
 
-if __name__ == '__main__': #pragma: no cover
+def getArgs(): #pragma: no cover
     parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")
     parser.add_argument("--input", required=True, type=str, help="Path of ColoRe run")
     parser.add_argument("--output", required=True, type=str, default=None, help="Path for output files")
@@ -40,7 +40,10 @@ if __name__ == '__main__': #pragma: no cover
     args = parser.parse_args()
     main(args)
 
-def main(args):
+def main(args=None):
+    if args is None:
+        args = getArgs()
+
     path   = args.input
     output  = args.output
 
@@ -588,3 +591,7 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
     }
 
     return values
+
+    
+if __name__ == '__main__': #pragma: no cover
+    main()
