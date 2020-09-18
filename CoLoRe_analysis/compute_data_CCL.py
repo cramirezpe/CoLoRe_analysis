@@ -38,7 +38,7 @@ def getArgs(): #pragma: no cover
     parser.add_argument('--code',         required=False, choices=['anafast','namaster'], default='namaster', help='Which code use to compute the cls')
 
     args = parser.parse_args()
-    main(args)
+    return args
 
 def main(args=None):
     if args is None:
