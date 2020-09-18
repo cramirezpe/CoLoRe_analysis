@@ -1,15 +1,16 @@
 ## This code will compute strings for a given simulation (path should point to the path where sim_info is locatded
 
-from contextlib import contextmanager
-import sys, os
-import numpy as np
-import healpy as hp
-from astropy.io import fits
 import argparse
-import warnings
-
-
 import logging
+import os
+import sys
+import warnings
+from contextlib import contextmanager
+
+import healpy as hp
+import numpy as np
+from astropy.io import fits
+
 log = logging.getLogger(__name__)
 
 

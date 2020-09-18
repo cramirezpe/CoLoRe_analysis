@@ -4,22 +4,27 @@
     It can be imported as a module or used as script.
 '''
 
-import logging
-log = logging.getLogger(__name__)
-from contextlib import contextmanager
-import warnings
-
-import numpy as np
-import healpy as hp
-import pyccl as ccl
-import os, sys, io
-from astropy.io import fits
-from itertools import combinations_with_replacement
-from datetime import datetime
-import CoLoRe_analysis.sims_reader as sims_reader
-
 import argparse
+import io
 import json
+import logging
+import os
+import sys
+import warnings
+from contextlib import contextmanager
+from datetime import datetime
+from itertools import combinations_with_replacement
+
+import healpy as hp
+import numpy as np
+import pyccl as ccl
+from astropy.io import fits
+
+from CoLoRe_analysis import sims_reader
+
+log = logging.getLogger(__name__)
+
+
 
 def getArgs(): #pragma: no cover
     parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")

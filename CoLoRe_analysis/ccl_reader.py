@@ -1,10 +1,12 @@
-from CoLoRe_analysis.compute_data_CCL import compute_data
-import numpy as np
-from shutil import rmtree
-import os
 import json
-
 import logging
+import os
+from shutil import rmtree
+
+import numpy as np
+
+from CoLoRe_analysis import compute_data_CCL
+
 log = logging.getLogger(__name__)
 
 class CCLReader:
@@ -29,7 +31,7 @@ class CCLReader:
         '''
         log.info(f'Computing data for source: { source }')
 
-        compute_data(self.sim_location, self.analysis_location, source, nside, None, downsampling, zbins, nz_h, nz_min, nz_max, **kwargs)
+        compute_data_CCL.compute_data(self.sim_location, self.analysis_location, source, nside, None, downsampling, zbins, nz_h, nz_min, nz_max, **kwargs)
 
     def get_values(self, value, **kwargs):
         '''Obtain values for Cls (CCL or sim)
@@ -117,4 +119,3 @@ class CCLReader:
             elif confirmation == 'n': # pragma: no cover
                 print('Cancelling')
                 return
-

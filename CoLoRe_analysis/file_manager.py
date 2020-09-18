@@ -1,10 +1,12 @@
-import os
-import shutil 
-from CoLoRe_analysis.sims_reader import Sim0404
 import json
-from pathlib import Path
+import os
 import shutil
+from pathlib import Path
+
 from tabulate import tabulate
+
+from CoLoRe_analysis import sims_reader
+
 
 # The class FileManager should be understood as a group of functions (a FileManager object would be totally unuseful). 
 # All the file handling system relies in the existence of a info_file in each Simulation. This info_file will contain the basic information of the Simulation and it is included by default in the scripts located in Shs/CoLoRe_LSST/. 
@@ -181,7 +183,7 @@ class FileManager:
         # Find simulations
         for i,sim in enumerate(cls.get_simulations(path,param_filter)):
             simname = i
-            sims[simname] = Sim0404(sim,simname)
+            sims[simname] = sims_reader.Sim0404(sim,simname)
         
         # Getting informations    
         for x in sims.keys():

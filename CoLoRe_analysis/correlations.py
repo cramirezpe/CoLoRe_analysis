@@ -1,12 +1,12 @@
-from CoLoRe_analysis.shear_reader import ShearReader, redshift_to_str_for_path
-from CoLoRe_analysis.functions import check_iterable
-import numpy as np
-from sklearn.linear_model import LinearRegression
-from shutil import copy2
-import os
-
-
 import logging
+import os
+from shutil import copy2
+
+import numpy as np
+from sklearn.linear_model    import LinearRegression
+
+from CoLoRe_analysis import shear_reader
+
 log = logging.getLogger(__name__)
 
 
@@ -130,8 +130,8 @@ class CorrelateTwoShears:
     def path_to_correlation(self, parameter='mp_e1', source=1, minz=None, maxz=None):
         seed = list(self.seeds)[0]
         if minz != None and maxz != None:
-            minz_str = redshift_to_str_for_path(minz)
-            maxz_str = redshift_to_str_for_path(maxz)
+            minz_str = shear_reader.redshift_to_str_for_path(minz)
+            maxz_str = shear_reader.redshift_to_str_for_path(maxz)
             out = self.sims[seed][0].analysis_location + f'/shear_data/correlations/' + self.sims[seed][1].preparation_time +f'/binned/{ minz_str }_{ maxz_str }/source_{ source }/'
         else:
             out = self.sims[seed][0].analysis_location + f'/shear_data/correlations/source_{ source }/' + self.sims[seed][1].preparation_time +'/'

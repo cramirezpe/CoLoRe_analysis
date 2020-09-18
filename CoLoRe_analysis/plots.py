@@ -1,5 +1,6 @@
-import numpy as np 
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 class ClsPlotter():
     cld_dd_string = '$\\delta_g\\times\\delta_g$'

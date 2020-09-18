@@ -1,13 +1,15 @@
-import os
 import glob
-import numpy as np
+import json
+import logging
+import os
 import re
 import shutil
 import subprocess
-import CoLoRe_analysis.shear_reader as shear_reader
-import CoLoRe_analysis.ccl_reader as ccl_reader
-import json
-import logging
+
+import numpy as np
+
+from CoLoRe_analysis import ccl_reader, shear_reader
+
 log = logging.getLogger(__name__)
 
 

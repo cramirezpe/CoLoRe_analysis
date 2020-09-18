@@ -119,7 +119,7 @@ class TestMainFunction(unittest.TestCase):
         if os.path.isdir( ccl_data_dir ):
             rmtree( ccl_data_dir )
 
-    @patch('CoLoRe_analysis.ccl_reader.compute_data', side_effect=mock_compute_data)
+    @patch('CoLoRe_analysis.compute_data_CCL.compute_data', side_effect=mock_compute_data)
     def test_output_exists_and_empty(self, mock_func):
         self.args.input = self.sim_location
         self.args.output= self.empty_output
@@ -130,7 +130,7 @@ class TestMainFunction(unittest.TestCase):
 
         assert not mock_func.called
 
-    @patch('CoLoRe_analysis.ccl_reader.compute_data')
+    @patch('CoLoRe_analysis.compute_data_CCL.compute_data')
     def test_raise_when_no_paramcfg(self, mock_func):
         self.args.input     = self.sim_location
         self.args.output    = self.wrong_output
@@ -141,7 +141,7 @@ class TestMainFunction(unittest.TestCase):
 
         assert not mock_func.called
         
-    @patch('CoLoRe_analysis.ccl_reader.compute_data')
+    @patch('CoLoRe_analysis.compute_data_CCL.compute_data')
     def test_output_exists_with_wrong_sim(self, mock_func):
         self.args.input     = self.sim_location
         self.args.output    = self.wrong_output
@@ -152,7 +152,7 @@ class TestMainFunction(unittest.TestCase):
 
         assert not mock_func.called
 
-    @patch('CoLoRe_analysis.ccl_reader.compute_data', side_effect=mock_compute_data)
+    @patch('CoLoRe_analysis.compute_data_CCL.compute_data', side_effect=mock_compute_data)
     @patch('builtins.print')
     def test_output_exists_with_correct_info(self, mock_print, mock_func):
         self.args.input     = self.sim_location
@@ -170,7 +170,7 @@ class TestMainFunction(unittest.TestCase):
         output = sim.ccl_reader.search_output()
         self.assertEqual(output[0]['source'], 3)
 
-    @patch('CoLoRe_analysis.ccl_reader.compute_data', side_effect=mock_compute_data)
+    @patch('CoLoRe_analysis.compute_data_CCL.compute_data', side_effect=mock_compute_data)
     @patch('builtins.print')
     def test_output_does_not_exist(self, mock_print, mock_func):
         self.args.input     = self.sim_location

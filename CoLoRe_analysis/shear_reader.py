@@ -1,9 +1,11 @@
-from CoLoRe_analysis.compute_data_shear import compute_data_shear
-import numpy as np
-from shutil import rmtree
-import os
-
 import logging
+import os
+from shutil import rmtree
+
+import numpy as np
+
+from CoLoRe_analysis import compute_data_shear
+
 log = logging.getLogger(__name__)
 
 def redshift_to_str_for_path(redshift):

@@ -116,20 +116,20 @@ class TestCCLReader(unittest.TestCase):
         self.assertEqual( self.cr.search_output(**self.data1), [] )
         
     
-    @patch('CoLoRe_analysis.ccl_reader.compute_data', side_effect=mock_compute_data)
+    @patch('CoLoRe_analysis.compute_data_CCL.compute_data', side_effect=mock_compute_data)
     def test_do_data_computations(self, mock_func):
         self.cr.do_data_computations( source=1 )
         cl_mm_t = np.loadtxt(self.computed_data_path + '/20200101_000000/cl_mm_t.dat')
         np.testing.assert_equal(cl_mm_t, [1,2,3])
 
     @patch('builtins.input', return_value='y')
-    @patch('CoLoRe_analysis.ccl_reader.compute_data', side_effect=mock_compute_data)
+    @patch('CoLoRe_analysis.compute_data_CCL.compute_data', side_effect=mock_compute_data)
     def test_creation_when_does_not_exist(self, mock_func, mocked_input):
         nz_tot = self.cr.get_values('nz_tot', nside=128)
         nz_tot = self.cr.get_values('nz_tot', nside=128)
         np.testing.assert_equal(nz_tot, [4,5,6])
 
-    @patch('CoLoRe_analysis.ccl_reader.compute_data')
+    @patch('CoLoRe_analysis.compute_data_CCL.compute_data')
     def test_obtain_when_does_exist_without_computing(self, mock_func):
         path = self.computed_data_path + '/1'
         with open(path + '/pairs.dat','a') as f:

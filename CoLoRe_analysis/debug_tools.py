@@ -1,10 +1,10 @@
-import pdb
 import functools
-import traceback
+import pdb
 import sys
 import time
-
+import traceback
 from contextlib import contextmanager
+
 
 @contextmanager
 def debug_on_context(*exceptions): #pragma: no cover
