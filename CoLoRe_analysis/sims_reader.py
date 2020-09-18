@@ -162,7 +162,7 @@ class Simulation:
     
     @version.setter
     def version(self, value):
-        if value not in ['New','Old','master','master_bias3']:
+        if value not in ['New','Old','master','master_bias3',None]:
             raise TypeError('Version should be New/Old/master',value)
         self._version = value
         
