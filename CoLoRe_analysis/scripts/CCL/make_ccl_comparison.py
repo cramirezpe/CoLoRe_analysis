@@ -25,7 +25,7 @@ def getArgs():
     parser.add_argument("--nz_h",         required=False, type=int , default=50 , help="pixelization of the redshift analysis ")
     parser.add_argument("--nz_min",       required=False, type=float , default=0 , help="min redshift for the redshfit analysis")
     parser.add_argument("--nz_max",       required=False, type=float , default=3 , help="max redshift for the redshfit analysis")
-    parser.add_argument('--code',         required=False, choices=['anafast','namaster'], default='namaster', help='Which code use to compute the cls')
+    parser.add_argument('--code',         required=False, choices=['anafast','namaster'], default='anafast', help='Which code use to compute the cls')
 
     args = parser.parse_args()
     return args
@@ -130,9 +130,9 @@ def main(args=None):
             ax.set_title(f'{a}-{p1} {b}-{p2}')
 
             msk = sims[0].ccl_reader.d_values.l < 2*sims[0].ccl_reader.d_values.nside
-            y_lim_msk = sims[0].ccl_reader.d_values.l<1500
+            y_lim_msk = sims[0].ccl_reader.d_values.l<750
             l = sims[0].ccl_reader.d_values.l[msk]
-            y_max = y_min = 10**5
+            y_max = y_min = 0
 
             if p1 == p2 and x=='dd':
                 for sim in sims:
@@ -149,18 +149,20 @@ def main(args=None):
                 sim.clt = sim.ccl_reader.t_values.get_values(a, b, p1, p2, msk)
                 sim.err = sim.ccl_reader.d_values.get_errors(a, b, p1, p2, msk)
 
-                y_lim_msk = sim.ccl_reader
-                y_max = max( y_max, np.max(sim.cl) )
-                y_min = min( y_min, np.min(sim.cl) )
+                high_value_masked_for_ylim  = (sim.ccl_reader.d_values.get_values(a, b, p1, p2, y_lim_msk) - sim.ccl_reader.nl + sim.ccl_reader.d_values.get_errors(a, b, p1, p2, y_lim_msk))/sim.ccl_reader.t_values.get_values(a, b, p1, p2, y_lim_msk) -1 
+                low_value_masked_for_ylim    = (sim.ccl_reader.d_values.get_values(a, b, p1, p2, y_lim_msk) - sim.ccl_reader.nl - sim.ccl_reader.d_values.get_errors(a, b, p1, p2, y_lim_msk))/sim.ccl_reader.t_values.get_values(a, b, p1, p2, y_lim_msk) -1
+                y_max = max( y_max, np.max(high_value_masked_for_ylim) )
+                y_min = min( y_min, np.min(low_value_masked_for_ylim) )
 
                 delta = (l[1]-l[0])*i/len(sims)*0.5
                 
                 ax.errorbar(l+delta, sim.cl/sim.clt - 1, yerr=sim.err/sim.clt, fmt='.', label=f'Sim {str(sim)}/pred', lw=0.5)
-
+            
+            ax.plot(l,np.zeros_like(l),'k-', lw=0.8)
             ax.set_xlabel(r'$\ell$', fontsize=15)
             ax.set_ylabel(r'$C_\ell$', fontsize=15)
+            ax.set_ylim(y_min, y_max)
             ax.legend()
-            ax.set_yscale('log')
     plt.tight_layout()
     plt.show()
 
@@ -192,7 +194,7 @@ def main(args=None):
             msk = sims[0].ccl_reader.d_values.l<2*sims[0].ccl_reader.d_values.nside
             l = sims[0].ccl_reader.d_values.l[msk]
 
-            for sim in sims:
+            for i, sim in enumerate(sims):
                 sim.cl  = sim.ccl_reader.d_values.get_values(a, b, p1, p2, msk)
                 sim.err = sim.ccl_reader.d_values.get_errors(a, b, p1, p2, msk)
                  
@@ -202,7 +204,7 @@ def main(args=None):
             ax.set_xlabel(r'$\ell$', fontsize=15)
             ax.set_ylabel(r'$C_ell$', fontsize=15)
             ax.legend()
-    # plt.tight_layout()
+    plt.tight_layout()
     plt.show()
 
     return
