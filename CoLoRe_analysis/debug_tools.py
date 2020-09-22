@@ -36,25 +36,31 @@ def debug_on(*exceptions): #pragma: no cover
 
 class Stopwatch(): #pragma: no cover
     def __init__(self):
-        self.start_time = time.process_time()
+        self.start_time = time.time()
         self.lap_times = []
+        self.lap_abs_times = []
     
-    def lap(self, message=None):
-        try:
-            lap_time = time.process_time() - self.lap_times[-1]
-        except IndexError:
-            lap_time = time.process_time() - self.start_time
-        self.lap_times.append(lap_time)
-        if message is None:
-            print('Stopwatch Lap\t', lap_time)
+    def lap(self, message=None, silent=True):
+        now = time.time()
+        if len(self.lap_times) == 0:
+            lap_time = now - self.start_time
         else:
-            print('Stopwatch Lap. ', message, ':\t', lap_time)
+            lap_time = now - self.lap_abs_times[-1]
+        self.lap_times.append(lap_time)
+        self.lap_abs_times.append(now)
+        if not silent:
+            if message is None:
+                print('Stopwatch Lap\t', lap_time)
+            else:
+                print(message, ':\t', lap_time)
+
         return lap_time
 
-    def full(self, message=None):
-        full_time = time.process_time() - self.start_time
-        if message is None:
-            print('Stopwatch Global\t', full_time)
-        else:
-            print('Stopwatch Global. ', message, ':\t', full_time)
+    def full(self, message=None, silent=True):
+        full_time = time.time() - self.start_time
+        if not silent:
+            if message is None:
+                print('Stopwatch Global\t', full_time)
+            else:
+                print(message, ':\t', full_time)
         return full_time
