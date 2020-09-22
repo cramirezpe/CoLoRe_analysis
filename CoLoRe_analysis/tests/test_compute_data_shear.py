@@ -35,7 +35,7 @@ class TestShearDataComputation(unittest.TestCase):
 
     def test_compute_data_shear_with_bins_2(self):
         # This will be saved as 200,201 in a regular basis. Just for testing pourpuses. In real usage It won't work well for this precision level
-        compute_data_shear.compute_data_shea(self.sim_path, source=2, minz=2, maxz=2.005, output_path = self.analysis_path + f'/shear_data/binned/200_2005/source_2', do_cls=False, do_kappa=False)
+        compute_data_shear.compute_data_shear(self.sim_path, source=2, minz=2, maxz=2.005, output_path = self.analysis_path + f'/shear_data/binned/200_2005/source_2', do_cls=False, do_kappa=False)
 
         a = np.loadtxt(self.analysis_path + f'/shear_data/binned/200_2005/source_2/mp_E.dat')
 
