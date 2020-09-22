@@ -30,9 +30,10 @@ class Simulation:
             while True:
                 try:
                     self.get_config_file(param_file)
+                    print('Configuration file found in '+param_file)
                     break
                 except FileNotFoundError:
-                    param_file = input(f'Configuration file for simulation {self.location} not found. Please provide the param.cfg path/s to skip')
+                    param_file = input(f'Configuration file for simulation {self.location} not found. Please provide the param.cfg path/s to skip\n')
                     
 
         try: 
