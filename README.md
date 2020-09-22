@@ -11,11 +11,6 @@ Activate virtual environment:
 conda activate <env_name>
 ```
 
-Install general requirements:
-```shell
-pip install -r requirements.txt
-```
-
 Install pymaster:
 ```shell
 conda install -c conda-forge namaster
@@ -24,6 +19,11 @@ conda install -c conda-forge namaster
 Install pyccl:
 ```shell
 conda install -c conda-forge pyccl
+```
+
+Install general requirements:
+```shell
+pip install -r requirements.txt
 ```
 
 Install package (in editable mode):
