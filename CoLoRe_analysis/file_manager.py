@@ -103,10 +103,16 @@ class FileManager:
     def filter_parameters(cls,path,param_filter):
         with open(f'{path}/sim_info.json') as json_file:
             info = json.load(json_file)
-        
+
         for key in param_filter.keys():
-            if info[key] not in param_filter[key]:
-                break
+            if key != 'param_cfg':
+                if info[key] not in param_filter[key]:
+                    return False
+            else:
+                for group_key in param_filter[key].keys():
+                    for element_key in param_filter[key][group_key].keys():
+                        if info['_param_cfg'][group_key][element_key] not in param_filter[key][group_key][element_key]:
+                            return False
         else:
             return True
 
