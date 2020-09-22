@@ -33,7 +33,6 @@ kdcount==0.3.29
 kiwisolver==1.2.0
 lazy-object-proxy==1.4.3
 libconf==2.0.1
-libsharp==0.1
 llvmlite==0.32.1
 LyaCoLoRe==0.1
 matplotlib==3.1.3
@@ -62,10 +61,8 @@ pmesh==0.1.55
 prompt-toolkit==3.0.2
 ptyprocess==0.6.0
 py==1.8.1
-pyccl==2.1.0
 Pygments==2.5.2
 pylint==2.5.3
-pymaster==1.0.2
 pyparsing==2.4.7
 pytest==5.4.2
 pytest-runner==5.2
