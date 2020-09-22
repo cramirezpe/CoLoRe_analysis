@@ -21,6 +21,7 @@ import pyccl as ccl
 from astropy.io import fits
 
 from CoLoRe_analysis import sims_reader
+from CoLoRe_analysis.debug_tools import Stopwatch
 
 log = logging.getLogger(__name__)
 
@@ -42,6 +43,8 @@ def getArgs(): #pragma: no cover
     parser.add_argument("--nz_max",       required=False, type=float , default=None , help="max redshift for the redshfit analysis")
     parser.add_argument('--code',         required=False, choices=['anafast','namaster'], default='namaster', help='Which code use to compute the cls')
 
+    parser.add_argument('--log',          required=False, default=None, help='Setup logging, use levelname as string  (Set to INFO to see script timings)')
+
     args = parser.parse_args()
     return args
 
@@ -56,6 +59,11 @@ def main(args=None):
     options.pop('input')
     options.pop('output')
     options.pop('param')
+    options.pop('log')
+
+    if args.log is not None:
+        level = logging.getLevelName(args.log)
+        logging.basicConfig(level=level)
 
     if not os.path.isfile(args.param):
         raise FileNotFoundError('Param cfg not found')
@@ -132,6 +140,7 @@ def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, d
     
     log.debug(f'Computing data for:\nsim_path: { sim_path }\nsource: { source }\noutput_path: { output_path }')
 
+
     if code == 'anafast':
         values = compute_all_cls_anafast(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max)
     elif code == 'namaster':
@@ -206,7 +215,8 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
 
     ifile = 0
 
-    log.info('Reading output files...\n')
+    timer = Stopwatch()
+    log.info('Reading output files...')
     while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile) and ( (not file_limit) or ifile <= max_files):
         hdulist = fits.open(sim_path + '/out_srcs_s1_%d.fits' % ifile)
         d = hdulist[1].data
@@ -248,8 +258,8 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
 
     # Midpoint of N(z) histogram
     z_nz = 0.5*(z_edges[1:] + z_edges[:-1])
-
-    log.info('Computing maps...\n')
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Computing maps...')
     # Compute <e> map and overdensity map
     # Compute also shot noise level
     shotnoise = np.zeros(nbins)
@@ -268,7 +278,9 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
     pks_dm = []
     pks_mm = []
     z_pk = 0.
-    log.info('Reading pk files...\n')
+    
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Reading pk files...')
     while os.path.isfile(sim_path + "/out_pk_srcs_pop0_z%.3lf.txt" % z_pk):
         ks, pdd, pdm, pmm = np.loadtxt(sim_path + "/out_pk_srcs_pop0_z%.3lf.txt" % z_pk, unpack=True)
         # The delta-delta prediction involves some Fourier transforms that make it unstable
@@ -287,7 +299,9 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
     pks_dm = np.array(pks_dm)[::-1, :] / h**3
     pks_mm = np.array(pks_mm)[::-1, :] / h**3
 
-    log.info('Creating CCL structures...\n')
+
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Creating CCLd structures...')
     # Create CCL P(k) structures
     cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=h, n_s=0.96, sigma8=0.8)
     pk2d_dd = ccl.Pk2D(a_arr=1./(1+zs), lk_arr=np.log(ks), pk_arr=pks_dd,
@@ -304,7 +318,9 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
             for i in range(nbins)]
     tr_l = [ccl.WeakLensingTracer(cosmo, (z_nz, nz_tot[i])) for i in range(nbins)]
 
-    log.info('Computing CCL power spectra...\n')
+
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Computing CCL power spectra...')
     # Compute power spectra. I'm only doing delta-delta here.
     larr = np.arange(3*nside)
     cl_dd_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dd)
@@ -316,7 +332,9 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
     cl_md_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_l[p2], larr, p_of_k_a=pk2d_dm)
                         for p2, p1 in pairs])
 
-    log.info('Computing values from data...\n')
+
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Computing values from data...')
     d_values = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asarray([dmap[p2],e1map[p2],e2map[p2]]), pol=True) for p1,p2 in pairs])
 
     cl_md_d = np.copy(d_values[:,3])
@@ -350,6 +368,9 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
         'cl_db_d':      cl_db_d
     }
 
+    
+    log.info(f'\t Relative time: {timer.lap()}\n\n')
+    log.info(f'\t Total time: {timer.full()}')
     return values
 
 def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
@@ -401,7 +422,9 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
 
     ifile = 0
 
-    log.info('Reading output files...\n')
+    timer = Stopwatch()
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Reading output files...')
     while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile) and ( (not file_limit) or ifile <= max_files):
         hdulist = fits.open(sim_path + '/out_srcs_s1_%d.fits' % ifile)
         d = hdulist[1].data
@@ -444,7 +467,8 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
     # Midpoint of N(z) histogram
     z_nz = 0.5*(z_edges[1:] + z_edges[:-1])
 
-    log.info('Computing maps...\n')
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Computing maps...')
     # Compute <e> map and overdensity map
     # Compute also shot noise level
     shotnoise = np.zeros(nbins)
@@ -463,7 +487,9 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
     pks_dm = []
     pks_mm = []
     z_pk = 0.
-    log.info('Reading pk files...\n')
+    
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Reading pk files...')
     while os.path.isfile(sim_path + "/out_pk_srcs_pop0_z%.3lf.txt" % z_pk):
         ks, pdd, pdm, pmm = np.loadtxt(sim_path + "/out_pk_srcs_pop0_z%.3lf.txt" % z_pk, unpack=True)
         # The delta-delta prediction involves some Fourier transforms that make it unstable
@@ -482,7 +508,8 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
     pks_dm = np.array(pks_dm)[::-1, :] / h**3
     pks_mm = np.array(pks_mm)[::-1, :] / h**3
 
-    log.info('Creating CCL structures...\n')
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Creating CCL structures...')
     # Create CCL P(k) structures
     cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=h, n_s=0.96, sigma8=0.8)
     pk2d_dd = ccl.Pk2D(a_arr=1./(1+zs), lk_arr=np.log(ks), pk_arr=pks_dd,
@@ -499,7 +526,8 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
             for i in range(nbins)]
     tr_l = [ccl.WeakLensingTracer(cosmo, (z_nz, nz_tot[i])) for i in range(nbins)]
 
-    log.info('Computing CCL power spectra...\n')
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Computing CCL power spectra...')
     # Compute power spectra. I'm only doing delta-delta here.
     larr = np.arange(3*nside)
     cl_dd_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dd)
@@ -511,7 +539,8 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
     cl_md_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_l[p2], larr, p_of_k_a=pk2d_dm)
                         for p2, p1 in pairs])
 
-    log.info('Computing values from data...\n')
+    log.info(f'\t Relative time: {timer.lap()}\n')
+    log.info('Computing values from data...')
     import pymaster as nmt
 
     b=nmt.NmtBin.from_edges(np.arange(3*nside+1)[:-1],
@@ -595,6 +624,8 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
         'e2map':        e2map
     }
 
+    log.info(f'\t Relative time: {timer.lap()}\n\n')
+    log.info(f'\t Total time: {timer.full()}')
     return values
 
     
