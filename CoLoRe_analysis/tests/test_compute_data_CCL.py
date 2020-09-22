@@ -99,7 +99,8 @@ class TestMainFunction(unittest.TestCase):
         nz_h=50,
         nz_min=0,
         nz_max=None,
-        code='anafast'
+        code='anafast',
+        log=None
     )
 
     def setUp(self):
