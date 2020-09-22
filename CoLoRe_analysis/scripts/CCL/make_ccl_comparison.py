@@ -17,6 +17,7 @@ def getArgs():
     parser = argparse.ArgumentParser(description="Compare Cls plots from multiple simulations")
     parser.add_argument('--sims', required=True, nargs='+', type=str, help='Path to simulations')
     parser.add_argument('--sims-labels', required=False, default=None, nargs='+', type=str, help='Sims labels for plots')
+    parser.add_argument('--sims-colors', required=False, default=None, nargs='+', type=str, help='Colors in the plots for the previous simulations (matplotlib color naming, e.g: b, r, g, k)')
     parser.add_argument('--rebin', required=False, default=2**6, type=int, help='Rebin size for plots')
    
     parser.add_argument("--source",       required=False, type=int, default=1, help="Sources to be computed")
@@ -38,11 +39,15 @@ def main(args=None):
     options.pop('sims')
     options.pop('sims_labels')
     options.pop('rebin')
+    options.pop('sims_colors')
 
     sims = []
-    args.sims_labels = list(range(len(args.sims))) if args.sims_labels is None else args.sims_labels
-    for path, label in zip(args.sims,args.sims_labels):
+    args.sims_labels = list(range(len(args.sims)))          if args.sims_labels is None else args.sims_labels
+    args.sims_colors = ["" for x in range(len(args.sims))]  if args.sims_colors is None else args.sims_colors
+    
+    for i, (path, label) in enumerate(zip(args.sims,args.sims_labels)):
         sims.append( sims_reader.Sim0404(path, label) )
+        sims[i].color = args.sims_colors[i]
 
     values_names = ['shotnoise','pairs','nz_tot','z_nz','cl_dd_d','cl_dm_d','cl_mm_d','cl_dd_t',
                 'cl_dm_t', 'cl_mm_t','cl_md_d','cl_md_t','cl_bb_d','cl_mb_d','cl_db_d']
@@ -90,7 +95,7 @@ def main(args=None):
                 for sim in sims:
                     sim.ccl_reader.nl = sim.ccl_reader.shotnoise[p1]
                     ax.plot(l, sim.ccl_reader.nl*np.ones_like( sim.ccl_reader.d_values.l[msk] ),
-                        '--', label=f'Shot noise {str(sim)}')
+                        sim.color+'--', label=f'Shot noise {str(sim)}')
             else:
                 for sim in sims:
                     sim.ccl_reader.nl = 0
@@ -102,8 +107,8 @@ def main(args=None):
 
                 delta = (l[1]-l[0])*i/len(sims)*0.5
                 
-                ax.errorbar(l+delta, sim.cl, yerr=sim.err, fmt='.', label=f'Sim {str(sim)}', lw=0.5)
-                ax.plot(l+delta, sim.clt, lw=0.3, label=f'Prediction {str(sim)}')
+                ax.errorbar(l+delta, sim.cl, yerr=sim.err, fmt=sim.color+'.', label=f'Sim {str(sim)}', lw=0.5)
+                ax.plot(l+delta, sim.clt, sim.color+'-', lw=0.3, label=f'Prediction {str(sim)}')
 
             ax.set_xlabel(r'$\ell$', fontsize=15)
             ax.set_ylabel(r'$C_\ell$', fontsize=15)
@@ -138,7 +143,7 @@ def main(args=None):
                 for sim in sims:
                     sim.ccl_reader.nl = sim.ccl_reader.shotnoise[p1]
                     ax.plot(l, sim.ccl_reader.nl*np.ones_like( sim.ccl_reader.d_values.l[msk] ),
-                        '--', label=f'Shot noise {str(sim)}')
+                        sim.color+'--', label=f'Shot noise {str(sim)}')
             else:
                 for sim in sims:
                     sim.ccl_reader.nl = 0
@@ -156,7 +161,7 @@ def main(args=None):
 
                 delta = (l[1]-l[0])*i/len(sims)*0.5
                 
-                ax.errorbar(l+delta, sim.cl/sim.clt - 1, yerr=sim.err/sim.clt, fmt='.', label=f'Sim {str(sim)}/pred', lw=0.5)
+                ax.errorbar(l+delta, sim.cl/sim.clt - 1, yerr=sim.err/sim.clt, fmt=sim.color+'.', label=f'Sim {str(sim)}/pred', lw=0.5)
             
             ax.plot(l,np.zeros_like(l),'k-', lw=0.8)
             ax.set_xlabel(r'$\ell$', fontsize=15)
@@ -199,8 +204,8 @@ def main(args=None):
                 sim.err = sim.ccl_reader.d_values.get_errors(a, b, p1, p2, msk)
                  
                 delta = (l[1]-l[0])*i/len(sims)*0.5
-                ax.errorbar(l+delta, sim.cl, yerr=sim.err, fmt='.', label=f'Sim {str(sim)}')
-            ax.plot(l, np.zeros_like(l), 'b-', label='Prediction')
+                ax.errorbar(l+delta, sim.cl, yerr=sim.err, fmt=sim.color+'.', label=f'Sim {str(sim)}')
+            ax.plot(l, np.zeros_like(l), 'k-', label='Prediction')
             ax.set_xlabel(r'$\ell$', fontsize=15)
             ax.set_ylabel(r'$C_ell$', fontsize=15)
             ax.legend()
