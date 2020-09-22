@@ -3,7 +3,7 @@ import os
 import unittest
 from shutil import rmtree
 
-from mock import call, patch
+from unittest.mock import call, patch
 
 from CoLoRe_analysis import sims_reader, file_manager, sims_reader
 
