@@ -6,6 +6,11 @@ Create virtual environment (optional):
 conda create -n <env_name> python=3.8.5
 ```
 
+Activate virtual environment:
+```shell
+conda activate <env_name>
+```
+
 Install general requirements:
 ```shell
 pip install -r requirements.txt
