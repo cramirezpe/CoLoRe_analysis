@@ -219,7 +219,7 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
     log.info('Reading output files...')
     while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile) and ( (not file_limit) or ifile <= max_files):
         file_watch = Stopwatch()
-        log.info('Reading file: ' + ifile)
+        log.info('Reading file: ' + str(ifile))
         hdulist = fits.open(sim_path + '/out_srcs_s1_%d.fits' % ifile)
         d = hdulist[1].data
         n_g = len(d)
@@ -498,11 +498,15 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
         # The delta-delta prediction involves some Fourier transforms that make it unstable
         # at high-k, so we just set it to zero.
         pdd[pmm<1E-30] = 0
+        pdd[pdd<0] = 0
+        pdd[ks>1.9] = 0
+        pdd[ks<3E-4] = 0
         pks_dd.append(pdd)
         pks_dm.append(pdm)
         pks_mm.append(pmm)
         zs.append(z_pk)
         z_pk += 0.1
+
     # Reverse order (because CCL needs increasing scale factor - not redshift).
     # Also, CCL uses non-h units.
     zs = np.array(zs)[::-1]
@@ -523,6 +527,8 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
                     is_logp=False, extrap_order_hik=0, extrap_order_lok=0)
     # These can be evaluated as follows:
     pk2d_dd.eval(k=0.1, a=1/(1+0.2), cosmo=cosmo) # This was printed by David!
+    pk2d_dm.eval(k=0.1, a=1/(1+0.2), cosmo=cosmo)
+    pk2d_mm.eval(k=0.1, a=1/(1+0.2), cosmo=cosmo)
 
     # Create a number counts and a weak lensing tracer for each of the bins
     tr_d = [ccl.NumberCountsTracer(cosmo, False, (z_nz, nz_tot[i]), bias=(z_nz, np.ones_like(z_nz)))
@@ -531,80 +537,60 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
 
     log.info(f'\t Relative time: {timer.lap()}\n')
     log.info('Computing CCL power spectra...')
-    # Compute power spectra. I'm only doing delta-delta here.
+    import pymaster as nmt
+
+    bn = nmt.NmtBin(nside, nlb=4)
+    leff = bn.get_effective_ells()
     larr = np.arange(3*nside)
-    cl_dd_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_d[p2], larr, p_of_k_a=pk2d_dd)
-                        for p1, p2 in pairs])
-    cl_dm_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_l[p2], larr, p_of_k_a=pk2d_dm)
-                        for p1, p2 in pairs])
-    cl_mm_t = np.array([ccl.angular_cl(cosmo, tr_l[p1], tr_l[p2], larr, p_of_k_a=pk2d_mm)
-                        for p1, p2 in pairs])
-    cl_md_t = np.array([ccl.angular_cl(cosmo, tr_d[p1], tr_l[p2], larr, p_of_k_a=pk2d_dm)
-                        for p2, p1 in pairs])
+
+    def get_cl_t(t1, t2, pk):
+        try:
+            cl = ccl.angular_cl(cosmo, t1, t2, larr, p_of_k_a=pk)
+        except:
+            print('SHIT')
+            cl = np.zeros_like(larr)
+        return bn.bin_cell(np.array([cl]))[0]
+
+    cl_dd_t = []
+    cl_dm_t = []
+    cl_mm_t = []
+    cl_md_t = []
+    for p1, p2 in pairs:
+        cl_dd_t.append( get_cl_t(tr_d[p1], tr_d[p2], pk2d_dd) )
+        cl_dm_t.append( get_cl_t(tr_d[p1], tr_l[p2], pk2d_dm) )
+        cl_mm_t.append( get_cl_t(tr_l[p1], tr_l[p2], pk2d_mm) )
+        cl_md_t.append( get_cl_t(tr_d[p2], tr_l[p1], pk2d_dm) )
+    
+    cl_dd_t, cl_dm_t, cl_mm_t, cl_md_t = list( map(np.asarray, (cl_dd_t, cl_dm_t, cl_mm_t, cl_md_t)) )
 
     log.info(f'\t Relative time: {timer.lap()}\n')
     log.info('Computing values from data...')
-    import pymaster as nmt
+    
+    f_g = []
+    f_l = []
 
-    b=nmt.NmtBin.from_edges(np.arange(3*nside+1)[:-1],
-                            np.arange(3*nside+1)[1:])
-    # Spin-0 fields
-    mone = np.ones(npix)
-    f0 = [nmt.NmtField(mone, [d], n_iter=0) for d in dmap]
-    # Spin-2 fields
-    f2 = [nmt.NmtField(n, [e1, e2], n_iter=0) for n, e1, e2 in zip(nmap, e1map, e2map)]
+    for ib in range(nbins):
+        f_g.append( nmt.NmtField(np.ones(npix), [dmap[ib]], n_iter=0) )
+        f_l.append( nmt.NmtField(nmap[ib], [e1map[ib], e2map[ib]], n_iter=0) )
 
-    # DD power spectra
-    w_dd = {}
-    for p in range(nbins):
-        w_dd[p] = nmt.NmtWorkspace()
-        w_dd[p].compute_coupling_matrix(f0[p],f0[p], b)
-    cl_dd = np.array([w_dd[p2].decouple_cell(nmt.compute_coupled_cell(f0[p1], f0[p2]))[0] 
-                        for p1, p2 in pairs])
+    def get_cl_d(f1, f2):
+        w = nmt.NmtWorkspace()
+        w.compute_coupling_matrix(f1, f2, bn)
+        cl = w.decouple_cell(nmt.compute_coupled_cell(f1, f2))[0]
+        return cl
 
-    # w_dd = nmt.NmtWorkspace()
-    # w_dd.compute_coupling_matrix(f0, f0, b)
-    # cl_dd = np.array([w_dd.decouple_cell(nmt.compute_coupled_cell(f0[p1], f0[p2]))[0]
-    #                   for p1, p2 in pairs])
-        
-    # DM power spectra
-    w_dl = {}
-    for p in range(nbins):
-        w_dl[p] = nmt.NmtWorkspace()
-        w_dl[p].compute_coupling_matrix(f0[p], f2[p], b)
-    cl_dm = np.array([[w_dl[p2].decouple_cell(nmt.compute_coupled_cell(f0[p1], f2[p2]))
-                       for p2 in range(nbins)]
-                      for p1 in range(nbins)])
-
-    # MM power spectra
-    w_ll = {}
-    for p in range(nbins):
-        w_ll[p] = nmt.NmtWorkspace()
-        w_ll[p].compute_coupling_matrix(f2[p], f2[p], b)
-    cl_mm = np.array([w_ll[p2].decouple_cell(nmt.compute_coupled_cell(f2[p1], f2[p2]))
-                       for p1, p2 in pairs])
-        
-    #d_values = np.array([hp.anafast(np.asarray([dmap[p1],e1map[p1],e2map[p1]]),np.asarray([dmap[p2],e1map[p2],e2map[p2]]), pol=True) for p1,p2 in pairs])
-    #
-    #cl_md_d = np.copy(d_values[:,3])
-    #
-    #for i, (p1,p2) in enumerate(pairs):
-    #    if p1 != p2:
-    #        cl_md_d[i] = np.array(hp.anafast(np.asarray([dmap[p2],e1map[p2],e2map[p2]]), np.asarray([dmap[p1],e1map[p1],e2map[p1]])))[3]
-
-    cl_dd_d = cl_dd
-    cl_mm_d = cl_mm[:, 0, :]
-    cl_bb_d = cl_mm[:, 3, :]
-    cl_dm_d = np.array([cl_dm[0, 0, 0, :],
-                        cl_dm[0, 1, 0, :],
-                        cl_dm[1, 1, 0, :]])
-    cl_md_d = np.array([cl_dm[0, 0, 0, :],
-                        cl_dm[1, 0, 0, :],
-                        cl_dm[1, 1, 0, :]])
-    cl_mb_d = cl_mm[:, 1, :]
-    cl_db_d = np.array([cl_dm[0, 0, 1, :],
-                        cl_dm[0, 1, 1, :],
-                        cl_dm[1, 1, 1, :]])
+    cl_dd_d = []
+    cl_dm_d = []
+    cl_mm_d = []
+    cl_md_d = []
+    for i, (p1, p2) in enumerate(pairs):
+        cl_dd_d.append( get_cl_d(f_g[p1], f_g[p2]) )
+        cl_mm_d.append( get_cl_d(f_l[p1], f_l[p2]) )
+        cl_dm_d.append( get_cl_d(f_g[p1], f_l[p2]) )
+        if p1 == p2:
+            cl_md_d.append( cl_dm_d[i] )
+        else:
+            cl_md_d.append( get_cl_d(f_l[p1], f_g[p2]) )
 
     values = {
         'pairs':        pairs,
@@ -619,12 +605,10 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
         'cl_md_t':      cl_md_t,
         'cl_mm_d':      cl_mm_d,
         'cl_mm_t':      cl_mm_t,
-        'cl_bb_d':      cl_bb_d,
-        'cl_mb_d':      cl_mb_d,
-        'cl_db_d':      cl_db_d,
         'nmap':         nmap,
         'e1map':        e1map,
-        'e2map':        e2map
+        'e2map':        e2map,
+        'leff':         leff
     }
 
     log.info(f'\t Relative time: {timer.lap()}\n\n')

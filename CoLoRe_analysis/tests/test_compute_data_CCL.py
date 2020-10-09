@@ -20,7 +20,7 @@ from CoLoRe_analysis.tests import test_ccl_reader
 log = logging.getLogger(__name__)
 
 
-@skipUnless('RUN_CCL_TESTS' in os.environ, 'Only run when activated in environment')
+# @skipUnless('RUN_CCL_TESTS' in os.environ, 'Only run when activated in environment')
 class TestComputeDataCCL(unittest.TestCase):
     sim_path    = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/sims/New_CCL'
     analysis_path = os.path.dirname(os.path.realpath(__file__)) + '/test_sims/analysis/New_CCL'
