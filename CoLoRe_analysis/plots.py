@@ -51,11 +51,12 @@ class CCLPlotter():
     '''
         Class to plot CCL values (for a given set)
     '''
-    def __init__(self, values, labels, pairs, nside):
+    def __init__(self, values, labels, pairs, nside, leff=None):
         '''
         Args:
             Values: tuple or list of arrays with the values of galaxy Cls. An array with shape (n. of values, n. of pairs, 2, 3*nside) is expected.
             Labels: tupel or list of labels for the previous values. An array of shape (n. of values) is expected. 
+            leff (1D array of float): set the effective l for the x axis in the Cls plot.
         '''
         self.labels = labels
         self.raw_values = dict()
@@ -68,7 +69,11 @@ class CCLPlotter():
 
         self.nside = nside
         self.larr = np.arange(3*nside)
-        self.l = np.arange(3*nside)
+        if leff is not None:
+            self.larr = leff
+        else:
+            self.larr = np.arange(3*nside)
+        self.l = list( self.larr ) # We need a copy here
     
     def compute_error_bars(self):
         '''
@@ -77,6 +82,7 @@ class CCLPlotter():
         Dl = self.larr[1] - self.larr[0]
 
         self.raw_errors = dict()
+        self.errors = dict()
 
         for name in self.labels:
             self.raw_errors[name] = np.zeros_like(self.raw_values[name])
@@ -94,10 +100,14 @@ class CCLPlotter():
         Args:
             rebin (int): Number of bins to average within.
         '''
-        for name in self.labels:
-            self.values[name] = np.mean( self.raw_values[name].reshape([3,-1,rebin]), axis=2)
-                
-        self.l = np.mean( self.larr.reshape([-1,rebin]), axis=1)
+        if rebin is None:
+            self.values = self.raw_values
+            self.l      = self.larr
+        else:
+            for name in self.labels:
+                self.values[name] = np.mean( self.raw_values[name].reshape([3,-1,rebin]), axis=2)
+                    
+            self.l = np.mean( self.larr.reshape([-1,rebin]), axis=1)
 
     def reshape_error_bars(self, rebin):
         '''
@@ -106,11 +116,12 @@ class CCLPlotter():
         Args:
             rebin (int): Number of bins to average within.
         '''
-
-        self.errors = dict()
-        for name in self.labels:
-            self.errors[name] = np.mean( self.raw_errors[name].reshape([3,-1,rebin]), axis=2)
-            
+        if rebin is None:
+            self.errors = self.raw_errors
+        else:
+            for name in self.labels:
+                self.errors[name] = np.mean( self.raw_errors[name].reshape([3,-1,rebin]), axis=2)
+    
     def get_raw_values(self, a, b, pair1, pair2):
         '''
         Get the values without rebinning.
