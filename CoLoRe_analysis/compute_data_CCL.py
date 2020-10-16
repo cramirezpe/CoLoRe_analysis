@@ -34,7 +34,7 @@ def getArgs(): #pragma: no cover
     parser.add_argument("--param", required=True, type=str, help="Path of ColoRe param.cfg file")
     
     parser.add_argument("--source",       required=False, type=int, default=1, help="Sources to be computed")
-    parser.add_argument("--nside",        required=False, type=int , default=128 , help="nside to use ")
+    parser.add_argument("--nside",        required=False, type=int , default=1024 , help="nside to use ")
     parser.add_argument("--max_files",    required=False, type=int, default=None , help="number of srcs files to consider (default: None, consider all the files)")
     parser.add_argument("--downsampling", required=False, type=float , default=1 , help="downsampling to apply to the data")
     parser.add_argument("--zbins",        required=False, type=float, nargs='+', default=[0,0.15,1] , help="defines the binning in redshift of the analysis")
