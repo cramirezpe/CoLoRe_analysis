@@ -429,6 +429,7 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
     log.info(f'\t Relative time: {timer.lap()}\n')
     log.info('Reading output files...')
     while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile) and ( (not file_limit) or ifile <= max_files):
+        print(ifile)
         hdulist = fits.open(sim_path + '/out_srcs_s1_%d.fits' % ifile)
         d = hdulist[1].data
         n_g = len(d)
@@ -452,8 +453,8 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
             dd = d[msk]
 
             pix = hp.ang2pix(nside,
-                            np.radians(90-dd['DEC']),
-                            np.radians(dd['RA']))
+                            dd['RA'],
+                            dd['DEC'], lonlat=True)
             n = np.bincount(pix, minlength=npix)
             e1 = np.bincount(pix, minlength=npix, weights=dd['E1'])
             e2 = np.bincount(pix, minlength=npix, weights=dd['E2'])
