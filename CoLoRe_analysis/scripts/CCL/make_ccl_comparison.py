@@ -99,27 +99,26 @@ def main(args=None):
             a, b = x[0], x[1]
             ax.set_title(f'{a}-{p1} {b}-{p2}')
 
-            msk = sims[0].ccl_reader.d_values.l < sims[0].ccl_reader.d_values.nside
-            l = sims[0].ccl_reader.d_values.l[msk]
-
             if p1 == p2 and x=='dd':
                 for sim in sims:
+                    sim.msk = sim.ccl_reader.d_values.l < sim.ccl_reader.d_values.nside
+                    sim.l = sim.ccl_reader.d_values.l[sim.msk]
                     sim.ccl_reader.nl = sim.ccl_reader.shotnoise[p1]
-                    ax.plot(l, sim.ccl_reader.nl*np.ones_like( sim.ccl_reader.d_values.l[msk] ),
+                    ax.plot(sim.l, sim.ccl_reader.nl*np.ones_like( sim.ccl_reader.d_values.l[sim.msk] ),
                         sim.color+'--', label=f'Shot noise {str(sim)}')
             else:
                 for sim in sims:
                     sim.ccl_reader.nl = 0
 
             for i, sim in enumerate(sims):
-                sim.cl  = sim.ccl_reader.d_values.get_values(a, b, p1, p2, msk) - sim.ccl_reader.nl
-                sim.clt = sim.ccl_reader.t_values.get_values(a, b, p1, p2, msk)
-                sim.err = sim.ccl_reader.d_values.get_errors(a, b, p1, p2, msk)
+                sim.cl  = sim.ccl_reader.d_values.get_values(a, b, p1, p2, sim.msk) - sim.ccl_reader.nl
+                sim.clt = sim.ccl_reader.t_values.get_values(a, b, p1, p2, sim.msk)
+                sim.err = sim.ccl_reader.d_values.get_errors(a, b, p1, p2, sim.msk)
 
-                delta = (l[1]-l[0])*i/len(sims)*0.5
+                delta = (sim.l[1]-sim.l[0])*i/len(sims)*0.5
                 
-                ax.errorbar(l+delta, sim.cl*l, yerr=sim.err, fmt=sim.color+'.', label=f'Sim {str(sim)}', lw=0.5, alpha=0.5)
-                ax.plot(l+delta, sim.clt*l, sim.color+'-', lw=0.5, label=f'Prediction {str(sim)}')
+                ax.errorbar(sim.l+delta, sim.cl*sim.l, yerr=sim.l*sim.err, fmt=sim.color+'.', label=f'Sim {str(sim)}', lw=0.5, alpha=0.5)
+                ax.plot(sim.l+delta, sim.clt*sim.l, sim.color+'-', lw=0.5, label=f'Prediction {str(sim)}')
 
             ax.set_xlabel(r'$\ell$', fontsize=15)
             ax.set_ylabel(r'$\ell\,C_\ell$', fontsize=15)
@@ -147,15 +146,16 @@ def main(args=None):
             a, b = x[0], x[1]
             ax.set_title(f'{a}-{p1} {b}-{p2}')
 
-            msk = sims[0].ccl_reader.d_values.l < 2*sims[0].ccl_reader.d_values.nside
-            y_lim_msk = sims[0].ccl_reader.d_values.l<750
-            l = sims[0].ccl_reader.d_values.l[msk]
+
             y_max = y_min = 0
 
             if p1 == p2 and x=='dd':
                 for sim in sims:
+                    sim.msk = sim.ccl_reader.d_values.l < 2*sim.ccl_reader.d_values.nside
+                    sim.y_lim_msk = sim.ccl_reader.d_values.l<750
+                    sim.l = sim.ccl_reader.d_values.l[sim.msk]
                     sim.ccl_reader.nl = sim.ccl_reader.shotnoise[p1]
-                    ax.plot(l, sim.ccl_reader.nl*np.ones_like( sim.ccl_reader.d_values.l[msk] ),
+                    ax.plot(sim.l, sim.ccl_reader.nl*np.ones_like( sim.ccl_reader.d_values.l[sim.msk] ),
                         sim.color+'--', label=f'Shot noise {str(sim)}')
             else:
                 for sim in sims:
@@ -163,20 +163,20 @@ def main(args=None):
 
 
             for i, sim in enumerate(sims):
-                sim.cl  = sim.ccl_reader.d_values.get_values(a, b, p1, p2, msk) - sim.ccl_reader.nl
-                sim.clt = sim.ccl_reader.t_values.get_values(a, b, p1, p2, msk)
-                sim.err = sim.ccl_reader.d_values.get_errors(a, b, p1, p2, msk)
+                sim.cl  = sim.ccl_reader.d_values.get_values(a, b, p1, p2, sim.msk) - sim.ccl_reader.nl
+                sim.clt = sim.ccl_reader.t_values.get_values(a, b, p1, p2, sim.msk)
+                sim.err = sim.ccl_reader.d_values.get_errors(a, b, p1, p2, sim.msk)
 
-                high_value_masked_for_ylim  = (sim.ccl_reader.d_values.get_values(a, b, p1, p2, y_lim_msk) - sim.ccl_reader.nl + sim.ccl_reader.d_values.get_errors(a, b, p1, p2, y_lim_msk))/sim.ccl_reader.t_values.get_values(a, b, p1, p2, y_lim_msk) -1 
-                low_value_masked_for_ylim    = (sim.ccl_reader.d_values.get_values(a, b, p1, p2, y_lim_msk) - sim.ccl_reader.nl - sim.ccl_reader.d_values.get_errors(a, b, p1, p2, y_lim_msk))/sim.ccl_reader.t_values.get_values(a, b, p1, p2, y_lim_msk) -1
+                high_value_masked_for_ylim  = (sim.ccl_reader.d_values.get_values(a, b, p1, p2, sim.y_lim_msk) - sim.ccl_reader.nl + sim.ccl_reader.d_values.get_errors(a, b, p1, p2, sim.y_lim_msk))/sim.ccl_reader.t_values.get_values(a, b, p1, p2, sim.y_lim_msk) -1 
+                low_value_masked_for_ylim   = (sim.ccl_reader.d_values.get_values(a, b, p1, p2, sim.y_lim_msk) - sim.ccl_reader.nl - sim.ccl_reader.d_values.get_errors(a, b, p1, p2, sim.y_lim_msk))/sim.ccl_reader.t_values.get_values(a, b, p1, p2, sim.y_lim_msk) -1
                 y_max = max( y_max, np.max(high_value_masked_for_ylim) )
                 y_min = min( y_min, np.min(low_value_masked_for_ylim) )
 
-                delta = (l[1]-l[0])*i/len(sims)*0.5
+                delta = (sim.l[1]-sim.l[0])*i/len(sims)*0.5
                 
-                ax.errorbar(l+delta, sim.cl/sim.clt - 1, yerr=sim.err/sim.clt, fmt=sim.color+'.', label=f'Sim {str(sim)}/pred', lw=0.5)
+                ax.errorbar(sim.l+delta, sim.cl/sim.clt - 1, yerr=sim.err/sim.clt, fmt=sim.color+'.', label=f'Sim {str(sim)}/pred', lw=0.5)
             
-            ax.plot(l,np.zeros_like(l),'k-', lw=0.8)
+            ax.plot(sim.l,np.zeros_like(sim.l),'k-', lw=0.8)
             ax.set_xlabel(r'$\ell$', fontsize=15)
             ax.set_ylabel(r'$C_\ell$', fontsize=15)
             ax.set_ylim(y_min, y_max)  
@@ -216,16 +216,15 @@ def main(args=None):
                 a, b = x[0], x[1]
                 ax.set_title(f'{a}-{p1} {b}-{p2}')
 
-                msk = sims[0].ccl_reader.d_values.l<2*sims[0].ccl_reader.d_values.nside
-                l = sims[0].ccl_reader.d_values.l[msk]
-
                 for i, sim in enumerate(sims):
-                    sim.cl  = sim.ccl_reader.d_values.get_values(a, b, p1, p2, msk)
-                    sim.err = sim.ccl_reader.d_values.get_errors(a, b, p1, p2, msk)
+                    sim.msk = sims[0].ccl_reader.d_values.l<2*sims[0].ccl_reader.d_values.nside
+                    sim.l = sims[0].ccl_reader.d_values.l[sim.msk]
+                    sim.cl  = sim.ccl_reader.d_values.get_values(a, b, p1, p2, sim.msk)
+                    sim.err = sim.ccl_reader.d_values.get_errors(a, b, p1, p2, sim.msk)
                     
-                    delta = (l[1]-l[0])*i/len(sims)*0.5
-                    ax.errorbar(l+delta, sim.cl*l, yerr=sim.err, fmt=sim.color+'.', label=f'Sim {str(sim)}')
-                ax.plot(l, np.zeros_like(l), 'k-', label='Prediction')
+                    delta = (sim.l[1]-sim.l[0])*i/len(sims)*0.5
+                    ax.errorbar(sim.l+delta, sim.cl*sim.l, yerr=sim.err, fmt=sim.color+'.', label=f'Sim {str(sim)}')
+                ax.plot(sim.l, np.zeros_like(sim.l), 'k-', label='Prediction')
                 ax.set_xlabel(r'$\ell$', fontsize=15)
                 ax.set_ylabel(r'$\ell\,C_ell$', fontsize=15)
                 ax.set_xlim(args.l_lim[0], args.l_lim[1])
