@@ -78,8 +78,8 @@ class TestCorrelations(unittest.TestCase):
         self.assertEqual( corr, 0.6855447840406176)
 
         coef, intercept = cs.regression_in_bin(parameter='mp_e2', minz=1, maxz=1.05)
-        self.assertEqual( intercept, 0.2659033078880413)
-        self.assertEqual( coef, 1.4440203562340965)
+        self.assertAlmostEqual( intercept, 0.2659033078880413)
+        self.assertAlmostEqual( coef, 1.4440203562340965)
         
         mock_func.assert_not_called()
 
@@ -96,11 +96,11 @@ class TestCorrelations(unittest.TestCase):
         mult_cs.store_correlation(parameter='mp_e2', minz=1, maxz=1.05, out=mult_cs.sims[300][0].analysis_location + '/shear_data')
         x = np.loadtxt(mult_cs.sims[300][0].analysis_location + '/shear_data/mp_e2.dat')
 
-        self.assertEqual(x, 0.6855447840406176)
+        self.assertAlmostEqual(x, 0.6855447840406176)
 
         good_cs.store_correlation(parameter='mp_e2', minz=1, maxz=1.05)
         
-        self.assertEqual(good_cs.get_correlation(parameter='mp_e2',minz=1, maxz=1.05), 0.42828052649917187)
+        self.assertAlmostEqual(good_cs.get_correlation(parameter='mp_e2',minz=1, maxz=1.05), 0.42828052649917187)
 
     def test_saved_regression(self):
         self.prepare_mock_data()
@@ -115,13 +115,13 @@ class TestCorrelations(unittest.TestCase):
         mult_cs.store_regression(parameter='mp_e2',minz=1,maxz=1.05, out= mult_cs.sims[300][0].analysis_location + '/shear_data')
         x = np.loadtxt(mult_cs.sims[300][0].analysis_location + '/shear_data/coef_mp_e2.dat')
         y = np.loadtxt(mult_cs.sims[300][0].analysis_location + '/shear_data/intercept_mp_e2.dat')
-        self.assertEqual(x, 1.4440203562340965)
-        self.assertEqual(y, 0.2659033078880413)
+        self.assertAlmostEqual(x, 1.4440203562340965)
+        self.assertAlmostEqual(y, 0.2659033078880413)
 
         good_cs.store_regression(parameter='mp_e2', minz=1, maxz=1.05)
         
-        self.assertEqual(good_cs.get_regression(reg_parameter = 'coef', parameter='mp_e2',minz=1, maxz=1.05), 0.22137404580152661)
-        self.assertEqual(good_cs.get_regression(reg_parameter = 'intercept', parameter='mp_e2',minz=1, maxz=1.05), 2.1984732824427486)
+        self.assertAlmostEqual(good_cs.get_regression(reg_parameter = 'coef', parameter='mp_e2',minz=1, maxz=1.05), 0.22137404580152661)
+        self.assertAlmostEqual(good_cs.get_regression(reg_parameter = 'intercept', parameter='mp_e2',minz=1, maxz=1.05), 2.1984732824427486)
     
     def test_path_to_regression(self):
         param     = "mp_e2"

@@ -27,10 +27,10 @@ class TestShearDataComputation(unittest.TestCase):
         b = np.loadtxt(self.analysis_path + f'/shear_data/source_2/cld_dd.dat')
         d = np.loadtxt(self.analysis_path + f'/shear_data/source_2/cld_kk.dat')
     
-        self.assertEqual(np.mean(a), 1.3593664904906463e-11)
-        self.assertEqual(a[0]      , 1.0001937620402216e-05)
-        self.assertEqual(np.mean(b), 0.00530553916038216)
-        self.assertEqual(np.mean(d), 3.2987881842564064e-11)
+        self.assertAlmostEqual(np.mean(a), 1.3593664904906463e-11)
+        self.assertAlmostEqual(a[0]      , 1.0001937620402216e-05)
+        self.assertAlmostEqual(np.mean(b), 0.00530553916038216)
+        self.assertAlmostEqual(np.mean(d), 3.2987881842564064e-11)
         
 
     def test_compute_data_shear_with_bins_2(self):
@@ -39,7 +39,7 @@ class TestShearDataComputation(unittest.TestCase):
 
         a = np.loadtxt(self.analysis_path + f'/shear_data/binned/200_2005/source_2/mp_E.dat')
 
-        self.assertEqual(np.mean(a), -4.153934804547951e-11)
+        self.assertAlmostEqual(np.mean(a), -4.153934804547951e-11)
 
 if __name__ == '__main__':
     unittest.main()

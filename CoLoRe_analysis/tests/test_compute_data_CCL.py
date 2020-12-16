@@ -50,7 +50,7 @@ class TestComputeDataCCL(unittest.TestCase):
 
 
         for i, value in enumerate(values):
-            np.testing.assert_equal(target_values[i], np.loadtxt(self.output_path + f'/{value}.dat'),f'Mismatching value: { value }')
+            np.testing.assert_almost_equal(target_values[i], np.loadtxt(self.output_path + f'/{value}.dat'),err_msg=f'Mismatching value: { value }')
 
         with open(self.output_path + '/INFO.json') as json_file:
             data = json.load(json_file)
