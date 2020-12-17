@@ -140,8 +140,8 @@ class Simulation:
     def set_shear_reader(self):
         self.shear_reader = shear_reader.ShearReader(self.location, self.analysis_location)
 
-    def set_ccl_reader(self):
-        self.ccl_reader = ccl_reader.CCLReader(self.location, self.analysis_location)
+    def set_ccl_reader(self, skip_lensing=False, skip_theory=False, skip_data=False):
+        self.ccl_reader = ccl_reader.CCLReader(self.location, self.analysis_location, skip_lensing, skip_theory, skip_data)
         
     def set_size(self):
         # in Mb

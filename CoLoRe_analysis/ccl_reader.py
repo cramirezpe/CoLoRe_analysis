@@ -12,17 +12,23 @@ log = logging.getLogger(__name__)
 class CCLReader:
     '''Class made to handle QA tests using CCL theoretical values'''
 
-    def __init__(self, sim_location, analysis_location):
+    def __init__(self, sim_location, analysis_location, skip_lensing=False, skip_theory=False, skip_data=False):
         '''Inits the class with a sim path
 
         Args: 
             sim_location (str): Path to the simulation
             analysis_location (str): Path to the analysis of the simulation
+            skip_lensing (bool, optional): Whether to skip lensing computations
+            skip_theory (bool, optional): Whether to skip theory computations
+            skip_data (bool, optional): Whether to skip data computations
         '''
         self.sim_location = sim_location
         self.analysis_location = analysis_location
+        self.skip_lensing = skip_lensing
+        self.skip_theory  = skip_theory
+        self.skip_data    = skip_data
 
-    def do_data_computations(self, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, **kwargs):
+    def do_data_computations(self, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, sigz=0.03, **kwargs):
         '''Computes the Cls from CCL and for the sim.
 
         Args:
@@ -31,7 +37,7 @@ class CCLReader:
         '''
         log.info(f'Computing data for source: { source }')
 
-        compute_data_CCL.compute_data(self.sim_location, self.analysis_location, source, nside, None, downsampling, zbins, nz_h, nz_min, nz_max, **kwargs)
+        compute_data_CCL.compute_data(self.sim_location, self.analysis_location, source, nside, None, downsampling, zbins, nz_h, nz_min, nz_max, sigz, self.skip_lensing, self.skip_theory, self.skip_data, **kwargs)
 
     def get_values(self, value, **kwargs):
         '''Obtain values for Cls (CCL or sim)

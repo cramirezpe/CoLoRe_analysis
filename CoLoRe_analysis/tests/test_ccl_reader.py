@@ -8,7 +8,7 @@ from mock import call, patch
 
 from CoLoRe_analysis import ccl_reader, compute_data_CCL, compute_data_shear
 
-def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None, code='anafast'):
+def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None, sigz=0.03, skip_lensing=False, skip_theory=False, skip_data=False, code='anafast'):
     
     output_path = analysis_path + f'/ccl_data/20200101_000000/'
         
