@@ -29,21 +29,25 @@ log = logging.getLogger(__name__)
 
 def getArgs(): #pragma: no cover
     parser = argparse.ArgumentParser(description="Save values to compute CCL test into .dat files")
-    parser.add_argument("--input", required=True, type=str, help="Path of ColoRe run")
-    parser.add_argument("--output", required=True, type=str, default=None, help="Path for output files")
-    parser.add_argument("--param", required=True, type=str, help="Path of ColoRe param.cfg file")
-    
-    parser.add_argument("--source",       required=False, type=int, default=1, help="Sources to be computed")
-    parser.add_argument("--nside",        required=False, type=int , default=1024 , help="nside to use ")
-    parser.add_argument("--max_files",    required=False, type=int, default=None , help="number of srcs files to consider (default: None, consider all the files)")
-    parser.add_argument("--downsampling", required=False, type=float , default=1 , help="downsampling to apply to the data")
-    parser.add_argument("--zbins",        required=False, type=float, nargs='+', default=[0,0.15,1] , help="defines the binning in redshift of the analysis")
-    parser.add_argument("--nz_h",         required=False, type=int , default=50 , help="pixelization of the redshift analysis ")
-    parser.add_argument("--nz_min",       required=False, type=float , default=0 , help="min redshift for the redshfit analysis")
-    parser.add_argument("--nz_max",       required=False, type=float , default=None , help="max redshift for the redshfit analysis")
-    parser.add_argument('--code',         required=False, choices=['anafast','namaster'], default='namaster', help='Which code use to compute the cls')
 
-    parser.add_argument('--log',          required=False, default=None, help='Setup logging, use levelname as string  (Set to INFO to see script timings)')
+    io_args = parser.add_argument_group('io')
+    io_args.add_argument("--input", required=True, type=str, help="Path of ColoRe run")
+    io_args.add_argument("--output", required=True, type=str, default=None, help="Path for output files")
+    io_args.add_argument("--param", required=True, type=str, help="Path of ColoRe param.cfg file")
+    io_args.add_argument("--source",       required=False, type=int, default=1, help="Sources to be computed")
+    io_args.add_argument("--max_files",    required=False, type=int, default=None , help="number of srcs files to consider (default: None, consider all the files)")
+
+    run_args = parser.add_argument_group('run')
+    run_args.add_argument("--nside",        required=False, type=int , default=1024 , help="nside to use ")
+    run_args.add_argument("--downsampling", required=False, type=float , default=1 , help="downsampling to apply to the data")
+    run_args.add_argument("--zbins",        required=False, type=float, nargs='+', default=[0,0.15,1] , help="defines the binning in redshift of the analysis")
+    run_args.add_argument("--nz_h",         required=False, type=int , default=50 , help="pixelization of the redshift analysis ")
+    run_args.add_argument("--nz_min",       required=False, type=float , default=0 , help="min redshift for the redshfit analysis")
+    run_args.add_argument("--nz_max",       required=False, type=float , default=None , help="max redshift for the redshfit analysis")
+    run_args.add_argument("--sigz",         required=False, type=float, default=0.03, help='Gaussian sigma applied to generate photo-z')
+    run_args.add_argument('--code',         required=False, choices=['anafast','namaster'], default='namaster', help='Which code use to compute the cls')
+    run_args.add_argument('--log',          required=False, default=None, help='Setup logging, use levelname as string  (Set to INFO to see script timings)')
+    run_args.add_argument('--skip-lensing', action='store_true', help='Skip lensing components')
 
     args = parser.parse_args()
     return args
@@ -126,7 +130,7 @@ def suppress_stdout():
 def fxn():
     warnings.warn("deprecrated", DeprecationWarning)
 
-def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, code=None):
+def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, sigz=0.03, skip_lensing=False, code=None):
     ''' Method to compute the values needed for CCL test plots.
     
     Args:
@@ -142,9 +146,9 @@ def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, d
 
 
     if code == 'anafast':
-        values = compute_all_cls_anafast(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max)
+        values = compute_all_cls_anafast(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max, sigz, skip_lensing)
     elif code == 'namaster':
-        values = compute_all_cls_namaster(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max)
+        values = compute_all_cls_namaster(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max, sigz, skip_lensing)
     else:
         raise ValueError('Not a valid code name enter namaster/anafast')
 
@@ -167,7 +171,7 @@ def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, d
     with open(output_path + '/INFO.json','w') as outfile:
         json.dump(info, outfile)
 
-def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
+def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, sigz=0.03, skip_lensing=False):
     '''Method to compute all cls from the anafast function using output from CoLoRe.
 
     Args:
@@ -180,6 +184,8 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
         nz_h (int, optional): pixelization of the redshift analysis (default: 50)
         nz_min (float, optional): min redshift for the N(z) histogram (default: 0)
         nz_max (float, optional): max redshift for the N(z) histogram (default: None (set to the max value in zbins))
+        sigz (float, optional): Gaussian sigma applied to generate photo-z.
+        skip_lensing (bool, optional): Skip lensing components
     
     Returns: 
         Tuple given by (shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t):
@@ -199,13 +205,12 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
     # This will contain the N(z) of the different bins
     nz_tot = np.zeros([nbins, nz_h])
     nz_max = nz_max if nz_max is not None else zbins[-1]
-    
-    sigz = 0.03
 
     # These will be the density and ellipticity maps
     dmap = np.zeros([nbins, npix])
-    e1map = np.zeros([nbins, npix])
-    e2map = np.zeros([nbins, npix])
+    if not skip_lensing:
+        e1map = np.zeros([nbins, npix])
+        e2map = np.zeros([nbins, npix])
 
     # Now we loop over all source files
     if max_files is None:
@@ -246,11 +251,12 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
                             np.radians(90-dd['DEC']),
                             np.radians(dd['RA']))
             n = np.bincount(pix, minlength=npix)
-            e1 = np.bincount(pix, minlength=npix, weights=dd['E1'])
-            e2 = np.bincount(pix, minlength=npix, weights=dd['E2'])
+            if not skip_lensing:
+                e1 = np.bincount(pix, minlength=npix, weights=dd['E1'])
+                e2 = np.bincount(pix, minlength=npix, weights=dd['E2'])
+                e1map[ibin, :] += e1
+                e2map[ibin, :] += e2
             dmap[ibin, :] += n
-            e1map[ibin, :] += e1
-            e2map[ibin, :] += e2
 
             # Add also to N(z)
             nz, z_edges = np.histogram(dd['Z_COSMO'], bins=nz_h,
@@ -269,10 +275,11 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
     for ib in range(nbins):
         ndens = (np.sum(dmap[ib])+0.0)/(4*np.pi)
         shotnoise[ib] = 1./ndens
-        e1map[ib, :] = e1map[ib]/dmap[ib]
-        e1map[ib, dmap[ib] <= 0] = 0
-        e2map[ib, :] = e2map[ib]/dmap[ib]
-        e2map[ib, dmap[ib] <= 0] = 0
+        if not skip_lensing:
+            e1map[ib, :] = e1map[ib]/dmap[ib]
+            e1map[ib, dmap[ib] <= 0] = 0
+            e2map[ib, :] = e2map[ib]/dmap[ib]
+            e2map[ib, dmap[ib] <= 0] = 0
         dmap[ib, :] = (dmap[ib, :] + 0.0) / np.mean(dmap[ib] + 0.0) - 1
 
     # Read P(k) theory prediction
@@ -376,7 +383,7 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
     log.info(f'\t Total time: {timer.full()}')
     return values
 
-def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None):
+def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, sigz=0.03, skip_lensing=False):
     '''Method to compute all cls from the anafast function using output from CoLoRe.
 
     Args:
@@ -389,6 +396,9 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
         nz_h (int, optional): pixelization of the redshift analysis (default: 50)
         nz_min (float, optional): min redshift for the N(z) histogram (default: 0)
         nz_max (float, optional): max redshift for the N(z) histogram (default: None (set to the max value in zbins))
+        sigz (float, optional): Gaussian sigma applied to generate photo-z.
+        skip_lensing (bool, optional): Skip lensing components
+
     
     Returns: 
         Tuple given by (shotnoise, pairs, nz_tot, z_nz, d_values, cl_dd_t, cl_dm_t, cl_mm_t):
@@ -409,13 +419,12 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
     nz_tot = np.zeros([nbins, nz_h])
     nz_max = nz_max if nz_max is not None else zbins[-1]
     
-    sigz = 0.03
-
     # These will be the density and ellipticity maps
     nmap = np.zeros([nbins, npix])
     dmap = np.zeros([nbins, npix])
-    e1map = np.zeros([nbins, npix])
-    e2map = np.zeros([nbins, npix])
+    if not skip_lensing:
+        e1map = np.zeros([nbins, npix])
+        e2map = np.zeros([nbins, npix])
 
     # Now we loop over all source files
     if max_files is None:
@@ -456,11 +465,12 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
                             dd['RA'],
                             dd['DEC'], lonlat=True)
             n = np.bincount(pix, minlength=npix)
-            e1 = np.bincount(pix, minlength=npix, weights=dd['E1'])
-            e2 = np.bincount(pix, minlength=npix, weights=dd['E2'])
+            if not skip_lensing:
+                e1 = np.bincount(pix, minlength=npix, weights=dd['E1'])
+                e2 = np.bincount(pix, minlength=npix, weights=dd['E2'])
+                e1map[ibin, :] += e1
+                e2map[ibin, :] += e2
             nmap[ibin, :] += n
-            e1map[ibin, :] += e1
-            e2map[ibin, :] += e2
 
             # Add also to N(z)
             nz, z_edges = np.histogram(dd['Z_COSMO'], bins=nz_h,
@@ -479,10 +489,11 @@ def compute_all_cls_namaster(sim_path, source=1, nside=128, max_files=None, down
     for ib in range(nbins):
         ndens = (np.sum(nmap[ib])+0.0)/(4*np.pi)
         shotnoise[ib] = 1./ndens
-        e1map[ib, :] = e1map[ib]/nmap[ib]
-        e1map[ib, nmap[ib] <= 0] = 0
-        e2map[ib, :] = e2map[ib]/nmap[ib]
-        e2map[ib, nmap[ib] <= 0] = 0
+        if not skip_lensing:
+            e1map[ib, :] = e1map[ib]/nmap[ib]
+            e1map[ib, nmap[ib] <= 0] = 0
+            e2map[ib, :] = e2map[ib]/nmap[ib]
+            e2map[ib, nmap[ib] <= 0] = 0
         dmap[ib, :] = (nmap[ib, :] + 0.0) / np.mean(nmap[ib] + 0.0) - 1
 
     # Read P(k) theory prediction
