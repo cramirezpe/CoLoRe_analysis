@@ -198,7 +198,7 @@ def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, d
     }
 
     with open(output_path + '/INFO.json','w') as outfile:
-        json.dump(info, outfile)
+        json.dump(info, outfile, indent=4, sort_keys=True)
 
 def get_maps(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1, 0.15, 1], nz_h=50, nz_min=0, nz_max=None, sigz=0.03, skip_lensing=False):
     ''' Function to get maps from CoLoRe output files:
