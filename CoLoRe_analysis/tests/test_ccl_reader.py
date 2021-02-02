@@ -14,11 +14,11 @@ def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, 
         
     os.makedirs(output_path, exist_ok=True)
 
-    cl_mm_t = [1,2,3]
+    cl_mm_d = [1,2,3]
     pairs   = [(0,0), (0,1), (1,1)]
     nz_tot  = [4,5,6]
 
-    compute_data_shear.savetofile(output_path, [cl_mm_t,pairs,nz_tot],['cl_mm_t','pairs','nz_tot'])
+    compute_data_shear.savetofile(output_path, [cl_mm_d,pairs,nz_tot],['cl_mm_d','pairs','nz_tot'])
 
     info = {
         'id'            : '20200101_000000',
@@ -130,7 +130,7 @@ class TestCCLReader(unittest.TestCase):
     @patch('CoLoRe_analysis.compute_data_CCL.compute_data', side_effect=mock_compute_data)
     def test_do_data_computations(self, mock_func):
         self.cr.do_data_computations( source=1 )
-        cl_mm_t = np.loadtxt(self.computed_data_path + '/20200101_000000/cl_mm_t.dat')
+        cl_mm_t = np.loadtxt(self.computed_data_path + '/20200101_000000/cl_mm_d.dat')
         np.testing.assert_equal(cl_mm_t, [1,2,3])
 
     @patch('builtins.input', return_value='y')

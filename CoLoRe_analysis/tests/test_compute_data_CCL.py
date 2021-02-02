@@ -215,7 +215,7 @@ class TestMainFunction(unittest.TestCase):
 
         compute_data_CCL.main(self.args)
 
-        cl_mm_t = np.loadtxt(self.args.output + '/ccl_data/20200101_000000/cl_mm_t.dat')
+        cl_mm_t = np.loadtxt(self.args.output + '/ccl_data/20200101_000000/cl_mm_d.dat')
         np.testing.assert_equal(cl_mm_t, [1,2,3])
 
         sim = sims_reader.Sim0404(self.exist_output)
@@ -233,7 +233,7 @@ class TestMainFunction(unittest.TestCase):
 
         compute_data_CCL.main(self.args)
 
-        cl_mm_t = np.loadtxt(self.args.output + '/ccl_data/20200101_000000/cl_mm_t.dat')
+        cl_mm_t = np.loadtxt(self.args.output + '/ccl_data/20200101_000000/cl_mm_d.dat')
         np.testing.assert_equal(cl_mm_t, [1,2,3])
 
         sim = sims_reader.Sim0404(self.args.output)

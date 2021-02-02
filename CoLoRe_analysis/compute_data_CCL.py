@@ -90,7 +90,7 @@ def main(args=None):
             f1 = sys.stdin 
             f = io.StringIO('y') # "mocking" input to force a yes
             sys.stdin = f
-            _ = sim.ccl_reader.get_values('cl_mm_t', **options)
+            _ = sim.ccl_reader.get_values('cl_mm_d', **options)
             sys.stdin = f1
     else:
         os.makedirs(output)
@@ -116,7 +116,7 @@ def main(args=None):
         sim.set_ccl_reader(args.update_INFO_files)
         f = io.StringIO('y')
         sys.stdin = f
-        sim.ccl_reader.get_values('cl_mm_t', **options)
+        sim.ccl_reader.get_values('cl_mm_d', **options)
         sys.stdin = f1
 
 def savetofile(location,variables,variables_names):
