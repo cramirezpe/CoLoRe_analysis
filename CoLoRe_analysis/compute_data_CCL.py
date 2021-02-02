@@ -249,15 +249,18 @@ def get_maps(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbin
     ifile = 0
 
     log.info('Reading output files...')
-    while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile) and ( (not file_limit) or ifile <= max_files):
+    while os.path.isfile(sim_path + f'/out_srcs_s{source}_{ifile}.fits') and ( (not file_limit) or ifile <= max_files):
         file_watch = Stopwatch()
         log.info('Reading file: ' + str(ifile))
-        hdulist = fits.open(sim_path + '/out_srcs_s1_%d.fits' % ifile)
+        hdulist = fits.open(sim_path + f'/out_srcs_s{source}_{ifile}.fits')
         d = hdulist[1].data
         n_g = len(d)
 
         # Generate random photo-z
-        z_photo = d['Z_COSMO'] + sigz*(1+d['Z_COSMO'])*np.random.randn(n_g)
+        if rsd:
+            z_photo = d['Z_COSMO'] + d['DZ_RSD'] + sigz*(1+ d['Z_COSMO'] + d['DZ_RSD'])*np.random.randn(n_g)
+        else:
+            z_photo = d['Z_COSMO'] + sigz*(1+d['Z_COSMO'])*np.random.randn(n_g)
 
         if downsampling != 1: 
             d_mask = np.random.random(len(z_photo)) < downsampling #pylint: disable=no-member
