@@ -12,21 +12,17 @@ log = logging.getLogger(__name__)
 class CCLReader:
     '''Class made to handle QA tests using CCL theoretical values'''
 
-    def __init__(self, sim_location, analysis_location, skip_lensing=False, skip_theory=False, skip_data=False):
+    def __init__(self, sim_location, analysis_location, update_json_files=True):
         '''Inits the class with a sim path
 
         Args: 
             sim_location (str): Path to the simulation
             analysis_location (str): Path to the analysis of the simulation
-            skip_lensing (bool, optional): Whether to skip lensing computations
-            skip_theory (bool, optional): Whether to skip theory computations
-            skip_data (bool, optional): Whether to skip data computations
+            update_json_files (bool, optional): Whether to update json files when searching.
         '''
         self.sim_location = sim_location
         self.analysis_location = analysis_location
-        self.skip_lensing = skip_lensing
-        self.skip_theory  = skip_theory
-        self.skip_data    = skip_data
+        self.update_json_files = update_json_files
 
     def do_data_computations(self, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, sigz=0.03, **kwargs):
         '''Computes the Cls from CCL and for the sim.
@@ -37,7 +33,7 @@ class CCLReader:
         '''
         log.info(f'Computing data for source: { source }')
 
-        compute_data_CCL.compute_data(self.sim_location, self.analysis_location, source, nside, None, downsampling, zbins, nz_h, nz_min, nz_max, sigz, self.skip_lensing, self.skip_theory, self.skip_data, **kwargs)
+        compute_data_CCL.compute_data(self.sim_location, self.analysis_location, source, nside, None, downsampling, zbins, nz_h, nz_min, nz_max, sigz, **kwargs)
 
     def get_values(self, value, **kwargs):
         '''Obtain values for Cls (CCL or sim)
@@ -97,7 +93,14 @@ class CCLReader:
         if len(ids) == 0: 
             return []
 
-        compatible = []
+        if self.update_json_files:
+            for id_ in sorted(ids):
+                try:
+                    self.update_INFO_file(f'{self.analysis_location}/ccl_data/{id_}/INFO.json')
+                except FileNotFoundError:
+                    pass
+        
+        compatible = []    
         for id_ in sorted(ids):
             try:
                 with open(f'{self.analysis_location}/ccl_data/{id_}/INFO.json') as json_file:
@@ -112,6 +115,15 @@ class CCLReader:
                 pass
         
         return compatible
+
+    def update_INFO_file(self, json_path):
+        with open(json_path) as json_file:
+            data = json.load(json_file)
+        for field in 'rsd', 'skip_lensing', 'skip_theory', 'skip_data':            
+            if field not in data:
+                data[field] = False
+                with open(json_path, 'w') as json_file:
+                    json.dump(data, json_file, indent=4, sort_keys=True)
 
     def remove_computed_data(self):
         while True:

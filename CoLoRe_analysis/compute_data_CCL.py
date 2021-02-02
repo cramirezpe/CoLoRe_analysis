@@ -38,9 +38,11 @@ def getArgs(): #pragma: no cover
     io_args.add_argument("--param", required=True, type=str, help="Path of ColoRe param.cfg file")
     io_args.add_argument("--source",       required=False, type=int, default=1, help="Sources to be computed")
     io_args.add_argument("--max_files",    required=False, type=int, default=None , help="number of srcs files to consider (default: None, consider all the files)")
+    io_args.add_argument("--update_INFO_files", action='store_true', help='Update json files when searching for results')
 
     run_args = parser.add_argument_group('run')
     run_args.add_argument("--nside",        required=False, type=int , default=1024 , help="nside to use ")
+    run_args.add_argument("--rsd",          action='store_true', help='Apply RSD to objects')
     run_args.add_argument("--downsampling", required=False, type=float , default=1 , help="downsampling to apply to the data")
     run_args.add_argument("--zbins",        required=False, type=float, nargs='+', default=[0,0.15,1] , help="defines the binning in redshift of the analysis")
     run_args.add_argument("--nz_h",         required=False, type=int , default=50 , help="pixelization of the redshift analysis ")
@@ -68,9 +70,7 @@ def main(args=None):
     options.pop('output')
     options.pop('param')
     options.pop('log')
-    options.pop('skip_lensing')
-    options.pop('skip_theory')
-    options.pop('skip_data')
+    options.pop('update_INFO_files')
 
     if args.log is not None:
         level = logging.getLevelName(args.log)
@@ -86,7 +86,7 @@ def main(args=None):
             raise ValueError("Output path already exists with a different simulation analysis")
         else:
             sim = sims_reader.Sim0404(output)
-            sim.set_ccl_reader(skip_lensing=args.skip_lensing, skip_theory=args.skip_theory, skip_data=args.skip_data)
+            sim.set_ccl_reader(args.update_INFO_files)
             f1 = sys.stdin 
             f = io.StringIO('y') # "mocking" input to force a yes
             sys.stdin = f
@@ -113,7 +113,7 @@ def main(args=None):
         sys.stdin = f
         sim = sims_reader.Sim0404(output)
 
-        sim.set_ccl_reader(skip_lensing=args.skip_lensing, skip_theory=args.skip_theory, skip_data=args.skip_data)
+        sim.set_ccl_reader(args.update_INFO_files)
         f = io.StringIO('y')
         sys.stdin = f
         sim.ccl_reader.get_values('cl_mm_t', **options)
@@ -137,7 +137,7 @@ def suppress_stdout():
 def fxn():
     warnings.warn("deprecrated", DeprecationWarning)
 
-def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, sigz=0.03, skip_lensing=False, skip_theory=False, skip_data=False, code=None):
+def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1,0.15,1], nz_h = 50, nz_min=0, nz_max=None, sigz=0.03, skip_lensing=False, skip_theory=False, skip_data=False, code=None, rsd=False):
     ''' Method to compute the values needed for CCL test plots.
     
     Args:
@@ -153,7 +153,7 @@ def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, d
     timer = Stopwatch()
     
     log.info('Reading maps from CoLoRe output')
-    maps = get_maps(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max, sigz, skip_lensing)
+    maps = get_maps(sim_path, source, nside, max_files, downsampling, zbins, nz_h, nz_min, nz_max, sigz, skip_lensing, rsd)
     log.info(f'\t Relative time: {timer.lap()}\n')
 
     if not skip_theory:
@@ -194,13 +194,18 @@ def compute_data(sim_path, analysis_path, source=1, nside=128, max_files=None, d
         'nz_h'          : nz_h,
         'nz_min'        : nz_min,
         'nz_max'        : nz_max,
-        'code'          : code
+        'code'          : code,
+        'sigz'          : sigz,
+        'skip_theory'   : skip_theory,
+        'skip_data'     : skip_data,
+        'skip_lensing'  : skip_lensing,
+        'rsd'           : rsd
     }
 
     with open(output_path + '/INFO.json','w') as outfile:
         json.dump(info, outfile, indent=4, sort_keys=True)
 
-def get_maps(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1, 0.15, 1], nz_h=50, nz_min=0, nz_max=None, sigz=0.03, skip_lensing=False):
+def get_maps(sim_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[-1, 0.15, 1], nz_h=50, nz_min=0, nz_max=None, sigz=0.03, skip_lensing=False, rsd=False):
     ''' Function to get maps from CoLoRe output files:
     
     Args:

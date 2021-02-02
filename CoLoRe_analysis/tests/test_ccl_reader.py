@@ -8,7 +8,7 @@ from mock import call, patch
 
 from CoLoRe_analysis import ccl_reader, compute_data_CCL, compute_data_shear
 
-def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None, sigz=0.03, skip_lensing=False, skip_theory=False, skip_data=False, code='anafast'):
+def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, downsampling=1, zbins=[0,0.15,1], nz_h = 50, nz_min=None, nz_max=None, sigz=0.03, skip_lensing=False, skip_theory=False, skip_data=False, code='anafast', rsd=False):
     
     output_path = analysis_path + f'/ccl_data/20200101_000000/'
         
@@ -30,11 +30,14 @@ def mock_compute_data(path, analysis_path, source=1, nside=128, max_files=None, 
         'nz_h'          : nz_h,
         'nz_min'        : nz_min,
         'nz_max'        : nz_max,
+        'skip_lensing'  : skip_lensing,
+        'skip_theory'   : skip_theory,
+        'skip_data'     : skip_data,
         'code'          : code
     }
 
     with open(output_path + '/INFO.json','w') as outfile:
-        json.dump(info, outfile)
+        json.dump(info, outfile, indent=4, sort_keys=True)
 
 
 
@@ -57,6 +60,10 @@ class TestCCLReader(unittest.TestCase):
             'zbins'         : [1,2,3],
             'nz_h'          : 100,
             'nz_min'        : 0,
+            'rsd'           : False,
+            'skip_data'     : False,
+            'skip_lensing'  : False,
+            'skip_theory'     : False,
             'nz_max'        : 1100
         }
 
@@ -69,12 +76,20 @@ class TestCCLReader(unittest.TestCase):
             'zbins'         : [10,2,3],
             'nz_h'          : 10011,
             'nz_min'        : 8,
+            'rsd'           : False,
+            'skip_data'     : False,
+            'skip_lensing'  : False,
+            'skip_theory'     : False,
             'nz_max'        : 1100
         }
 
         self.data_mixed = {
             'nside'     : 16,
             'nz_max'    : 1100,
+            'rsd'           : False,
+            'skip_data'     : False,
+            'skip_lensing'  : False,
+            'skip_theory'     : False,
             'max_files' : None
         }
 
