@@ -49,7 +49,7 @@ mpsort==0.1.17
 nbodykit==0.3.13
 numba==0.49.1
 numexpr==2.7.1
-numpy==1.18.5
+numpy==1.22.0
 packaging==20.3
 pandas==1.0.0
 parso==0.5.2
