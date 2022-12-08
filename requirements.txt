@@ -5,7 +5,7 @@ backcall==0.1.0
 bigfile==0.1.49
 cachey==0.1.1
 camb==1.1.0
-certifi==2020.4.5.1
+certifi==2022.12.7
 classylss==0.2.9
 Corrfunc==2.3.2
 coverage==5.0.3
