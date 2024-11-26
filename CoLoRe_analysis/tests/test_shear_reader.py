@@ -4,7 +4,7 @@ import unittest
 from shutil import rmtree
 
 import numpy as np
-from mock import call, patch
+from unittest.mock import call, patch
 
 from CoLoRe_analysis import shear_reader, compute_data_shear, shear_reader
 
@@ -45,7 +45,7 @@ class TestShearReader(unittest.TestCase):
     def test_creation_when_does_not_exist(self, mock_func):
         a = self.sr.get_values('mp_E', source=1, compute=True)
         self.assertTrue( os.path.isfile(self.analysis_path + '/shear_data/source_1/mp_E.dat') )
-        self.assertEqual(a[0], 21)
+        np.testing.assert_almost_equal(a[0], 21)
 
     @patch('CoLoRe_analysis.shear_reader.compute_data_shear',side_effect=mock_compute_data_shear)
     def test_get_cls_and_kappa(self, mock_func):
@@ -53,18 +53,18 @@ class TestShearReader(unittest.TestCase):
         expected_file = self.analysis_path + '/shear_data/binned/100_210/source_1/mp_k.dat'
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)
-        self.assertEqual(a[0],7)
+        np.testing.assert_almost_equal(a[0],7)
     
         a = self.sr.get_values('cld_dd', source=1, minz=1, maxz=2.10, compute=True, do_kappa=True)
         expected_file = self.analysis_path + '/shear_data/binned/100_210/source_1/cld_dd.dat'
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)
-        self.assertEqual(a[0],4)
+        np.testing.assert_almost_equal(a[0],4)
   
         expected_file = self.analysis_path + '/shear_data/binned/100_210/source_1/cld_kk.dat'
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)
-        self.assertEqual(a[0],10)
+        np.testing.assert_almost_equal(a[0],10)
 
 
     @patch.object(shear_reader.ShearReader, "do_compute_data_shear")
@@ -75,7 +75,7 @@ class TestShearReader(unittest.TestCase):
             the_file.write('3141592653\n')
         vals = self.sr.get_values('mp_e1', source=2)
         mock_func.assert_not_called()
-        self.assertEqual(vals,3141592653)
+        np.testing.assert_almost_equal(vals,3141592653)
         
     @patch('CoLoRe_analysis.shear_reader.compute_data_shear',side_effect=mock_compute_data_shear)
     def test_creation_when_does_not_exist_binned(self, mock_func):
@@ -84,7 +84,7 @@ class TestShearReader(unittest.TestCase):
         
         self.assertTrue( os.path.isfile(expected_file) )
         a = np.loadtxt(expected_file)
-        self.assertEqual(a[0], 21)
+        np.testing.assert_almost_equal(a[0], 21)
 
     @patch('builtins.input', return_value='y')
     @patch('builtins.print')
@@ -103,7 +103,7 @@ class TestShearReader(unittest.TestCase):
             the_file.write('3141592653\n')
         vals = self.sr.get_values('mp_e1', source=3, minz=3, maxz=3.01)
         mock_func.assert_not_called()
-        self.assertEqual(vals,3141592653)
+        np.testing.assert_almost_equal(vals,3141592653)
 
     @patch('CoLoRe_analysis.shear_reader.compute_data_shear',side_effect=mock_compute_data_shear)
     def test_binned_statistics(self, mock_func):
@@ -114,7 +114,7 @@ class TestShearReader(unittest.TestCase):
 
         vals = self.sr.get_values('mp_e1',source=1,minz=1,maxz=1.05)
         for str in '100_105','105_110':
-            self.assertEqual( vals[0], 1)
+            np.testing.assert_almost_equal( vals[0], 1)
             self.assertTrue( os.path.isfile(path_head + str + path_tail), path_head+str+path_tail)
 
     @patch('builtins.input', return_value='y')

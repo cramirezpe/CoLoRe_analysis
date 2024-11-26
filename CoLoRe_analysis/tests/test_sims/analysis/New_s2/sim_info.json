@@ -53,7 +53,7 @@
     "factor": 0.0001,
     "nodes": 10,
     "nside": 512,
-    "path": "/global/u2/c/cramirez/Codes/CoLoRe_analysis/CoLoRe_analysis/tests/test_sims/sims/New_s2",
+    "path": "/global/common/software/desi/users/cramirez/CoLoRe_analysis/tests/test_sims/sims/New_s2",
     "preparation_time": "202004160717",
     "seed": 300,
     "shear": 20,

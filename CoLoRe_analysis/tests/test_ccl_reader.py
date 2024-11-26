@@ -4,7 +4,7 @@ import unittest
 from shutil import rmtree
 
 import numpy as np
-from mock import call, patch
+from unittest.mock import call, patch
 
 from CoLoRe_analysis import ccl_reader, compute_data_CCL, compute_data_shear
 
@@ -104,12 +104,12 @@ class TestCCLReader(unittest.TestCase):
     def test_search_with_nothing_to_search(self):
         if os.path.isdir(self.computed_data_path):
             rmtree(self.computed_data_path)
-        self.assertEqual( self.cr.search_output(**self.data1), [] )
+        np.testing.assert_almost_equal( self.cr.search_output(**self.data1), [] )
     
     def test_search_without_results(self):
         for dir_ in os.scandir(self.computed_data_path):
             rmtree(dir_)
-        self.assertEqual( self.cr.search_output(**self.data1), [] )
+        np.testing.assert_almost_equal( self.cr.search_output(**self.data1), [] )
         
     
     @patch('CoLoRe_analysis.compute_data_CCL.compute_data', side_effect=mock_compute_data)

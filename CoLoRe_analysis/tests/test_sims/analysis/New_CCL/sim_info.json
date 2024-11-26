@@ -59,7 +59,7 @@
     "factor": 1.0,
     "nodes": 1,
     "nside": 128,
-    "path": "/global/u2/c/cramirez/Codes/CoLoRe_analysis/CoLoRe_analysis/tests/test_sims/sims/New_CCL",
+    "path": "/global/common/software/desi/users/cramirez/CoLoRe_analysis/tests/test_sims/sims/New_CCL",
     "preparation_time": "20200708_174453",
     "seed": 1003,
     "shear": 11,

@@ -53,7 +53,7 @@
     "factor": 0.0001,
     "nodes": 10,
     "nside": 512,
-    "path": "/global/u2/c/cramirez/Codes/CoLoRe_analysis/CoLoRe_analysis/tests/test_sims/sims/Old_false_seed",
+    "path": "/global/common/software/desi/users/cramirez/CoLoRe_analysis/tests/test_sims/sims/Old_false_seed",
     "preparation_time": "202004160717",
     "seed": 1020,
     "shear": 20,

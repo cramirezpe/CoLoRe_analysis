@@ -219,7 +219,7 @@ def compute_all_cls_anafast(sim_path, source=1, nside=128, max_files=None, downs
     log.info('Reading output files...')
     while os.path.isfile(sim_path + '/out_srcs_s1_%d.fits' % ifile) and ( (not file_limit) or ifile <= max_files):
         file_watch = Stopwatch()
-        log.info('Reading file: ' + ifile)
+        log.info(f'Reading file: {ifile}')
         hdulist = fits.open(sim_path + '/out_srcs_s1_%d.fits' % ifile)
         d = hdulist[1].data
         n_g = len(d)

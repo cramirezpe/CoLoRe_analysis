@@ -47,7 +47,7 @@
     "factor": 0.01,
     "nodes": 10,
     "nside": null,
-    "path": "/global/u2/c/cramirez/Codes/CoLoRe_analysis/CoLoRe_analysis/tests/test_sims/sims/0404",
+    "path": "/global/common/software/desi/users/cramirez/CoLoRe_analysis/tests/test_sims/sims/0404",
     "preparation_time": "20200416090110",
     "seed": 1003,
     "shear": null,

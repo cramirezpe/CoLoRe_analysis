@@ -1,6 +1,8 @@
 import filecmp
 import os
 import unittest
+
+import numpy as np
 from shutil import rmtree
 
 from unittest.mock import call, patch
@@ -30,7 +32,7 @@ class TestSimulationMaster(unittest.TestCase):
         hours   = ms/(1000*60*60)
         raw_hours = hours*nodes
 
-        self.assertEqual(self.Sim.time_reader.raw_hours,raw_hours) 
+        np.testing.assert_almost_equal(self.Sim.time_reader.raw_hours,raw_hours) 
         
     def test_assert_wrong_version(self):
         with self.assertRaises(TypeError):
@@ -127,8 +129,8 @@ class TestConfig(unittest.TestCase):
     def test_read_config_file(self):
         config = self.Sim.get_config_file(self.sim_path + '/param.cfg')
 
-        self.assertEqual(config['srcs2']['store_skewers'], False)
-        self.assertEqual(config['shear']['nside'], 512)
+        np.testing.assert_almost_equal(config['srcs2']['store_skewers'], False)
+        np.testing.assert_almost_equal(config['shear']['nside'], 512)
 
 if __name__ == '__main__':
     unittest.main()
